@@ -1,0 +1,387 @@
+package com.ramijemli.percentagechartview;
+
+import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Outline;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.os.Build;
+import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewOutlineProvider;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.OvershootInterpolator;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import androidx.annotation.FloatRange;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+
+public class PercentageChartView extends View {
+
+    // CHART MODE
+    public static final int MODE_RING = 0;
+    public static final int MODE_PIE = 1;
+
+    // ORIENTATION
+    public static final int ORIENTATION_CLOCKWISE = 0;
+    public static final int ORIENTATION_COUNTERCLOCKWISE = 1;
+
+    // BACKGROUND
+    private static final float DEFAULT_BACKGROUND_DP_WIDTH = 16;
+    private static final int DEFAULT_BACKGROUND_COLOR = Color.BLACK;
+
+    private Paint mBackgroundPaint;
+    private float mBackgroundWidth;
+    private int mBackgroundColor;
+
+
+    // PROGRESS
+    private static final float DEFAULT_PERCENTAGE_DP_WIDTH = 16;
+    private static final int DEFAULT_PERCENTAGE_COLOR = Color.RED;
+    public static final int CAP_ROUND = 0;
+    public static final int CAP_SQUARE = 1;
+
+    private Paint mPercentagePaint;
+    private Paint.Cap percentageStyle;
+    private float mPercentageWidth;
+    private int mPercentageColor;
+
+
+    // TEXT
+    private static float DEFAULT_TEXT_SP_SIZE = 100;
+
+    private Rect mTextBounds;
+    private Paint mTextPaint;
+    private float mTextSize;
+    private int mTextColor;
+    private int mTextPercentage;
+
+
+    // ANIMATION INTERPOLATORS
+    public static final int LINEAR = 0;
+    public static final int ACCELERATE = 1;
+    public static final int DECELERATE = 2;
+    public static final int ACCELERATE_DECELERATE = 3;
+    public static final int ANTICIPATE = 4;
+    public static final int OVERSHOOT = 5;
+    public static final int ANTICIPATE_OVERSHOOT = 6;
+    public static final int BOUNCE = 7;
+    public static final int FAST_OUT_LINEAR_IN = 8;
+    public static final int FAST_OUT_SLOW_IN = 9;
+    public static final int LINEAR_OUT_SLOW_IN = 10;
+
+
+    // COMMON
+    private static final int DEFAULT_START_ANGLE = 0;
+    private static final float MAX = 100;
+    private static final int DEFAULT_ANIMATION_DURATION = 1000;
+    private static final int DEFAULT_ANIMATION_INTERPOLATOR = 0;
+
+    private ValueAnimator mValueAnimator;
+    private Interpolator mAnimInterpolator;
+    private RectF mCircleBounds;
+    private int mAnimDuration;
+    private float mPercentage;
+    private float startAngle;
+    private float arcAngle;
+    @PercentageOrientation
+    private int orientation;
+    @ChartMode
+    private int mode;
+
+
+    public PercentageChartView(Context context) {
+        super(context);
+        init(context, null);
+    }
+
+    public PercentageChartView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(context, attrs);
+    }
+
+    public PercentageChartView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context, attrs);
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    public PercentageChartView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        init(context, attrs);
+    }
+
+    private void init(@NonNull Context context, @Nullable AttributeSet attrs) {
+        mCircleBounds = new RectF();
+        mTextBounds = new Rect();
+        mPercentage = mTextPercentage = 0;
+        arcAngle = mPercentage / MAX * 360;
+
+        initAttributes(context, attrs);
+
+        mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBackgroundPaint.setColor(mBackgroundColor);
+
+        mPercentagePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPercentagePaint.setColor(mPercentageColor);
+
+        switch (mode) {
+            case MODE_RING:
+                mBackgroundPaint.setStyle(Paint.Style.STROKE);
+                mBackgroundPaint.setStrokeCap(percentageStyle);
+                mBackgroundPaint.setStrokeWidth(mBackgroundWidth);
+
+                mPercentagePaint.setStyle(Paint.Style.STROKE);
+                mPercentagePaint.setStrokeCap(percentageStyle);
+                mPercentagePaint.setStrokeWidth(mPercentageWidth);
+                break;
+
+            case MODE_PIE:
+                mBackgroundPaint.setStyle(Paint.Style.FILL);
+                mPercentagePaint.setStyle(Paint.Style.FILL);
+                break;
+        }
+
+        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.setStyle(Paint.Style.FILL);
+        mTextPaint.setTextAlign(Paint.Align.CENTER);
+        mTextPaint.setTextSize(mTextSize);
+        mTextPaint.setColor(mTextColor);
+
+        //ANIMATION
+        mValueAnimator = ValueAnimator.ofFloat(0, mPercentage);
+        mValueAnimator.setDuration(mAnimDuration);
+        mValueAnimator.setInterpolator(mAnimInterpolator);
+        mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                mPercentage = (float) valueAnimator.getAnimatedValue();
+
+                if (mPercentage > 0 && mPercentage < 100)
+                    mTextPercentage = (int) mPercentage;
+                else if (mPercentage > 100)
+                    mTextPercentage = 100;
+                else mTextPercentage = 0;
+
+                invalidate();
+            }
+        });
+
+    }
+
+
+    private void initAttributes(@NonNull Context context, @Nullable AttributeSet attrs){
+
+        if (attrs != null) {
+
+            TypedArray a = context.getTheme().obtainStyledAttributes(
+                    attrs,
+                    R.styleable.PercentageChartView,
+                    0, 0
+            );
+
+            try {
+                mBackgroundColor = a.getColor(R.styleable.PercentageChartView_pcv_backgroundColor, DEFAULT_BACKGROUND_COLOR);
+                mBackgroundWidth = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_backgroundWidth, dp2px(DEFAULT_BACKGROUND_DP_WIDTH));
+
+                int cap = a.getInt(R.styleable.PercentageChartView_pcv_percentageStyle, CAP_ROUND);
+                percentageStyle = (cap == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
+                mPercentageColor = a.getColor(R.styleable.PercentageChartView_pcv_percentageColor, DEFAULT_PERCENTAGE_COLOR);
+                mPercentageWidth = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_percentageWidth, dp2px(DEFAULT_PERCENTAGE_DP_WIDTH));
+
+                mTextColor = a.getColor(R.styleable.PercentageChartView_pcv_textColor, DEFAULT_PERCENTAGE_COLOR);
+                mTextSize = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_textSize, sp2px(DEFAULT_TEXT_SP_SIZE));
+
+                startAngle = a.getInt(R.styleable.PercentageChartView_pcv_startAngle, DEFAULT_START_ANGLE);
+                if (startAngle < 0 || startAngle > 360) {
+                    startAngle = DEFAULT_START_ANGLE;
+                }
+                orientation = a.getInt(R.styleable.PercentageChartView_pcv_orientation, ORIENTATION_CLOCKWISE);
+                mode = a.getInt(R.styleable.PercentageChartView_pcv_mode, MODE_RING);
+                mAnimDuration = a.getInt(R.styleable.PercentageChartView_pcv_animDuration, DEFAULT_ANIMATION_DURATION);
+                int interpolator = a.getInt(R.styleable.PercentageChartView_pcv_animInterpolator, DEFAULT_ANIMATION_INTERPOLATOR);
+                switch (interpolator) {
+                    case LINEAR:
+                        mAnimInterpolator = new LinearInterpolator();
+                        break;
+                    case ACCELERATE:
+                        mAnimInterpolator = new AccelerateInterpolator();
+                        break;
+                    case DECELERATE:
+                        mAnimInterpolator = new DecelerateInterpolator();
+                        break;
+                    case ACCELERATE_DECELERATE:
+                        mAnimInterpolator = new AccelerateDecelerateInterpolator();
+                        break;
+                    case ANTICIPATE:
+                        mAnimInterpolator = new AnticipateInterpolator();
+                        break;
+                    case OVERSHOOT:
+                        mAnimInterpolator = new OvershootInterpolator();
+                        break;
+                    case ANTICIPATE_OVERSHOOT:
+                        mAnimInterpolator = new AnticipateOvershootInterpolator();
+                        break;
+                    case BOUNCE:
+                        mAnimInterpolator = new BounceInterpolator();
+                        break;
+                    case FAST_OUT_LINEAR_IN:
+                        mAnimInterpolator = new FastOutLinearInInterpolator();
+                        break;
+                    case FAST_OUT_SLOW_IN:
+                        mAnimInterpolator = new FastOutSlowInInterpolator();
+                        break;
+                    case LINEAR_OUT_SLOW_IN:
+                        mAnimInterpolator = new LinearOutSlowInInterpolator();
+                        break;
+                }
+            } finally {
+                a.recycle();
+            }
+
+        } else {
+
+            //DEFAULTS
+            mBackgroundColor = DEFAULT_BACKGROUND_COLOR;
+            mBackgroundWidth = dp2px(DEFAULT_BACKGROUND_DP_WIDTH);
+
+            percentageStyle = Paint.Cap.ROUND;
+            mPercentageColor = DEFAULT_PERCENTAGE_COLOR;
+            mPercentageWidth = dp2px(DEFAULT_PERCENTAGE_DP_WIDTH);
+
+            mTextColor = mPercentageColor;
+            mTextSize = sp2px(DEFAULT_TEXT_SP_SIZE);
+
+            startAngle = DEFAULT_START_ANGLE;
+            orientation = ORIENTATION_CLOCKWISE;
+            mode = MODE_RING;
+            mAnimDuration = DEFAULT_ANIMATION_DURATION;
+            mAnimInterpolator = new LinearInterpolator();
+
+        }
+    }
+
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        int diameter = Math.min(w, h);
+        float maxOffset = Math.max(mPercentageWidth, mBackgroundWidth);
+
+        if (mode == MODE_PIE) maxOffset = 0;
+
+        int centerX = w / 2;
+        int centerY = h / 2;
+        float radius = (diameter - maxOffset) / 2;
+
+        mCircleBounds.left = centerX - radius;
+        mCircleBounds.top = centerY - radius;
+        mCircleBounds.right = centerX + radius;
+        mCircleBounds.bottom = centerY + radius;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public ViewOutlineProvider getOutlineProvider() {
+        return new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                if (mode == MODE_PIE) {
+                    try {
+                        outline.setOval((int) mCircleBounds.left,
+                                (int) mCircleBounds.top,
+                                (int) mCircleBounds.right,
+                                (int) mCircleBounds.bottom);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        };
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        //BACKGROUND
+        canvas.drawArc(mCircleBounds, 0, 360, (mode == MODE_PIE), mBackgroundPaint);
+
+        //FOREGROUND
+        if (mPercentage != 0) {
+            arcAngle = this.mPercentage / MAX * 360;
+            canvas.drawArc(mCircleBounds, startAngle, arcAngle, (mode == MODE_PIE), mPercentagePaint);
+        }
+
+        //TEXT
+        String text = String.valueOf(mTextPercentage) + "%";
+        mTextPaint.getTextBounds(text, 0, text.length(), mTextBounds);
+        int textHeight = mTextBounds.height();
+        canvas.drawText(text, mCircleBounds.centerX(), mCircleBounds.centerY() + (textHeight / 2f), mTextPaint);
+    }
+
+    public float getPercentage() {
+        return mPercentage;
+    }
+
+    public void setPercentage(@FloatRange(from = 0f, to = 100f) float percentage) {
+        if (this.mPercentage == percentage)
+            return;
+        if (mValueAnimator.isRunning()) mValueAnimator.cancel();
+        mValueAnimator.setFloatValues(mPercentage, percentage);
+        mValueAnimator.start();
+    }
+
+    private int dp2px(float dp) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics);
+    }
+
+    private int sp2px(float sp) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, metrics);
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({MODE_PIE, MODE_RING})
+    public @interface ChartMode {
+    }
+
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ORIENTATION_CLOCKWISE, ORIENTATION_COUNTERCLOCKWISE})
+    public @interface PercentageOrientation {
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({CAP_ROUND, CAP_SQUARE})
+    public @interface PercentageStyle {
+    }
+
+    public interface ColorProvider {
+        int getColor(float value);
+    }
+}
