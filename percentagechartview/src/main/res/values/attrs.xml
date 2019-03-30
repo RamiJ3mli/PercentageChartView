@@ -18,8 +18,8 @@
         <attr name="pcv_percentageColor" format="color|reference"/>
         <attr name="pcv_percentageWidth" format="dimension"/>
         <attr name="pcv_percentageStyle" format="enum">
-            <enum name="ROUND" value="0"/>
-            <enum name="SQUARE" value="1"/>
+            <enum name="round" value="0"/>
+            <enum name="square" value="1"/>
         </attr>
 
         <attr name="pcv_textColor" format="color|reference"/>
