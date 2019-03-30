@@ -1,15 +1,36 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
+
+ext {
+    bintrayRepo = "PercentageChartView"
+    bintrayName = "com.ramijemli.percentagechartview"
+    libraryName = "percentagechartview"
+
+    publishedGroupId = 'com.ramijemli.percentagechartview'
+    artifact = 'percentagechartview'
+    libraryVersion = '0.1.0'
+
+    libraryDescription = 'An Android percentage chart custom view that displays the progress of any single given task or information.'
+    siteUrl = 'https://github.com/RamiJ3mli/PercentageChartView'
+    gitUrl = 'https://github.com/RamiJ3mli/PercentageChartView.git'
+    developerId = 'ramijemli'
+    developerName = 'Rami Jemli'
+    developerEmail = 'jemli.idea@gmail.com'
+    licenseName = 'The Apache Software Licence, Version 2.0'
+    licenseUrl = 'https://www.apache.org/licenses/LICENSE-2.0'
+    allLicenses = ["Apache-2.0"]
+
+}
 
 android {
     compileSdkVersion 28
-
-
 
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
-        versionName "1.0"
+        versionName "0.1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -31,4 +52,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+if (rootProject.file('local.properties').exists()) {
+    apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+    apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
 }

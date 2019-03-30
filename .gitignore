@@ -40,3 +40,5 @@ proguard_logs/
 
 ### Keystore file ###
 *.keystore
+
+local.properties
