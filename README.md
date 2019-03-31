@@ -8,7 +8,7 @@ Dependency should be declared in your app module level  `build.gradle` file:
   
 ```  
 dependencies {    
-    implementation 'com.ramijemli.percentagechartview:percentagechartview:0.1.0' 
+    implementation 'com.ramijemli.percentagechartview:percentagechartview:0.1.1' 
 }  
 ```  
 
