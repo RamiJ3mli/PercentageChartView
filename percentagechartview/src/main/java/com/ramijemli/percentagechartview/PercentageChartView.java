@@ -1,5 +1,6 @@
 package com.ramijemli.percentagechartview;
 
+import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -67,6 +68,7 @@ public class PercentageChartView extends View {
     private Paint.Cap percentageStyle;
     private float mPercentageWidth;
     private int mPercentageColor;
+    private int mProvidedPercentageColor;
 
 
     // TEXT
@@ -100,6 +102,7 @@ public class PercentageChartView extends View {
     private static final int DEFAULT_ANIMATION_INTERPOLATOR = 0;
 
     private ValueAnimator mValueAnimator;
+    private ValueAnimator mColorAnimator;
     private Interpolator mAnimInterpolator;
     private RectF mCircleBounds;
     private int mAnimDuration;
@@ -111,6 +114,7 @@ public class PercentageChartView extends View {
     @ChartMode
     private int mode;
 
+    private ColorProvider mColorProvider;
 
     public PercentageChartView(Context context) {
         super(context);
@@ -136,8 +140,6 @@ public class PercentageChartView extends View {
     private void init(@NonNull Context context, @Nullable AttributeSet attrs) {
         mCircleBounds = new RectF();
         mTextBounds = new Rect();
-        mPercentage = mTextPercentage = 0;
-        arcAngle = mPercentage / MAX * 360;
 
         initAttributes(context, attrs);
 
@@ -192,7 +194,10 @@ public class PercentageChartView extends View {
     }
 
 
-    private void initAttributes(@NonNull Context context, @Nullable AttributeSet attrs){
+    private void initAttributes(@NonNull Context context, @Nullable AttributeSet attrs) {
+        mPercentage = mTextPercentage = 0;
+        arcAngle = mPercentage / MAX * 360;
+        mProvidedPercentageColor = -1;
 
         if (attrs != null) {
 
@@ -302,6 +307,23 @@ public class PercentageChartView extends View {
         mCircleBounds.bottom = centerY + radius;
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mValueAnimator != null) {
+            if (mValueAnimator.isRunning()) mValueAnimator.cancel();
+            mValueAnimator.removeAllUpdateListeners();
+            mValueAnimator = null;
+        }
+        if (mColorAnimator != null) {
+            if (mColorAnimator.isRunning()) mColorAnimator.cancel();
+            mColorAnimator.removeAllUpdateListeners();
+            mColorAnimator = null;
+        }
+
+        mColorProvider = null;
+    }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public ViewOutlineProvider getOutlineProvider() {
@@ -332,6 +354,8 @@ public class PercentageChartView extends View {
 
         //FOREGROUND
         if (mPercentage != 0) {
+            if (mColorProvider != null)
+                mPercentagePaint.setColor(mProvidedPercentageColor);
             arcAngle = this.mPercentage / MAX * 360;
             canvas.drawArc(mCircleBounds, startAngle, arcAngle, (mode == MODE_PIE), mPercentagePaint);
         }
@@ -347,12 +371,127 @@ public class PercentageChartView extends View {
         return mPercentage;
     }
 
-    public void setPercentage(@FloatRange(from = 0f, to = 100f) float percentage) {
-        if (this.mPercentage == percentage)
-            return;
+    public void setPercentage(@FloatRange(from = 0f, to = 100f) float percentage, boolean animate) {
+        if (this.mPercentage == percentage) return;
+
         if (mValueAnimator.isRunning()) mValueAnimator.cancel();
+        if (mColorAnimator != null && mColorAnimator.isRunning()) mColorAnimator.cancel();
+
+        if (!animate) {
+            this.mPercentage = percentage;
+            invalidate();
+            return;
+        }
+
+
         mValueAnimator.setFloatValues(mPercentage, percentage);
         mValueAnimator.start();
+
+        if (mColorProvider != null) {
+            int startColor = mProvidedPercentageColor != -1 ? mProvidedPercentageColor : mPercentageColor;
+            int endColor = mColorProvider.getColor(percentage);
+            mColorAnimator.setIntValues(startColor, endColor);
+            mColorAnimator.start();
+        }
+    }
+
+    public @PercentageStyle
+    int getPercentageStyle() {
+        return (percentageStyle == Paint.Cap.ROUND) ? CAP_ROUND : CAP_SQUARE;
+    }
+
+    public void setPercentageStyle(@PercentageStyle int percentageStyle) {
+        this.percentageStyle = (percentageStyle == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
+        invalidate();
+    }
+
+    public float getPercentageWidth() {
+        return mPercentageWidth;
+    }
+
+    public void setPercentageWidth(float mPercentageWidth) {
+        this.mPercentageWidth = mPercentageWidth;
+        invalidate();
+    }
+
+    public int getPercentageColor() {
+        return mPercentageColor;
+    }
+
+    public void setPercentageColor(int mPercentageColor) {
+        this.mPercentageColor = mPercentageColor;
+        invalidate();
+    }
+
+    public float getTextSize() {
+        return mTextSize;
+    }
+
+    public void setTextSize(float mTextSize) {
+        this.mTextSize = mTextSize;
+        invalidate();
+    }
+
+    public int getTextColor() {
+        return mTextColor;
+    }
+
+    public void setTextColor(int mTextColor) {
+        this.mTextColor = mTextColor;
+        invalidate();
+    }
+
+    public int getAnimDuration() {
+        return mAnimDuration;
+    }
+
+    public void setAnimDuration(int mAnimDuration) {
+        this.mAnimDuration = mAnimDuration;
+        invalidate();
+    }
+
+    public float getStartAngle() {
+        return startAngle;
+    }
+
+    public void setStartAngle(@FloatRange(from = 0f, to = 360f) float startAngle) {
+        this.startAngle = startAngle;
+        invalidate();
+    }
+
+    public @PercentageOrientation
+    int getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(@PercentageOrientation int orientation) {
+        this.orientation = orientation;
+    }
+
+    public @ChartMode
+    int getMode() {
+        return mode;
+    }
+
+    public void setMode(@ChartMode int mode) {
+        this.mode = mode;
+    }
+
+    public void setColorProvider(ColorProvider colorProvider) {
+        this.mColorProvider = colorProvider;
+        if (mColorProvider != null && mColorAnimator == null) {
+            mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mPercentageColor, mColorProvider.getColor(mPercentage));
+            mColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    mProvidedPercentageColor = (int) animation.getAnimatedValue();
+                }
+            });
+            mColorAnimator.setDuration(mAnimDuration);
+            mColorAnimator.setInterpolator(mAnimInterpolator);
+        } else if (mColorAnimator == null)
+            mColorAnimator = null;
+
     }
 
     private int dp2px(float dp) {
