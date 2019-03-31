@@ -17,9 +17,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        PercentageChartView circular = findViewById(R.id.progress);
-        circular.setOnClickListener(view -> circular.setPercentage(new Random().nextInt(100), true));
-        circular.setColorProvider(value -> {
+        PercentageChartView chart = findViewById(R.id.chart);
+        chart.setOnClickListener(view -> chart.setPercentage(new Random().nextInt(100), true));
+        chart.setColorProvider(value -> {
             String color;
 
             if (value <= 25)
