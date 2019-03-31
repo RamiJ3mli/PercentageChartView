@@ -1,4 +1,4 @@
-package com.ramijemli.percentagechartview;
+package com.ramijemli.sample;
 
 import android.content.Context;
 
