@@ -13,6 +13,7 @@
         app:pcv_animInterpolator="accelerate_decelerate"
         app:pcv_backgroundColor="#00838F"
         app:pcv_mode="ring"
+        app:pcv_typeface="Marshmallows.ttf"
         app:pcv_percentageColor="#0ffff0"
         app:pcv_percentageWidth="50dp"
         app:pcv_startAngle="180"

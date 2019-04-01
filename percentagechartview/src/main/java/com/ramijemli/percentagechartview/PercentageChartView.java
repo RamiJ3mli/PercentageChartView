@@ -11,6 +11,7 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -79,6 +80,7 @@ public class PercentageChartView extends View {
     private float mTextSize;
     private int mTextColor;
     private int mTextPercentage;
+    private Typeface mTypeface;
 
 
     // ANIMATION INTERPOLATORS
@@ -171,6 +173,9 @@ public class PercentageChartView extends View {
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setTextSize(mTextSize);
         mTextPaint.setColor(mTextColor);
+        if (mTypeface != null) {
+            mTextPaint.setTypeface(mTypeface);
+        }
 
         //ANIMATION
         mValueAnimator = ValueAnimator.ofFloat(0, mPercentage);
@@ -218,6 +223,9 @@ public class PercentageChartView extends View {
 
                 mTextColor = a.getColor(R.styleable.PercentageChartView_pcv_textColor, DEFAULT_PERCENTAGE_COLOR);
                 mTextSize = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_textSize, sp2px(DEFAULT_TEXT_SP_SIZE));
+                String typefaceName = a.getString(R.styleable.PercentageChartView_pcv_typeface);
+                if (typefaceName != null) mTypeface = Typeface.createFromAsset(getResources()
+                        .getAssets(), typefaceName);
 
                 startAngle = a.getInt(R.styleable.PercentageChartView_pcv_startAngle, DEFAULT_START_ANGLE);
                 if (startAngle < 0 || startAngle > 360) {
@@ -371,7 +379,8 @@ public class PercentageChartView extends View {
         return mPercentage;
     }
 
-    public void setPercentage(@FloatRange(from = 0f, to = 100f) float percentage, boolean animate) {
+    public void setPercentage(@FloatRange(from = 0f, to = 100f) float percentage,
+                              boolean animate) {
         if (this.mPercentage == percentage) return;
 
         if (mValueAnimator.isRunning()) mValueAnimator.cancel();
@@ -477,6 +486,15 @@ public class PercentageChartView extends View {
         this.mode = mode;
     }
 
+    public Typeface getTypeface() {
+        return mTypeface;
+    }
+
+    public void setTypeface(@NonNull Typeface mTypeface) {
+        this.mTypeface = mTypeface;
+        invalidate();
+    }
+
     public void setColorProvider(ColorProvider colorProvider) {
         this.mColorProvider = colorProvider;
         if (mColorProvider != null && mColorAnimator == null) {
@@ -489,7 +507,7 @@ public class PercentageChartView extends View {
             });
             mColorAnimator.setDuration(mAnimDuration);
             mColorAnimator.setInterpolator(mAnimInterpolator);
-        } else if (mColorAnimator == null)
+        } else if (mColorProvider == null)
             mColorAnimator = null;
 
     }

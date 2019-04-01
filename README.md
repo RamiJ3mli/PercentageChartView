@@ -1,6 +1,11 @@
 # Percentage Chart View
 A customizable Android percentage chart that displays the progress of any single given task or information.    
-  
+[![Platform](https://img.shields.io/badge/platform-android-green.svg)](http://developer.android.com/index.html)
+[![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=16)
+[![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.1.1) ](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.1.1/link)
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-PercentageChartView-yellow.svg?style=flat)](https://android-arsenal.com/details/1/7600)
+[![Twitter](https://img.shields.io/badge/Twitter-@RamiJemli-blue.svg?style=flat)](http://twitter.com/rami_jemli)
+
 <img src="art/showcase_01.gif"/>
 
 ## Setup
@@ -8,7 +13,9 @@ Dependency should be declared in your app module level  `build.gradle` file:
   
 ```  
 dependencies {    
+
     implementation 'com.ramijemli.percentagechartview:percentagechartview:0.1.1' 
+    
 }  
 ```  
 
