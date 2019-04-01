@@ -12,19 +12,19 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         app:pcv_animDuration="1000"
-        app:pcv_animInterpolator="anticipate_overshoot"
+        app:pcv_animInterpolator="linear_out_slow_in"
         app:pcv_backgroundColor="#37474F"
         app:pcv_backgroundWidth="82dp"
         app:pcv_mode="ring"
         app:pcv_percentageStyle="square"
         app:pcv_percentageColor="#0ffff0"
         app:pcv_percentageWidth="50dp"
-        app:pcv_progress="100"
+        app:pcv_progress="23"
         app:pcv_startAngle="180"
         app:pcv_textColor="#0ffff0"
         app:pcv_textSize="50sp"
         app:pcv_textStyle="bold|italic"
-        app:pcv_typeface="Interstellar.ttf" />
+        app:pcv_typeface="Marshmallows.ttf" />
 
 </FrameLayout>
 

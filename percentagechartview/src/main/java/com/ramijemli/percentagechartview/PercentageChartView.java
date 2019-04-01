@@ -46,9 +46,11 @@ public class PercentageChartView extends View {
     public static final int MODE_RING = 0;
     public static final int MODE_PIE = 1;
 
+
     // ORIENTATION
     public static final int ORIENTATION_CLOCKWISE = 0;
     public static final int ORIENTATION_COUNTERCLOCKWISE = 1;
+
 
     // BACKGROUND
     private static final float DEFAULT_BACKGROUND_DP_WIDTH = 16;
@@ -82,6 +84,7 @@ public class PercentageChartView extends View {
     private int mTextColor;
     private int mTextPercentage;
     private Typeface mTypeface;
+
 
     // ANIMATION INTERPOLATORS
     public static final int LINEAR = 0;
@@ -198,7 +201,6 @@ public class PercentageChartView extends View {
 
     }
 
-
     private void initAttributes(@NonNull Context context, @Nullable AttributeSet attrs) {
 
         //ATTRIBUTES
@@ -309,6 +311,7 @@ public class PercentageChartView extends View {
             } finally {
                 a.recycle();
             }
+
         } else {
 
             //DEFAULTS
@@ -522,7 +525,8 @@ public class PercentageChartView extends View {
         return mode;
     }
 
-    public @TextStyle int getTextStyle() {
+    public @TextStyle
+    int getTextStyle() {
         return mTextStyle;
     }
 
@@ -557,7 +561,7 @@ public class PercentageChartView extends View {
         this.mColorProvider = colorProvider;
         if (mColorProvider != null && mColorAnimator == null) {
 
-            mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mPercentageColor, mColorProvider.getColor(mPercentage));
+            mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mPercentageColor, mColorProvider.getColor(mTextPercentage));
             mColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
@@ -566,7 +570,7 @@ public class PercentageChartView extends View {
             });
             mColorAnimator.setDuration(mAnimDuration);
             mColorAnimator.setInterpolator(mAnimInterpolator);
-            mProvidedPercentageColor = mColorProvider.getColor(mPercentage);
+            mProvidedPercentageColor = mColorProvider.getColor(mTextPercentage);
             invalidate();
         } else if (mColorProvider == null)
             mColorAnimator = null;

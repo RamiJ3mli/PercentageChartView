@@ -9,7 +9,7 @@ ext {
 
     publishedGroupId = 'com.ramijemli.percentagechartview'
     artifact = 'percentagechartview'
-    libraryVersion = '0.1.0'
+    libraryVersion = '0.1.2'
 
     libraryDescription = 'An Android percentage chart custom view that displays the progress of any single given task or information.'
     siteUrl = 'https://github.com/RamiJ3mli/PercentageChartView'
@@ -29,8 +29,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 2
-        versionName "0.1.1"
+        versionCode 3
+        versionName "0.1.2"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
