@@ -1,10 +1,10 @@
 # Percentage Chart View
-A customizable Android percentage chart that displays the progress of any single given task or information.    
 [![Platform](https://img.shields.io/badge/platform-android-green.svg)](http://developer.android.com/index.html)
 [![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=16)
 [![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.1.2) ](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.1.2/link)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-PercentageChartView-yellow.svg?style=flat)](https://android-arsenal.com/details/1/7600)
 [![Twitter](https://img.shields.io/badge/Twitter-@RamiJemli-blue.svg?style=flat)](http://twitter.com/rami_jemli)
+<br/>A customizable Android percentage chart that displays the progress of any single given task or information.    
 
 <img src="art/showcase_01.gif" width="33%"/> <img src="art/showcase_02.gif" width="33%"/> <img src="art/showcase_03.gif" width="33%"/>
 
@@ -76,7 +76,7 @@ chart.setColorProvider(value -> {
 | `pcv_textColor` | `color` | Change text color    
 | `pcv_textSize` | `dimension` | Set text size in SP    
 | `pcv_typeface` | `string` | Set progress text's typeface file path in assets folder
-| `pcv_textStyle` | `enum` | Set progress text's style to **`"normal"`** (default), **`"bold"`**, **`"italic"`**, **`"bold|italic"`**
+| `pcv_textStyle` | `enum` | Set progress text's style to **`"normal"`** (default), **`"bold"`**, **`"italic"`**, **`"bold\|italic"`**
 | `pcv_animDuration` | `integer` | Set progress update's animation duration    
 | `pcv_animInterpolator` | `enum` | Set progress update's animation interpolator to **`"linear"`** (default), **`"accelerate"`**, **`"decelerate"`**, **`"accelerate_decelerate"`**, **`"anticipate"`**, **`"overshoot"`**, **`"anticipate_overshoot"`**, **`"bounce"`**, **`"fast_out_linear_in"`**, **`"fast_out_slow_in"`**, **`"linear_out_slow_in"`**.    
 
