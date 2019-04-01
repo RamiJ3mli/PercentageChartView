@@ -200,9 +200,6 @@ public class PercentageChartView extends View {
 
 
     private void initAttributes(@NonNull Context context, @Nullable AttributeSet attrs) {
-        mPercentage = mTextPercentage = 0;
-        arcAngle = mPercentage / MAX * 360;
-        mProvidedPercentageColor = -1;
 
         //ATTRIBUTES
         if (attrs != null) {
@@ -221,6 +218,8 @@ public class PercentageChartView extends View {
                 //BACKGROUND WIDTH
                 mBackgroundWidth = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_backgroundWidth, dp2px(DEFAULT_BACKGROUND_DP_WIDTH));
 
+                //PROGRESS
+                mPercentage = mTextPercentage = a.getInt(R.styleable.PercentageChartView_pcv_progress, 0);
 
                 //PROGRESS COLOR
                 mPercentageColor = a.getColor(R.styleable.PercentageChartView_pcv_percentageColor, DEFAULT_PERCENTAGE_COLOR);
@@ -313,6 +312,7 @@ public class PercentageChartView extends View {
         } else {
 
             //DEFAULTS
+            mPercentage = mTextPercentage = 0;
             mBackgroundColor = DEFAULT_BACKGROUND_COLOR;
             mBackgroundWidth = dp2px(DEFAULT_BACKGROUND_DP_WIDTH);
 
@@ -331,6 +331,9 @@ public class PercentageChartView extends View {
             mAnimInterpolator = new LinearInterpolator();
 
         }
+
+        arcAngle = mPercentage / MAX * 360;
+        mProvidedPercentageColor = -1;
     }
 
 

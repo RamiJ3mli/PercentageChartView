@@ -15,6 +15,7 @@
         <attr name="pcv_backgroundColor" format="color|reference"/>
         <attr name="pcv_backgroundWidth" format="dimension"/>
 
+        <attr name="pcv_progress" format="integer"/>
         <attr name="pcv_percentageColor" format="color|reference"/>
         <attr name="pcv_percentageWidth" format="dimension"/>
         <attr name="pcv_percentageStyle" format="enum">
