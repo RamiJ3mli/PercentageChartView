@@ -11,6 +11,7 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -45,9 +46,11 @@ public class PercentageChartView extends View {
     public static final int MODE_RING = 0;
     public static final int MODE_PIE = 1;
 
+
     // ORIENTATION
     public static final int ORIENTATION_CLOCKWISE = 0;
     public static final int ORIENTATION_COUNTERCLOCKWISE = 1;
+
 
     // BACKGROUND
     private static final float DEFAULT_BACKGROUND_DP_WIDTH = 16;
@@ -77,8 +80,10 @@ public class PercentageChartView extends View {
     private Rect mTextBounds;
     private Paint mTextPaint;
     private float mTextSize;
+    private int mTextStyle;
     private int mTextColor;
     private int mTextPercentage;
+    private Typeface mTypeface;
 
 
     // ANIMATION INTERPOLATORS
@@ -171,6 +176,9 @@ public class PercentageChartView extends View {
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setTextSize(mTextSize);
         mTextPaint.setColor(mTextColor);
+        if (mTypeface != null) {
+            mTextPaint.setTypeface(mTypeface);
+        }
 
         //ANIMATION
         mValueAnimator = ValueAnimator.ofFloat(0, mPercentage);
@@ -193,12 +201,9 @@ public class PercentageChartView extends View {
 
     }
 
-
     private void initAttributes(@NonNull Context context, @Nullable AttributeSet attrs) {
-        mPercentage = mTextPercentage = 0;
-        arcAngle = mPercentage / MAX * 360;
-        mProvidedPercentageColor = -1;
 
+        //ATTRIBUTES
         if (attrs != null) {
 
             TypedArray a = context.getTheme().obtainStyledAttributes(
@@ -208,24 +213,64 @@ public class PercentageChartView extends View {
             );
 
             try {
+
+                //BACKGROUND COLOR
                 mBackgroundColor = a.getColor(R.styleable.PercentageChartView_pcv_backgroundColor, DEFAULT_BACKGROUND_COLOR);
+
+                //BACKGROUND WIDTH
                 mBackgroundWidth = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_backgroundWidth, dp2px(DEFAULT_BACKGROUND_DP_WIDTH));
 
-                int cap = a.getInt(R.styleable.PercentageChartView_pcv_percentageStyle, CAP_ROUND);
-                percentageStyle = (cap == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
+                //PROGRESS
+                mPercentage = mTextPercentage = a.getInt(R.styleable.PercentageChartView_pcv_progress, 0);
+
+                //PROGRESS COLOR
                 mPercentageColor = a.getColor(R.styleable.PercentageChartView_pcv_percentageColor, DEFAULT_PERCENTAGE_COLOR);
+
+                //PROGRESS WIDTH
                 mPercentageWidth = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_percentageWidth, dp2px(DEFAULT_PERCENTAGE_DP_WIDTH));
 
+                //PROGRESS BAR STROKE STYLE
+                int cap = a.getInt(R.styleable.PercentageChartView_pcv_percentageStyle, CAP_ROUND);
+                percentageStyle = (cap == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
+
+                //TEXT COLOR
                 mTextColor = a.getColor(R.styleable.PercentageChartView_pcv_textColor, DEFAULT_PERCENTAGE_COLOR);
+
+                //TEXT SIZE
                 mTextSize = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_textSize, sp2px(DEFAULT_TEXT_SP_SIZE));
 
+                //TEXT TYPEFACE
+                String typeface = a.getString(R.styleable.PercentageChartView_pcv_typeface);
+                if (typeface != null && !typeface.isEmpty()) {
+                    mTypeface = Typeface.createFromAsset(getResources().getAssets(), typeface);
+                }
+
+                //TEXT STYLE
+                mTextStyle = a.getInt(R.styleable.PercentageChartView_pcv_textStyle, Typeface.NORMAL);
+                if (mTextStyle > 0) {
+                    if (mTypeface == null) {
+                        mTypeface = Typeface.defaultFromStyle(mTextStyle);
+                    } else {
+                        mTypeface = Typeface.create(mTypeface, mTextStyle);
+                    }
+                }
+
+                //START DRAWING ANGLE
                 startAngle = a.getInt(R.styleable.PercentageChartView_pcv_startAngle, DEFAULT_START_ANGLE);
                 if (startAngle < 0 || startAngle > 360) {
                     startAngle = DEFAULT_START_ANGLE;
                 }
+
+                //DRAWING ORIENTATION
                 orientation = a.getInt(R.styleable.PercentageChartView_pcv_orientation, ORIENTATION_CLOCKWISE);
+
+                //CHART MODE
                 mode = a.getInt(R.styleable.PercentageChartView_pcv_mode, MODE_RING);
+
+                //PROGRESS ANIMATION DURATION
                 mAnimDuration = a.getInt(R.styleable.PercentageChartView_pcv_animDuration, DEFAULT_ANIMATION_DURATION);
+
+                //PROGRESS ANIMATION INTERPOLATOR
                 int interpolator = a.getInt(R.styleable.PercentageChartView_pcv_animInterpolator, DEFAULT_ANIMATION_INTERPOLATOR);
                 switch (interpolator) {
                     case LINEAR:
@@ -262,6 +307,7 @@ public class PercentageChartView extends View {
                         mAnimInterpolator = new LinearOutSlowInInterpolator();
                         break;
                 }
+
             } finally {
                 a.recycle();
             }
@@ -269,6 +315,7 @@ public class PercentageChartView extends View {
         } else {
 
             //DEFAULTS
+            mPercentage = mTextPercentage = 0;
             mBackgroundColor = DEFAULT_BACKGROUND_COLOR;
             mBackgroundWidth = dp2px(DEFAULT_BACKGROUND_DP_WIDTH);
 
@@ -278,6 +325,7 @@ public class PercentageChartView extends View {
 
             mTextColor = mPercentageColor;
             mTextSize = sp2px(DEFAULT_TEXT_SP_SIZE);
+            mTextStyle = Typeface.NORMAL;
 
             startAngle = DEFAULT_START_ANGLE;
             orientation = ORIENTATION_CLOCKWISE;
@@ -286,6 +334,9 @@ public class PercentageChartView extends View {
             mAnimInterpolator = new LinearInterpolator();
 
         }
+
+        arcAngle = mPercentage / MAX * 360;
+        mProvidedPercentageColor = -1;
     }
 
 
@@ -371,7 +422,8 @@ public class PercentageChartView extends View {
         return mPercentage;
     }
 
-    public void setPercentage(@FloatRange(from = 0f, to = 100f) float percentage, boolean animate) {
+    public void setPercentage(@FloatRange(from = 0f, to = 100f) float percentage,
+                              boolean animate) {
         if (this.mPercentage == percentage) return;
 
         if (mValueAnimator.isRunning()) mValueAnimator.cancel();
@@ -473,14 +525,43 @@ public class PercentageChartView extends View {
         return mode;
     }
 
-    public void setMode(@ChartMode int mode) {
-        this.mode = mode;
+    public @TextStyle
+    int getTextStyle() {
+        return mTextStyle;
     }
+
+    public void setTextStyle(@TextStyle int mTextStyle) {
+        this.mTextStyle = mTextStyle;
+        if (mTextStyle > 0) {
+            if (mTypeface == null) {
+                mTypeface = Typeface.defaultFromStyle(mTextStyle);
+            } else {
+                mTypeface = Typeface.create(mTypeface, mTextStyle);
+            }
+        }
+        invalidate();
+    }
+
+    public Typeface getTypeface() {
+        return mTypeface;
+    }
+
+    public void setTypeface(@NonNull Typeface typeFace) {
+        if (mTextStyle > 0) {
+            mTypeface = Typeface.create(mTypeface, mTextStyle);
+        } else {
+            mTypeface = typeFace;
+        }
+        mTextPaint.setTypeface(mTypeface);
+        invalidate();
+    }
+
 
     public void setColorProvider(ColorProvider colorProvider) {
         this.mColorProvider = colorProvider;
         if (mColorProvider != null && mColorAnimator == null) {
-            mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mPercentageColor, mColorProvider.getColor(mPercentage));
+
+            mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mPercentageColor, mColorProvider.getColor(mTextPercentage));
             mColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
@@ -489,9 +570,10 @@ public class PercentageChartView extends View {
             });
             mColorAnimator.setDuration(mAnimDuration);
             mColorAnimator.setInterpolator(mAnimInterpolator);
-        } else if (mColorAnimator == null)
+            mProvidedPercentageColor = mColorProvider.getColor(mTextPercentage);
+            invalidate();
+        } else if (mColorProvider == null)
             mColorAnimator = null;
-
     }
 
     private int dp2px(float dp) {
@@ -518,6 +600,11 @@ public class PercentageChartView extends View {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CAP_ROUND, CAP_SQUARE})
     public @interface PercentageStyle {
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({Typeface.NORMAL, Typeface.ITALIC, Typeface.BOLD, Typeface.BOLD_ITALIC})
+    public @interface TextStyle {
     }
 
     public interface ColorProvider {
