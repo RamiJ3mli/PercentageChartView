@@ -25,6 +25,11 @@
         <attr name="pcv_textColor" format="color|reference"/>
         <attr name="pcv_textSize" format="dimension"/>
         <attr name="pcv_typeface" format="string"/>
+        <attr name="pcv_textStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
 
         <attr name="pcv_animDuration" format="integer"/>
         <attr name="pcv_animInterpolator" format="enum">
