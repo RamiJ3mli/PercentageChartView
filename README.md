@@ -25,8 +25,6 @@ dependencies {
 <com.ramijemli.percentagechartview.PercentageChartView
     android:id="@+id/chart"
     android:layout_height="match_parent"
-    android:layout_marginEnd="16dp"
-    android:layout_marginStart="16dp"
     android:layout_width="match_parent"
     app:pcv_animDuration="1000"
     app:pcv_animInterpolator="accelerate_decelerate"
