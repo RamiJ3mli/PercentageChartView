@@ -6,7 +6,7 @@
 [![Twitter](https://img.shields.io/badge/Twitter-@RamiJemli-blue.svg?style=flat)](http://twitter.com/rami_jemli)
 <br/>A customizable Android percentage chart that displays the progress of any single given task or information.    
 
-<img src="showcase_01.gif" width="33%"/> <img src="showcase_02.gif" width="33%"/> <img src="showcase_03.gif" width="33%"/> <br/> <img src="showcase_04.gif" width="33%"/>
+<img src="art/showcase_01.gif" width="33%"/> <img src="art/showcase_02.gif" width="33%"/> <img src="art/showcase_03.gif" width="33%"/> <br/> <img src="art/showcase_04.gif" width="33%"/>
 
 ## Setup
 Dependency should be declared in your app module level  `build.gradle` file:  
