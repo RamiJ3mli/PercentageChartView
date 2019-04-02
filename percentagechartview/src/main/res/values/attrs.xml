@@ -11,9 +11,10 @@
             <enum name="ring" value="0"/>
             <enum name="pie" value="1"/>
         </attr>
-
         <attr name="pcv_backgroundColor" format="color|reference"/>
         <attr name="pcv_backgroundWidth" format="dimension"/>
+        <attr name="pcv_fillBackground" format="boolean"/>
+        <attr name="pcv_fillBackgroundColor" format="color|reference"/>
 
         <attr name="pcv_progress" format="integer"/>
         <attr name="pcv_percentageColor" format="color|reference"/>

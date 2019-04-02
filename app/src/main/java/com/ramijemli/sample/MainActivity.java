@@ -33,5 +33,6 @@ public class MainActivity extends AppCompatActivity {
 
             return Color.parseColor(color);
         });
+
     }
 }
