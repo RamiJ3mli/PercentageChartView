@@ -60,6 +60,11 @@ public class PercentageChartView extends View {
     private float mBackgroundWidth;
     private int mBackgroundColor;
 
+    // BACKGROUND FILL
+    private Paint mFillBackgroundPaint;
+    private int mBackgroundFillColor;
+    private boolean mFillBackground;
+    private RectF mBackgroundFillBounds;
 
     // PROGRESS
     private static final float DEFAULT_PERCENTAGE_DP_WIDTH = 16;
@@ -106,6 +111,8 @@ public class PercentageChartView extends View {
     private static final int DEFAULT_ANIMATION_DURATION = 1000;
     private static final int DEFAULT_ANIMATION_INTERPOLATOR = 0;
 
+    @Nullable
+    private OnProgressChangeListener onProgressChangeListener;
     private ValueAnimator mValueAnimator;
     private ValueAnimator mColorAnimator;
     private Interpolator mAnimInterpolator;
@@ -144,6 +151,7 @@ public class PercentageChartView extends View {
 
     private void init(@NonNull Context context, @Nullable AttributeSet attrs) {
         mCircleBounds = new RectF();
+        mBackgroundFillBounds = new RectF();
         mTextBounds = new Rect();
 
         initAttributes(context, attrs);
@@ -159,6 +167,10 @@ public class PercentageChartView extends View {
                 mBackgroundPaint.setStyle(Paint.Style.STROKE);
                 mBackgroundPaint.setStrokeCap(percentageStyle);
                 mBackgroundPaint.setStrokeWidth(mBackgroundWidth);
+
+                mFillBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                mFillBackgroundPaint.setStyle(Paint.Style.FILL);
+                mFillBackgroundPaint.setColor(mBackgroundFillColor);
 
                 mPercentagePaint.setStyle(Paint.Style.STROKE);
                 mPercentagePaint.setStrokeCap(percentageStyle);
@@ -189,12 +201,15 @@ public class PercentageChartView extends View {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 mPercentage = (float) valueAnimator.getAnimatedValue();
 
-                if (mPercentage > 0 && mPercentage < 100)
+                if (mPercentage > 0 && mPercentage <= 100)
                     mTextPercentage = (int) mPercentage;
                 else if (mPercentage > 100)
                     mTextPercentage = 100;
                 else mTextPercentage = 0;
 
+                if (onProgressChangeListener != null) {
+                    onProgressChangeListener.onProgressChanged(mPercentage);
+                }
                 invalidate();
             }
         });
@@ -219,6 +234,12 @@ public class PercentageChartView extends View {
 
                 //BACKGROUND WIDTH
                 mBackgroundWidth = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_backgroundWidth, dp2px(DEFAULT_BACKGROUND_DP_WIDTH));
+
+                //BACKGROUND FILL ENABLE STATE
+                mFillBackground = a.getBoolean(R.styleable.PercentageChartView_pcv_fillBackground, false);
+
+                //BACKGROUND FILL COLOR
+                mBackgroundFillColor = a.getColor(R.styleable.PercentageChartView_pcv_fillBackgroundColor, DEFAULT_BACKGROUND_COLOR);
 
                 //PROGRESS
                 mPercentage = mTextPercentage = a.getInt(R.styleable.PercentageChartView_pcv_progress, 0);
@@ -316,8 +337,9 @@ public class PercentageChartView extends View {
 
             //DEFAULTS
             mPercentage = mTextPercentage = 0;
-            mBackgroundColor = DEFAULT_BACKGROUND_COLOR;
+            mBackgroundColor = mBackgroundFillColor = DEFAULT_BACKGROUND_COLOR;
             mBackgroundWidth = dp2px(DEFAULT_BACKGROUND_DP_WIDTH);
+            mFillBackground = false;
 
             percentageStyle = Paint.Cap.ROUND;
             mPercentageColor = DEFAULT_PERCENTAGE_COLOR;
@@ -356,6 +378,13 @@ public class PercentageChartView extends View {
         mCircleBounds.top = centerY - radius;
         mCircleBounds.right = centerX + radius;
         mCircleBounds.bottom = centerY + radius;
+
+        float fillBackgroundRadius = radius - (mBackgroundWidth / 2);
+        mBackgroundFillBounds.left = centerX - fillBackgroundRadius;
+        mBackgroundFillBounds.top = centerY - fillBackgroundRadius;
+        mBackgroundFillBounds.right = centerX + fillBackgroundRadius;
+        mBackgroundFillBounds.bottom = centerY + fillBackgroundRadius;
+
     }
 
     @Override
@@ -400,6 +429,11 @@ public class PercentageChartView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        //BACKGROUND FILL
+        if (mode == MODE_RING && mFillBackground) {
+            canvas.drawArc(mBackgroundFillBounds, 0, 360, true, mFillBackgroundPaint);
+        }
+
         //BACKGROUND
         canvas.drawArc(mCircleBounds, 0, 360, (mode == MODE_PIE), mBackgroundPaint);
 
@@ -422,8 +456,7 @@ public class PercentageChartView extends View {
         return mPercentage;
     }
 
-    public void setPercentage(@FloatRange(from = 0f, to = 100f) float percentage,
-                              boolean animate) {
+    public void setPercentage(@FloatRange(from = 0f, to = 100f) float percentage, boolean animate) {
         if (this.mPercentage == percentage) return;
 
         if (mValueAnimator.isRunning()) mValueAnimator.cancel();
@@ -431,10 +464,13 @@ public class PercentageChartView extends View {
 
         if (!animate) {
             this.mPercentage = percentage;
+            this.mTextPercentage = (int) percentage;
+            if (onProgressChangeListener != null) {
+                onProgressChangeListener.onProgressChanged(mPercentage);
+            }
             invalidate();
             return;
         }
-
 
         mValueAnimator.setFloatValues(mPercentage, percentage);
         mValueAnimator.start();
@@ -453,6 +489,7 @@ public class PercentageChartView extends View {
     }
 
     public void setPercentageStyle(@PercentageStyle int percentageStyle) {
+        if (mode == MODE_PIE) return;
         this.percentageStyle = (percentageStyle == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
         invalidate();
     }
@@ -462,6 +499,7 @@ public class PercentageChartView extends View {
     }
 
     public void setPercentageWidth(float mPercentageWidth) {
+        if (mode == MODE_PIE) return;
         this.mPercentageWidth = mPercentageWidth;
         invalidate();
     }
@@ -576,6 +614,15 @@ public class PercentageChartView extends View {
             mColorAnimator = null;
     }
 
+    public void setOnProgressChangeListener(@Nullable OnProgressChangeListener onProgressChangeListener) {
+        this.onProgressChangeListener = onProgressChangeListener;
+    }
+
+    @Nullable
+    public OnProgressChangeListener getOnProgressChangeListener() {
+        return onProgressChangeListener;
+    }
+
     private int dp2px(float dp) {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics);
@@ -590,7 +637,6 @@ public class PercentageChartView extends View {
     @IntDef({MODE_PIE, MODE_RING})
     public @interface ChartMode {
     }
-
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ORIENTATION_CLOCKWISE, ORIENTATION_COUNTERCLOCKWISE})
@@ -609,5 +655,9 @@ public class PercentageChartView extends View {
 
     public interface ColorProvider {
         int getColor(float value);
+    }
+
+    public interface OnProgressChangeListener {
+        void onProgressChanged(float progress);
     }
 }
