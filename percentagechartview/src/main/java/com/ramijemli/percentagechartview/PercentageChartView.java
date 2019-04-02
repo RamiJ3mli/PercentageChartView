@@ -111,6 +111,8 @@ public class PercentageChartView extends View {
     private static final int DEFAULT_ANIMATION_DURATION = 1000;
     private static final int DEFAULT_ANIMATION_INTERPOLATOR = 0;
 
+    @Nullable
+    private OnProgressChangeListener onProgressChangeListener;
     private ValueAnimator mValueAnimator;
     private ValueAnimator mColorAnimator;
     private Interpolator mAnimInterpolator;
@@ -162,7 +164,6 @@ public class PercentageChartView extends View {
 
         switch (mode) {
             case MODE_RING:
-
                 mBackgroundPaint.setStyle(Paint.Style.STROKE);
                 mBackgroundPaint.setStrokeCap(percentageStyle);
                 mBackgroundPaint.setStrokeWidth(mBackgroundWidth);
@@ -170,7 +171,6 @@ public class PercentageChartView extends View {
                 mFillBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
                 mFillBackgroundPaint.setStyle(Paint.Style.FILL);
                 mFillBackgroundPaint.setColor(mBackgroundFillColor);
-
 
                 mPercentagePaint.setStyle(Paint.Style.STROKE);
                 mPercentagePaint.setStrokeCap(percentageStyle);
@@ -207,6 +207,9 @@ public class PercentageChartView extends View {
                     mTextPercentage = 100;
                 else mTextPercentage = 0;
 
+                if (onProgressChangeListener != null) {
+                    onProgressChangeListener.onProgressChanged(mPercentage);
+                }
                 invalidate();
             }
         });
@@ -461,6 +464,10 @@ public class PercentageChartView extends View {
 
         if (!animate) {
             this.mPercentage = percentage;
+            this.mTextPercentage = (int) percentage;
+            if (onProgressChangeListener != null) {
+                onProgressChangeListener.onProgressChanged(mPercentage);
+            }
             invalidate();
             return;
         }
@@ -607,6 +614,15 @@ public class PercentageChartView extends View {
             mColorAnimator = null;
     }
 
+    public void setOnProgressChangeListener(@Nullable OnProgressChangeListener onProgressChangeListener) {
+        this.onProgressChangeListener = onProgressChangeListener;
+    }
+
+    @Nullable
+    public OnProgressChangeListener getOnProgressChangeListener() {
+        return onProgressChangeListener;
+    }
+
     private int dp2px(float dp) {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics);
@@ -639,5 +655,9 @@ public class PercentageChartView extends View {
 
     public interface ColorProvider {
         int getColor(float value);
+    }
+
+    public interface OnProgressChangeListener {
+        void onProgressChanged(float progress);
     }
 }
