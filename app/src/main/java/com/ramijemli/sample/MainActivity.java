@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 public class MainActivity extends AppCompatActivity {
+
     private final String TAG = MainActivity.class.getSimpleName();
 
     @Override
@@ -20,14 +21,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         PercentageChartView chart = findViewById(R.id.chart);
-        chart.setOnClickListener(view -> chart.setPercentage(100, true));
+        chart.setOnClickListener(view -> chart.setPercentage(new Random().nextInt(100), true));
 
         //COLOR PROVIDER
         chart.setColorProvider(value -> {
             String color;
 
             if (value <= 25)
-                color ="#F44336";
+                color = "#F44336";
             else if (value <= 50)
                 color = "#FFB300";
             else if (value <= 75)
@@ -46,4 +47,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 }

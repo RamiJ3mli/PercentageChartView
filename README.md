@@ -1,12 +1,12 @@
 # Percentage Chart View
 [![Platform](https://img.shields.io/badge/platform-android-green.svg)](http://developer.android.com/index.html)
 [![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=16)
-[![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.1.2) ](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.1.2/link)
+[![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.1.3) ](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.1.3/link)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-PercentageChartView-yellow.svg?style=flat)](https://android-arsenal.com/details/1/7600)
 [![Twitter](https://img.shields.io/badge/Twitter-@RamiJemli-blue.svg?style=flat)](http://twitter.com/rami_jemli)
 <br/>A customizable Android percentage chart that displays the progress of any single given task or information.    
 
-<img src="art/showcase_01.gif" width="33%"/> <img src="art/showcase_02.gif" width="33%"/> <img src="art/showcase_03.gif" width="33%"/>
+<img src="showcase_01.gif" width="33%"/> <img src="showcase_02.gif" width="33%"/> <img src="showcase_03.gif" width="33%"/> <br/> <img src="showcase_04.gif" width="33%"/>
 
 ## Setup
 Dependency should be declared in your app module level  `build.gradle` file:  
@@ -14,7 +14,7 @@ Dependency should be declared in your app module level  `build.gradle` file:
 ```  
 dependencies {    
 
-    implementation 'com.ramijemli.percentagechartview:percentagechartview:0.1.2' 
+    implementation 'com.ramijemli.percentagechartview:percentagechartview:0.1.3' 
     
 }  
 ```  
@@ -24,25 +24,29 @@ dependencies {
 ```  
 <com.ramijemli.percentagechartview.PercentageChartView
     android:id="@+id/chart"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_width="match_parent"
     app:pcv_animDuration="1000"
-    app:pcv_animInterpolator="linear_out_slow_in"
-    app:pcv_backgroundColor="#37474F"
-    app:pcv_backgroundWidth="82dp"
+    app:pcv_animInterpolator="accelerate_decelerate"
+    app:pcv_backgroundColor="#0ffff0"
+    app:pcv_backgroundWidth="8dp"
+    app:pcv_fillBackground="true"
+    app:pcv_fillBackgroundColor="#37474F"
     app:pcv_mode="ring"
-    app:pcv_percentageStyle="square"
     app:pcv_percentageColor="#0ffff0"
+    app:pcv_percentageStyle="round"
     app:pcv_percentageWidth="50dp"
-    app:pcv_progress="23"
-    app:pcv_startAngle="180"
+    app:pcv_progress="50"
+    app:pcv_startAngle="90"
     app:pcv_textColor="#0ffff0"
     app:pcv_textSize="50sp"
     app:pcv_textStyle="bold|italic"
-    app:pcv_typeface="Marshmallows.ttf" />
+    app:pcv_typeface="Interstellar.ttf" />
   ```  
 
-To use the color per progress feature, you have to pass a ColorProvider class using the setColorProvider() method.
+To use the color per progress feature, you have to pass a **`ColorProvider`** class using the **`setColorProvider()`** method.
 
 ``` 
 PercentageChartView chart = findViewById(R.id.chart);  
@@ -61,6 +65,15 @@ chart.setColorProvider(value -> {
     return Color.parseColor(color);  
 });
 ``` 
+It's possible to get progress updates by settings an **`OnProgressChangeListener`**.
+``` 
+chart.setOnProgressChangeListener(new PercentageChartView.OnProgressChangeListener() {
+    @Override
+    public void onProgressChanged(float progress) {
+        Log.d(TAG, String.valueOf(progress));
+    }
+});
+``` 
 
 ## Attributes
 |Name|Format|Description| 
@@ -69,6 +82,8 @@ chart.setColorProvider(value -> {
 | `pcv_startAngle` | `integer` | Set progress bar's start angle to **[0..360]** 
 | `pcv_backgroundColor` | `color` | Change progress background color    
 | `pcv_backgroundWidth` | `dimension` | set progress background bar width **if `pcv_mode="ring"`** 
+| `pcv_fillBackground` | `boolean` | Sets whether to draw a filled background or not when **`pcv_mode="ring"`**   
+| `pcv_fillBackgroundColor` | `color` | set background fill color **if `pcv_mode="ring"`** 
 | `pcv_progress` | `integer` | Set current progress
 | `pcv_percentageColor` | `color` | Change progress foreground color    
 | `pcv_percentageWidth` | `dimension` | set progress foreground bar width **if `pcv_mode="ring"`** 
@@ -76,7 +91,7 @@ chart.setColorProvider(value -> {
 | `pcv_textColor` | `color` | Change text color    
 | `pcv_textSize` | `dimension` | Set text size in SP    
 | `pcv_typeface` | `string` | Set progress text's typeface file path in assets folder
-| `pcv_textStyle` | `enum` | Set progress text's style to **`"normal"`** (default), **`"bold"`**, **`"italic"`**, **`"bold\|italic"`**
+| `pcv_textStyle` | `flag` | Set progress text's style to **`"normal"`** (default), **`"bold"`**, **`"italic"`**, **`"bold\|italic"`**
 | `pcv_animDuration` | `integer` | Set progress update's animation duration    
 | `pcv_animInterpolator` | `enum` | Set progress update's animation interpolator to **`"linear"`** (default), **`"accelerate"`**, **`"decelerate"`**, **`"accelerate_decelerate"`**, **`"anticipate"`**, **`"overshoot"`**, **`"anticipate_overshoot"`**, **`"bounce"`**, **`"fast_out_linear_in"`**, **`"fast_out_slow_in"`**, **`"linear_out_slow_in"`**.    
 
@@ -85,8 +100,9 @@ chart.setColorProvider(value -> {
 - [x] ~~Progress based adaptive color support~~ 
 - [x] ~~Text style support~~ 
 - [ ] Color states support  
-- [ ] Filled background support for ring mode  
-- [ ] ~~Text typeface support~~  
+- [x] ~~Filled background support for ring mode~~  
+- [x] ~~Text typeface support~~  
+- [x] ~~Progress change listener~~  
 - [ ] New mode/appearance  
 - [ ] Dynamic text suffix support  
 - [ ] Text formatter support  
@@ -108,7 +124,7 @@ All bugs, feature requests, pull requests, feedback, etc. are welcome. Please, f
 
 ## License    
 
- Copyright 2019 Rami Jemli<br/>
- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at    
- http://www.apache.org/licenses/LICENSE-2.0<br/>
- Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.<br/>
+Copyright 2019 Rami Jemli<br/>
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at    
+http://www.apache.org/licenses/LICENSE-2.0<br/>
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.<br/>
