@@ -5,9 +5,8 @@ import java.lang.annotation.RetentionPolicy;
 
 import androidx.annotation.IntDef;
 
-import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.CAP_ROUND;
-import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.CAP_SQUARE;
-
+import static com.ramijemli.percentagechartview.renderer.RingModeRenderer.CAP_ROUND;
+import static com.ramijemli.percentagechartview.renderer.RingModeRenderer.CAP_SQUARE;
 
 @Retention(RetentionPolicy.SOURCE)
 @IntDef({CAP_ROUND, CAP_SQUARE})

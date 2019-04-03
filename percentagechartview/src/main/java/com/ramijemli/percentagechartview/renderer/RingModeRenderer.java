@@ -6,26 +6,30 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.util.TypedValue;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AnticipateInterpolator;
-import android.view.animation.AnticipateOvershootInterpolator;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.OvershootInterpolator;
 
 import com.ramijemli.percentagechartview.IPercentageChartView;
 import com.ramijemli.percentagechartview.R;
 
-import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
-
 public class RingModeRenderer extends BaseModeRenderer {
 
+    // BACKGROUND BAR
+    private static final float DEFAULT_BG_BAR_DP_WIDTH = 16;
+    private Paint mBackgroundBarPaint;
+    private float mBackgroundBarWidth;
+    private int mBackgroundBarColor;
+
+    // BACKGROUND FILL
+    private RectF mBackgroundFillBounds;
+    private Paint mBackgroundFillPaint;
+    private int mBackgroundFillColor;
+
+    //PROGRESS BAR
+    private static final float DEFAULT_PROGRESS_BAR_DP_WIDTH = 12;
+    public static final int CAP_ROUND = 0;
+    public static final int CAP_SQUARE = 1;
+    private Paint.Cap mProgressStyle;
+    private float mProgressWidth;
 
     public RingModeRenderer(IPercentageChartView view) {
         super(view);
@@ -33,123 +37,35 @@ public class RingModeRenderer extends BaseModeRenderer {
     }
 
     public RingModeRenderer(IPercentageChartView view, TypedArray attrs) {
-        super(view);
+        super(view, attrs);
         init(attrs);
     }
 
     private void init(TypedArray attrs) {
-        //DRAWING ORIENTATION
-        orientation = attrs.getInt(R.styleable.PercentageChartView_pcv_orientation, ORIENTATION_CLOCKWISE);
+        //BACKGROUND WIDTH
+        mBackgroundBarWidth = attrs.getDimensionPixelSize(com.ramijemli.percentagechartview.R.styleable.PercentageChartView_pcv_backgroundBarWidth,
+                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DEFAULT_BG_BAR_DP_WIDTH, mView.getViewContext().getResources().getDisplayMetrics()));
 
-        //BACKGROUND DRAW STATE
-        drawBackground = attrs.getBoolean(R.styleable.PercentageChartView_pcv_drawBackground, true);
+        //BACKGROUND FILL COLOR
+        mBackgroundFillColor = attrs.getColor(com.ramijemli.percentagechartview.R.styleable.PercentageChartView_pcv_backgroundFillColor, -1);
 
-        //BACKGROUND COLOR
-        mBackgroundColor = attrs.getColor(R.styleable.PercentageChartView_pcv_backgroundColor, DEFAULT_BACKGROUND_COLOR);
+        //PROGRESS WIDTH
+        mProgressWidth = attrs.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_progressBarWidth,
+                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DEFAULT_PROGRESS_BAR_DP_WIDTH, mView.getViewContext().getResources().getDisplayMetrics()));
 
-
-        //PROGRESS COLOR
-        mProgressColor = attrs.getColor(R.styleable.PercentageChartView_pcv_progressColor, DEFAULT_PROGRESS_COLOR);
-
-        //PROGRESS
-        mProgress = mTextProgress = attrs.getInt(R.styleable.PercentageChartView_pcv_progress, 0);
-
-        //TEXT COLOR
-        mTextColor = attrs.getColor(R.styleable.PercentageChartView_pcv_textColor, DEFAULT_PROGRESS_COLOR);
-
-        //TEXT SIZE
-        mTextSize = attrs.getDimensionPixelSize(
-                R.styleable.PercentageChartView_pcv_textSize,
-                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-                        DEFAULT_TEXT_SP_SIZE,
-                        mView.getViewContext().getResources().getDisplayMetrics()
-                ));
-
-        //TEXT TYPEFACE
-        String typeface = attrs.getString(R.styleable.PercentageChartView_pcv_typeface);
-        if (typeface != null && !typeface.isEmpty()) {
-            mTypeface = Typeface.createFromAsset(mView.getViewContext().getResources().getAssets(), typeface);
-        }
-
-        //TEXT STYLE
-        mTextStyle = attrs.getInt(R.styleable.PercentageChartView_pcv_textStyle, Typeface.NORMAL);
-        if (mTextStyle > 0) {
-            if (mTypeface == null) {
-                mTypeface = Typeface.defaultFromStyle(mTextStyle);
-            } else {
-                mTypeface = Typeface.create(mTypeface, mTextStyle);
-            }
-        }
-
-        //START DRAWING ANGLE
-        startAngle = attrs.getInt(R.styleable.PercentageChartView_pcv_startAngle, DEFAULT_START_ANGLE);
-        if (startAngle < 0 || startAngle > 360) {
-            startAngle = DEFAULT_START_ANGLE;
-        }
-
-        //PROGRESS ANIMATION DURATION
-        mAnimDuration = attrs.getInt(R.styleable.PercentageChartView_pcv_animDuration, DEFAULT_ANIMATION_DURATION);
-
-        //PROGRESS ANIMATION INTERPOLATOR
-        int interpolator = attrs.getInt(R.styleable.PercentageChartView_pcv_animInterpolator, DEFAULT_ANIMATION_INTERPOLATOR);
-        switch (interpolator) {
-            case LINEAR:
-                mAnimInterpolator = new LinearInterpolator();
-                break;
-            case ACCELERATE:
-                mAnimInterpolator = new AccelerateInterpolator();
-                break;
-            case DECELERATE:
-                mAnimInterpolator = new DecelerateInterpolator();
-                break;
-            case ACCELERATE_DECELERATE:
-                mAnimInterpolator = new AccelerateDecelerateInterpolator();
-                break;
-            case ANTICIPATE:
-                mAnimInterpolator = new AnticipateInterpolator();
-                break;
-            case OVERSHOOT:
-                mAnimInterpolator = new OvershootInterpolator();
-                break;
-            case ANTICIPATE_OVERSHOOT:
-                mAnimInterpolator = new AnticipateOvershootInterpolator();
-                break;
-            case BOUNCE:
-                mAnimInterpolator = new BounceInterpolator();
-                break;
-            case FAST_OUT_LINEAR_IN:
-                mAnimInterpolator = new FastOutLinearInInterpolator();
-                break;
-            case FAST_OUT_SLOW_IN:
-                mAnimInterpolator = new FastOutSlowInInterpolator();
-                break;
-            case LINEAR_OUT_SLOW_IN:
-                mAnimInterpolator = new LinearOutSlowInInterpolator();
-                break;
-        }
+        //PROGRESS BAR STROKE STYLE
+        int cap = attrs.getInt(com.ramijemli.percentagechartview.R.styleable.PercentageChartView_pcv_progressBarStyle, CAP_ROUND);
+        mProgressStyle = (cap == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
 
         prepare();
     }
 
     private void init() {
-        orientation = ORIENTATION_CLOCKWISE;
+        mBackgroundBarWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DEFAULT_BG_BAR_DP_WIDTH, mView.getViewContext().getResources().getDisplayMetrics());
+        mBackgroundFillColor = -1;
 
-        mBackgroundColor = DEFAULT_BACKGROUND_COLOR;
-
-        mProgressColor = DEFAULT_PROGRESS_COLOR;
-        mProgress = mTextProgress = 0;
-
-        mTextColor = mProgressColor;
-        mTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-                DEFAULT_TEXT_SP_SIZE,
-                mView.getViewContext().getResources().getDisplayMetrics()
-        );
-        mTextStyle = Typeface.NORMAL;
-
-        startAngle = DEFAULT_START_ANGLE;
-
-        mAnimDuration = DEFAULT_ANIMATION_DURATION;
-        mAnimInterpolator = new LinearInterpolator();
+        mProgressWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DEFAULT_PROGRESS_BAR_DP_WIDTH, mView.getViewContext().getResources().getDisplayMetrics());
+        mProgressStyle = Paint.Cap.ROUND;
 
         prepare();
     }
@@ -157,12 +73,18 @@ public class RingModeRenderer extends BaseModeRenderer {
     private void prepare() {
         mCircleBounds = new RectF();
         mTextBounds = new Rect();
-        arcAngle = mProgress / DEFAULT_MAX * 360;
+        mBackgroundFillBounds = new RectF();
+        mArcAngle = mProgress / DEFAULT_MAX * 360;
 
-        //BACKGROUND
-        mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBackgroundPaint.setColor(mBackgroundColor);
-        mBackgroundPaint.setStyle(Paint.Style.FILL);
+        //BACKGROUND BAR
+        mBackgroundFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBackgroundFillPaint.setStyle(Paint.Style.STROKE);
+        mBackgroundFillPaint.setColor(mBackgroundFillColor);
+
+        //BACKGROUND FILL
+        mBackgroundFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBackgroundFillPaint.setStyle(Paint.Style.STROKE);
+        mBackgroundFillPaint.setColor(mBackgroundFillColor);
 
         //PROGRESS
         mProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -218,15 +140,15 @@ public class RingModeRenderer extends BaseModeRenderer {
         //FOREGROUND
         if (mProgress != 0) {
             if (orientation == ORIENTATION_COUNTERCLOCKWISE)
-                arcAngle = -(this.mProgress / DEFAULT_MAX * 360);
+                mArcAngle = -(this.mProgress / DEFAULT_MAX * 360);
             else
-                arcAngle = this.mProgress / DEFAULT_MAX * 360;
-            canvas.drawArc(mCircleBounds, startAngle, arcAngle, true, mProgressPaint);
+                mArcAngle = this.mProgress / DEFAULT_MAX * 360;
+            canvas.drawArc(mCircleBounds, mStartAngle, mArcAngle, true, mProgressPaint);
         }
 
         //BACKGROUND
         if (drawBackground) {
-            canvas.drawArc(mCircleBounds, startAngle + arcAngle, 360 - arcAngle, true, mBackgroundPaint);
+//            canvas.drawArc(mCircleBounds, mStartAngle + mArcAngle, 360 - mArcAngle, true, mBackgroundPaint);
         }
 
         //TEXT
@@ -248,7 +170,7 @@ public class RingModeRenderer extends BaseModeRenderer {
         mValueAnimator = null;
         mCircleBounds = null;
         mTextBounds = null;
-        mBackgroundPaint = mProgressPaint = mTextPaint = null;
+//        mBackgroundPaint = mProgressPaint = mTextPaint = null;
     }
 
     @Override
