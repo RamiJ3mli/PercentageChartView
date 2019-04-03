@@ -67,29 +67,42 @@ public class PieModeRenderer extends BaseModeRenderer {
         //ADAPTIVE COLORS
         String adaptiveColors = attrs.getString(R.styleable.PercentageChartView_pcv_adaptiveColors);
         if (adaptiveColors != null) {
-            String[] colors = adaptiveColors.split(",");
-            mAdaptiveColors = new SparseIntArray();
             try {
-                for (int i = 0; i < colors.length; i++) {
-                    mAdaptiveColors.append(i, Color.parseColor(colors[i].trim()));
+                String[] colors = adaptiveColors.split(",");
+                mAdaptiveColors = new SparseIntArray();
+
+                for (int startI = 0, endI = colors.length -1; startI != endI; startI++) {
+                    mAdaptiveColors.append(startI, Color.parseColor(colors[startI].trim()));
+                    mAdaptiveColors.append(endI, Color.parseColor(colors[endI].trim()));
+                    endI--;
                 }
+
             } catch (Exception e) {
-                throw new InflateException("pcv_adaptiveColors attribute contains invalid hex color value.");
+                throw new InflateException("pcv_adaptiveColors attribute contains an invalid hex color value.");
             }
 
+            //ADAPTIVE COLORS DISTRIBUTION
             String distribution = attrs.getString(R.styleable.PercentageChartView_pcv_adaptiveDistribution);
             if (distribution != null) {
-                String[] values = distribution.split(",");
-                mAdaptiveDistribution = new SparseArray<>();
-                for (int i = 0; i < values.length; i++) {
-                    mAdaptiveDistribution.append(i, Float.parseFloat(values[i]));
+                try {
+                    String[] values = distribution.split(",");
+                    mAdaptiveDistribution = new SparseArray<>();
+
+                    for (int startI = 0, endI = values.length -1; startI != endI; startI++) {
+                        mAdaptiveDistribution.append(startI, Float.parseFloat(values[startI].trim()));
+                        mAdaptiveDistribution.append(endI, Float.parseFloat(values[endI].trim()));
+                        endI--;
+                    }
+
+                } catch (Exception e) {
+                    throw new InflateException("pcv_adaptiveDistribution attribute contains an invalid value.");
                 }
             }
-
-            mAdaptiveColor = getAdaptiveColor(mProgress);
 
             if (mAdaptiveDistribution != null && mAdaptiveDistribution.size() != mAdaptiveColors.size())
                 throw new InflateException("pcv_adaptiveDistribution and pcv_adaptiveColors attributes should have same number of elements contained.");
+
+            mAdaptiveColor = getAdaptiveColor(mProgress);
         }
 
         //TEXT COLOR
@@ -166,7 +179,7 @@ public class PieModeRenderer extends BaseModeRenderer {
                 break;
         }
 
-        prepare();
+        setup();
     }
 
     private void init() {
@@ -189,10 +202,10 @@ public class PieModeRenderer extends BaseModeRenderer {
         mAnimDuration = DEFAULT_ANIMATION_DURATION;
         mAnimInterpolator = new LinearInterpolator();
 
-        prepare();
+        setup();
     }
 
-    private void prepare() {
+    private void setup() {
         mCircleBounds = new RectF();
         mTextBounds = new Rect();
         arcAngle = mProgress / DEFAULT_MAX * 360;

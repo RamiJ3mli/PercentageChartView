@@ -100,11 +100,13 @@ public abstract class BaseModeRenderer {
 
     //INTERNAL
     int getAdaptiveColor(float progress) {
-        if (progress == 100f)
+        if (progress == 100f){
             return mAdaptiveColors.get(mAdaptiveColors.size() - 1);
+        }
 
-        if (mAdaptiveDistribution != null)
+        if (mAdaptiveDistribution != null){
             return mAdaptiveColors.get(getColorIndex(progress));
+        }
 
         float hueSlice = DEFAULT_MAX / mAdaptiveColors.size();
         int index = (int) (progress / hueSlice);

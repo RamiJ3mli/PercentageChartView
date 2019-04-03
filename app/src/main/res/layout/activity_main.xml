@@ -16,7 +16,7 @@
         app:pcv_animInterpolator="accelerate"
         app:pcv_backgroundColor="#770FFFF0"
         app:pcv_backgroundWidth="8dp"
-        app:pcv_adaptiveColors="#18FFFF, #F44336, #FFEB3B"
+        app:pcv_adaptiveColors="#18FFFF, #F44336, #FFEB3B, #555555, #666666, #666777, #777777, #18FFFF, #18FFFF"
         app:pcv_adaptiveDistribution="10.0, 80, 100"
         app:pcv_mode="pie"
         app:pcv_orientation="clockwise"

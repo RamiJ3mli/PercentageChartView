@@ -10,7 +10,6 @@ import android.view.View;
 import com.ramijemli.percentagechartview.annotation.ChartMode;
 import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
 import com.ramijemli.percentagechartview.renderer.PieModeRenderer;
-import com.ramijemli.percentagechartview.renderer.RingModeRenderer;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
