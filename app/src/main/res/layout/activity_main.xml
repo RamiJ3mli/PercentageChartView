@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="#263238">
 
+    <!--app:pcv_adaptiveColors="#18FFFF, #F44336, #FFEB3B, #546E7A, #9C27B0, #4CAF50"-->
     <com.ramijemli.percentagechartview.PercentageChartView
         android:id="@+id/chart"
         android:layout_width="match_parent"
@@ -12,18 +13,22 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         app:pcv_animDuration="1000"
-        app:pcv_animInterpolator="accelerate_decelerate"
-        app:pcv_backgroundColor="#0ffff0"
+        app:pcv_animInterpolator="accelerate"
+        app:pcv_backgroundColor="#770FFFF0"
         app:pcv_backgroundWidth="8dp"
-        app:pcv_mode="ring"
+        app:pcv_adaptiveColors="#18FFFF, #F44336, #FFEB3B"
+        app:pcv_adaptiveDistribution="10.0, 80, 100"
+        app:pcv_mode="pie"
+        app:pcv_orientation="clockwise"
+        app:pcv_drawBackground="true"
         app:pcv_fillBackground="true"
         app:pcv_fillBackgroundColor="#37474F"
-        app:pcv_percentageStyle="round"
-        app:pcv_percentageColor="#0ffff0"
-        app:pcv_percentageWidth="50dp"
-        app:pcv_progress="50"
+        app:pcv_progressBarStyle="round"
+        app:pcv_progressColor="#0ffff0"
+        app:pcv_progressBarWidth="50dp"
+        app:pcv_progress="0"
         app:pcv_startAngle="90"
-        app:pcv_textColor="#0ffff0"
+        app:pcv_textColor="#000"
         app:pcv_textSize="50sp"
         app:pcv_textStyle="bold|italic"
         app:pcv_typeface="Interstellar.ttf" />

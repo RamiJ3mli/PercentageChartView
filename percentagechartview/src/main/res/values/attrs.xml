@@ -11,15 +11,18 @@
             <enum name="ring" value="0"/>
             <enum name="pie" value="1"/>
         </attr>
+        <attr name="pcv_drawBackground" format="boolean"/>
         <attr name="pcv_backgroundColor" format="color|reference"/>
         <attr name="pcv_backgroundWidth" format="dimension"/>
         <attr name="pcv_fillBackground" format="boolean"/>
         <attr name="pcv_fillBackgroundColor" format="color|reference"/>
 
-        <attr name="pcv_progress" format="integer"/>
-        <attr name="pcv_percentageColor" format="color|reference"/>
-        <attr name="pcv_percentageWidth" format="dimension"/>
-        <attr name="pcv_percentageStyle" format="enum">
+        <attr name="pcv_progress" format="float"/>
+        <attr name="pcv_progressColor" format="color|reference"/>
+        <attr name="pcv_adaptiveColors" format="string"/>
+        <attr name="pcv_adaptiveDistribution" format="string"/>
+        <attr name="pcv_progressBarWidth" format="dimension"/>
+        <attr name="pcv_progressBarStyle" format="enum">
             <enum name="round" value="0"/>
             <enum name="square" value="1"/>
         </attr>

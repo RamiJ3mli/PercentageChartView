@@ -21,31 +21,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         PercentageChartView chart = findViewById(R.id.chart);
-        chart.setOnClickListener(view -> chart.setPercentage(new Random().nextInt(100), true));
+        chart.setOnClickListener(view -> chart.setProgress(new Random().nextInt(100), true));
 
         //COLOR PROVIDER
-        chart.setColorProvider(value -> {
-            String color;
-
-            if (value <= 25)
-                color = "#F44336";
-            else if (value <= 50)
-                color = "#FFB300";
-            else if (value <= 75)
-                color = "#00E676";
-            else
-                color = "#18FFFF";
-
-            return Color.parseColor(color);
-        });
+//        chart.setColorProvider(value -> {
+//            String color;
+//
+//            if (value <= 25)
+//                color = "#F44336";
+//            else if (value <= 50)
+//                color = "#FFB300";
+//            else if (value <= 75)
+//                color = "#00E676";
+//            else
+//                color = "#18FFFF";
+//
+//            return Color.parseColor(color);
+//        });
 
         //PROGRESS CHANGE LISTENER
-        chart.setOnProgressChangeListener(new PercentageChartView.OnProgressChangeListener() {
-            @Override
-            public void onProgressChanged(float progress) {
-                Log.d(TAG, String.valueOf(progress));
-            }
-        });
+        chart.setOnProgressChangeListener(progress -> Log.d(TAG, String.valueOf(progress)));
     }
 
 }
