@@ -21,20 +21,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         PercentageChartView chart = findViewById(R.id.chart);
-        chart.setOnClickListener(view -> chart.setProgress(new Random().nextInt(100), true));
+        chart.setOnClickListener(view -> {
+            int rand = new Random().nextInt(100);
+            chart.setProgress(rand, true);
+//            chart.setStartAngle(new Random().nextInt(360));
+//            chart.setDrawBackgroundEnabled(rand % 2 == 0);
+//            chart.setOrientation((rand % 2 == 0)? BaseModeRenderer.ORIENTATION_CLOCKWISE: BaseModeRenderer.ORIENTATION_CLOCKWISE);
+            chart.setBackgroundColor((rand % 2 == 0) ? Color.BLACK : Color.GREEN);
+            chart.setProgressColor((rand % 2 == 0) ? Color.GREEN : Color.BLACK);
+        });
 
         //COLOR PROVIDER
         chart.setAdaptiveColorProvider(value -> {
             String color;
 
             if (value <= 25)
-                color = "#F44336";
+                color = "#03A9F4";
             else if (value <= 50)
-                color = "#FFB300";
+                color = "#FFEB3B";
             else if (value <= 75)
-                color = "#00E676";
+                color = "#26A69A";
             else
-                color = "#18FFFF";
+                color = "#F44336";
 
             return Color.parseColor(color);
         });

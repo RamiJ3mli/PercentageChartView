@@ -10,7 +10,9 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 
 import com.ramijemli.percentagechartview.IPercentageChartView;
+import com.ramijemli.percentagechartview.PercentageChartView;
 
+import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 
 public class PieModeRenderer extends BaseModeRenderer {
@@ -31,15 +33,16 @@ public class PieModeRenderer extends BaseModeRenderer {
         mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
                 -(this.mProgress / DEFAULT_MAX * 360) :
                 this.mProgress / DEFAULT_MAX * 360;
+        mAdaptiveColor = -1;
 
         //BACKGROUND
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBackgroundPaint.setColor(mAdaptBackground ? mAdaptiveBackgroundColor : mBackgroundColor);
+        mBackgroundPaint.setColor(mBackgroundColor);
         mBackgroundPaint.setStyle(Paint.Style.FILL);
 
         //PROGRESS
         mProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mProgressPaint.setColor((mAdaptiveColors != null) ? mAdaptiveColor : mProgressColor);
+        mProgressPaint.setColor(mProgressColor);
         mProgressPaint.setStyle(Paint.Style.FILL);
 
         //TEXT
@@ -47,19 +50,20 @@ public class PieModeRenderer extends BaseModeRenderer {
         mTextPaint.setStyle(Paint.Style.FILL);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setTextSize(mTextSize);
-        mTextPaint.setColor(mAdaptText ? mAdaptiveTextColor : mTextColor);
+        mTextPaint.setColor(mTextColor);
+
         if (mTypeface != null) {
             mTextPaint.setTypeface(mTypeface);
         }
-        if (mTextShadowColor != Color.TRANSPARENT){
+        if (mTextShadowColor != Color.TRANSPARENT) {
             mTextPaint.setShadowLayer(mTextShadowRadius, mTextShadowDistX, mTextShadowDistY, mTextShadowColor);
         }
 
         //ANIMATIONS
-        mValueAnimator = ValueAnimator.ofFloat(0, mProgress);
-        mValueAnimator.setDuration(mAnimDuration);
-        mValueAnimator.setInterpolator(mAnimInterpolator);
-        mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        mProgressAnimator = ValueAnimator.ofFloat(0, mProgress);
+        mProgressAnimator.setDuration(mAnimDuration);
+        mProgressAnimator.setInterpolator(mAnimInterpolator);
+        mProgressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 mProgress = (float) valueAnimator.getAnimatedValue();
@@ -78,17 +82,6 @@ public class PieModeRenderer extends BaseModeRenderer {
                 mView.requestInvalidate();
             }
         });
-
-        if (mAdaptiveColors != null) {
-            mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mAdaptiveColor, getAdaptiveColor(mProgress));
-            mColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    updateAdaptiveColors((int) animation.getAnimatedValue());
-                }
-            });
-            mColorAnimator.setDuration(mAnimDuration);
-        }
     }
 
     @Override
@@ -124,11 +117,11 @@ public class PieModeRenderer extends BaseModeRenderer {
 
     @Override
     public void destroy() {
-        if (mValueAnimator != null) {
-            if (mValueAnimator.isRunning()) {
-                mValueAnimator.cancel();
+        if (mProgressAnimator != null) {
+            if (mProgressAnimator.isRunning()) {
+                mProgressAnimator.cancel();
             }
-            mValueAnimator.removeAllUpdateListeners();
+            mProgressAnimator.removeAllUpdateListeners();
         }
 
         if (mColorAnimator != null) {
@@ -138,39 +131,39 @@ public class PieModeRenderer extends BaseModeRenderer {
             mColorAnimator.removeAllUpdateListeners();
         }
 
-        mValueAnimator = mColorAnimator = null;
+        mProgressAnimator = mColorAnimator = null;
         mCircleBounds = null;
         mTextBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
+        if (adaptiveColorProvider != null) {
+            adaptiveColorProvider = null;
+        }
 
     }
 
-    private void updateAdaptiveColors(int targetColor) {
-        mAdaptiveColor = targetColor;
-        mProgressPaint.setColor(mAdaptiveColor);
-
-        if (drawBackground && mAdaptBackground) {
-            mAdaptiveBackgroundColor = (mAdaptiveBackgroundMode != -1 && mAdaptiveBackgroundRatio != -1) ?
-                    ColorUtils.blendARGB(targetColor,
-                            (mAdaptiveBackgroundMode == DARKER_COLOR) ? Color.BLACK : Color.WHITE,
-                            mAdaptiveBackgroundRatio / 100) :
-                    ColorUtils.blendARGB(targetColor,
-                            Color.BLACK,
-                            .5f);
-
-            mBackgroundPaint.setColor(mAdaptiveBackgroundColor);
+    @Override
+    public void setAdaptiveColorProvider(@Nullable PercentageChartView.AdaptiveColorProvider adaptiveColorProvider) {
+        if (adaptiveColorProvider == null) {
+            mColorAnimator = null;
+            this.adaptiveColorProvider = null;
+            return;
         }
 
-        if (mAdaptText) {
-            mAdaptiveTextColor = (mAdaptiveTextMode != -1 && mAdaptiveTextRatio != -1) ?
-                    ColorUtils.blendARGB(targetColor,
-                            (mAdaptiveTextMode == DARKER_COLOR) ? Color.BLACK : Color.WHITE,
-                            mAdaptiveTextRatio / 100) :
-                    ColorUtils.blendARGB(targetColor,
-                            Color.WHITE,
-                            .5f);
+        this.adaptiveColorProvider = adaptiveColorProvider;
 
-            mTextPaint.setColor(mAdaptiveTextColor);
+        if (mColorAnimator == null) {
+            updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
+
+            mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mProgressColor, mAdaptiveColor);
+            mColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    updateAdaptiveColors((int) animation.getAnimatedValue());
+                }
+            });
+            mColorAnimator.setDuration(mAnimDuration);
+
+            mView.requestInvalidate();
         }
     }
 
@@ -178,18 +171,17 @@ public class PieModeRenderer extends BaseModeRenderer {
     public void setProgress(float progress, boolean animate) {
         if (this.mProgress == progress) return;
 
-        if (mValueAnimator.isRunning()) {
-            mValueAnimator.cancel();
+        if (mProgressAnimator.isRunning()) {
+            mProgressAnimator.cancel();
         }
 
-        if (mAdaptiveColors != null && mColorAnimator.isRunning()) {
+        if (mColorAnimator != null && mColorAnimator.isRunning()) {
             mColorAnimator.cancel();
         }
 
-
         if (!animate) {
-            if (mAdaptiveColors != null) {
-                updateAdaptiveColors(getAdaptiveColor(progress));
+            if (adaptiveColorProvider != null) {
+                updateAdaptiveColors(adaptiveColorProvider.getColor(progress));
             }
             this.mProgress = progress;
             this.mTextProgress = (int) progress;
@@ -201,13 +193,61 @@ public class PieModeRenderer extends BaseModeRenderer {
             return;
         }
 
-        mValueAnimator.setFloatValues(mProgress, progress);
-        mValueAnimator.start();
+        mProgressAnimator.setFloatValues(mProgress, progress);
+        mProgressAnimator.start();
 
-        if (mAdaptiveColors != null) {
-            updateAdaptiveColors(mAdaptiveColor);
-            mColorAnimator.setIntValues(mAdaptiveColor, getAdaptiveColor(progress));
+        if (adaptiveColorProvider != null) {
+            int startColor = mAdaptiveColor != -1 ? mAdaptiveColor : mProgressColor;
+            int endColor = adaptiveColorProvider.getColor(progress);
+            mColorAnimator.setIntValues(startColor, endColor);
             mColorAnimator.start();
         }
+    }
+
+    void updateAdaptiveColors(int targetColor) {
+        mAdaptiveColor = targetColor;
+        mProgressPaint.setColor(mAdaptiveColor);
+
+        if (drawBackground && mAdaptBackground) {
+            mAdaptiveBackgroundColor = (mAdaptiveBackgroundMode != -1 && mAdaptiveBackgroundRatio != -1) ?
+                    ColorUtils.blendARGB(targetColor,
+                            (mAdaptiveBackgroundMode == DARKER_MODE) ? Color.BLACK : Color.WHITE,
+                            mAdaptiveBackgroundRatio / 100) :
+                    ColorUtils.blendARGB(targetColor,
+                            Color.BLACK,
+                            .5f);
+
+            mBackgroundPaint.setColor(mAdaptiveBackgroundColor);
+        }
+
+        if (mAdaptText) {
+            mAdaptiveTextColor = (mAdaptiveTextMode != -1 && mAdaptiveTextRatio != -1) ?
+                    ColorUtils.blendARGB(targetColor,
+                            (mAdaptiveTextMode == DARKER_MODE) ? Color.BLACK : Color.WHITE,
+                            mAdaptiveTextRatio / 100) :
+                    ColorUtils.blendARGB(targetColor,
+                            Color.WHITE,
+                            .5f);
+
+            mTextPaint.setColor(mAdaptiveTextColor);
+        }
+    }
+
+    public void setAdaptiveBackground(float ratio, int adaptiveMode) {
+        if (adaptiveColorProvider == null || !drawBackground) return;
+        mAdaptBackground = true;
+        mAdaptiveBackgroundRatio = ratio;
+        mAdaptiveBackgroundMode = adaptiveMode;
+        updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
+        mView.requestInvalidate();
+    }
+
+    public void setAdaptiveText(float ratio, int adaptiveMode) {
+        if (adaptiveColorProvider == null) return;
+        mAdaptText = true;
+        mAdaptiveTextRatio = ratio;
+        mAdaptiveTextMode = adaptiveMode;
+        updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
+        mView.requestInvalidate();
     }
 }

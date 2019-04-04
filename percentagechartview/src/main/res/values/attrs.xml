@@ -7,19 +7,23 @@
             <enum name="ring" value="0" />
             <enum name="pie" value="1" />
         </attr>
+        <!--COMMON ATTRIBUTES-->
         <attr name="pcv_orientation" format="enum">
             <enum name="clockwise" value="0" />
             <enum name="counter_clockwise" value="1" />
         </attr>
+        <!--COMMON ATTRIBUTES-->
         <attr name="pcv_startAngle" format="integer" />
 
+        <!--COMMON ATTRIBUTES-->
         <attr name="pcv_drawBackground" format="boolean" />
+        <!--COMMON ATTRIBUTES-->
         <attr name="pcv_backgroundColor" format="color" />
 
+        <!--COMMON ATTRIBUTES-->
         <attr name="pcv_progress" format="float" />
+        <!--COMMON ATTRIBUTES-->
         <attr name="pcv_progressColor" format="color" />
-
-        <attr name="pcv_adaptiveColors" format="string" />
 
         <attr name="pcv_adaptiveBackground" format="boolean" />
         <attr name="pcv_adaptiveBackgroundRatio" format="integer" />
@@ -31,13 +35,6 @@
         <attr name="pcv_adaptiveText" format="boolean" />
         <attr name="pcv_adaptiveTextRatio" format="integer" />
         <attr name="pcv_adaptiveTextMode"  format="enum">
-            <enum name="darker" value="0" />
-            <enum name="lighter" value="1" />
-        </attr>
-
-        <attr name="pcv_adaptiveBackgroundBar" format="boolean" />
-        <attr name="pcv_adaptiveBackgroundBarRatio" format="integer" />
-        <attr name="pcv_adaptiveBackgroundBarMode"  format="enum">
             <enum name="darker" value="0" />
             <enum name="lighter" value="1" />
         </attr>
@@ -79,6 +76,13 @@
         <attr name="pcv_progressBarStyle" format="enum">
             <enum name="round" value="0" />
             <enum name="square" value="1" />
+        </attr>
+
+        <attr name="pcv_adaptiveBackgroundBar" format="boolean" />
+        <attr name="pcv_adaptiveBackgroundBarRatio" format="integer" />
+        <attr name="pcv_adaptiveBackgroundBarMode"  format="enum">
+            <enum name="darker" value="0" />
+            <enum name="lighter" value="1" />
         </attr>
 
     </declare-styleable>
