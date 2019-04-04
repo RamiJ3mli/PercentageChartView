@@ -24,20 +24,20 @@ public class MainActivity extends AppCompatActivity {
         chart.setOnClickListener(view -> chart.setProgress(new Random().nextInt(100), true));
 
         //COLOR PROVIDER
-//        chart.setColorProvider(value -> {
-//            String color;
-//
-//            if (value <= 25)
-//                color = "#F44336";
-//            else if (value <= 50)
-//                color = "#FFB300";
-//            else if (value <= 75)
-//                color = "#00E676";
-//            else
-//                color = "#18FFFF";
-//
-//            return Color.parseColor(color);
-//        });
+        chart.setAdaptiveColorProvider(value -> {
+            String color;
+
+            if (value <= 25)
+                color = "#F44336";
+            else if (value <= 50)
+                color = "#FFB300";
+            else if (value <= 75)
+                color = "#00E676";
+            else
+                color = "#18FFFF";
+
+            return Color.parseColor(color);
+        });
 
         //PROGRESS CHANGE LISTENER
         chart.setOnProgressChangeListener(progress -> Log.d(TAG, String.valueOf(progress)));

@@ -10,4 +10,6 @@ public interface IPercentageChartView {
 
     void onProgressUpdated(float progress);
 
+    int getProvidedColor(float progress);
+
 }

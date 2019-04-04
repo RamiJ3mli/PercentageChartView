@@ -10,6 +10,7 @@ import android.view.View;
 import com.ramijemli.percentagechartview.annotation.ChartMode;
 import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
 import com.ramijemli.percentagechartview.renderer.PieModeRenderer;
+import com.ramijemli.percentagechartview.renderer.RingModeRenderer;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
@@ -28,6 +29,8 @@ public class PercentageChartView extends View implements IPercentageChartView {
 
     @Nullable
     private OnProgressChangeListener onProgressChangeListener;
+    @Nullable
+    private AdaptiveColorProvider adaptiveColorProvider;
 
     public PercentageChartView(Context context) {
         super(context);
@@ -63,7 +66,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
                 mode = attrs.getInt(R.styleable.PercentageChartView_pcv_mode, MODE_PIE);
                 switch (mode) {
                     case MODE_RING:
-                        renderer = new PieModeRenderer(this, attrs);
+                        renderer = new RingModeRenderer(this, attrs);
                         break;
                     case MODE_PIE:
                         renderer = new PieModeRenderer(this, attrs);
@@ -91,18 +94,20 @@ public class PercentageChartView extends View implements IPercentageChartView {
         super.onDetachedFromWindow();
         renderer.destroy();
         renderer = null;
+
+        if (onProgressChangeListener != null) {
+            onProgressChangeListener = null;
+        }
+
+        if (adaptiveColorProvider != null) {
+            adaptiveColorProvider = null;
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         renderer.draw(canvas);
-    }
-
-    //STYLE MODIFIERS
-    public void setProgress(@FloatRange(from = 0f, to = 100f) float progress, boolean animate){
-        if(renderer == null) return;
-        renderer.setProgress(progress, animate);
     }
 
     //RENDERER CALLBACKS
@@ -118,8 +123,24 @@ public class PercentageChartView extends View implements IPercentageChartView {
 
     @Override
     public void onProgressUpdated(float progress) {
-        if(onProgressChangeListener != null)
+        if (onProgressChangeListener != null)
             onProgressChangeListener.onProgressChanged(progress);
+    }
+
+    //STYLE MODIFIERS
+    public void setProgress(@FloatRange(from = 0f, to = 100f) float progress, boolean animate) {
+        if (renderer == null) return;
+        renderer.setProgress(progress, animate);
+    }
+
+    //ADAPTIVE COLOR PROVIDER
+    public void setAdaptiveColorProvider(@Nullable AdaptiveColorProvider adaptiveColorProvider) {
+        this.adaptiveColorProvider = adaptiveColorProvider;
+    }
+
+    @Override
+    public int getProvidedColor(float progress) {
+        return (adaptiveColorProvider != null) ? adaptiveColorProvider.getColor(progress) : -1;
     }
 
     //LISTENER
@@ -127,7 +148,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
         this.onProgressChangeListener = onProgressChangeListener;
     }
 
-    public interface ColorProvider {
+    public interface AdaptiveColorProvider {
         int getColor(float value);
     }
 

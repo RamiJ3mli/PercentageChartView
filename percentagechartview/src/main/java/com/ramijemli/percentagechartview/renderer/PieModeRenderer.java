@@ -15,37 +15,22 @@ import androidx.core.graphics.ColorUtils;
 
 public class PieModeRenderer extends BaseModeRenderer {
 
-    //BACKGROUND
-    private Paint mBackgroundPaint;
-    private int mBackgroundColor;
-
     public PieModeRenderer(IPercentageChartView view) {
         super(view);
-        init();
+        setup();
     }
 
     public PieModeRenderer(IPercentageChartView view, TypedArray attrs) {
         super(view, attrs);
-        init(attrs);
-    }
-
-    private void init(TypedArray attrs) {
-        //BACKGROUND COLOR
-        mBackgroundColor = attrs.getColor(com.ramijemli.percentagechartview.R.styleable.PercentageChartView_pcv_backgroundColor, ColorUtils.blendARGB(getThemeAccentColor(), Color.BLACK, 0.8f));
-
-        setup();
-    }
-
-    private void init() {
-        mBackgroundColor = ColorUtils.blendARGB(getThemeAccentColor(), Color.BLACK, 0.8f);
-
         setup();
     }
 
     private void setup() {
         mCircleBounds = new RectF();
         mTextBounds = new Rect();
-        mArcAngle = mProgress / DEFAULT_MAX * 360;
+        mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
+                -(this.mProgress / DEFAULT_MAX * 360) :
+                this.mProgress / DEFAULT_MAX * 360;
 
         //BACKGROUND
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -66,8 +51,11 @@ public class PieModeRenderer extends BaseModeRenderer {
         if (mTypeface != null) {
             mTextPaint.setTypeface(mTypeface);
         }
+        if (mTextShadowColor != Color.TRANSPARENT){
+            mTextPaint.setShadowLayer(mTextShadowRadius, mTextShadowDistX, mTextShadowDistY, mTextShadowColor);
+        }
 
-        //ANIMATION
+        //ANIMATIONS
         mValueAnimator = ValueAnimator.ofFloat(0, mProgress);
         mValueAnimator.setDuration(mAnimDuration);
         mValueAnimator.setInterpolator(mAnimInterpolator);
@@ -82,10 +70,15 @@ public class PieModeRenderer extends BaseModeRenderer {
                     mTextProgress = 100;
                 else mTextProgress = 0;
 
+                mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
+                        -(mProgress / DEFAULT_MAX * 360) :
+                        mProgress / DEFAULT_MAX * 360;
+
                 mView.onProgressUpdated(mProgress);
                 mView.requestInvalidate();
             }
         });
+
         if (mAdaptiveColors != null) {
             mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mAdaptiveColor, getAdaptiveColor(mProgress));
             mColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -112,12 +105,6 @@ public class PieModeRenderer extends BaseModeRenderer {
 
     @Override
     public void draw(Canvas canvas) {
-        if (orientation == ORIENTATION_COUNTERCLOCKWISE) {
-            mArcAngle = -(this.mProgress / DEFAULT_MAX * 360);
-        } else {
-            mArcAngle = this.mProgress / DEFAULT_MAX * 360;
-        }
-
         //FOREGROUND
         if (mProgress != 0) {
             canvas.drawArc(mCircleBounds, mStartAngle, mArcAngle, true, mProgressPaint);
@@ -155,6 +142,7 @@ public class PieModeRenderer extends BaseModeRenderer {
         mCircleBounds = null;
         mTextBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
+
     }
 
     private void updateAdaptiveColors(int targetColor) {
@@ -162,28 +150,26 @@ public class PieModeRenderer extends BaseModeRenderer {
         mProgressPaint.setColor(mAdaptiveColor);
 
         if (drawBackground && mAdaptBackground) {
-            if (mAdaptiveBackgroundMode != -1 && mAdaptiveBackgroundRatio != -1) {
-                mAdaptiveBackgroundColor = ColorUtils.blendARGB(targetColor,
-                        (mAdaptiveBackgroundMode == DARKER_COLOR) ? Color.BLACK : Color.WHITE,
-                        mAdaptiveBackgroundRatio / 100);
-            } else {
-                mAdaptiveBackgroundColor = ColorUtils.blendARGB(targetColor,
-                        Color.BLACK,
-                        .5f);
-            }
+            mAdaptiveBackgroundColor = (mAdaptiveBackgroundMode != -1 && mAdaptiveBackgroundRatio != -1) ?
+                    ColorUtils.blendARGB(targetColor,
+                            (mAdaptiveBackgroundMode == DARKER_COLOR) ? Color.BLACK : Color.WHITE,
+                            mAdaptiveBackgroundRatio / 100) :
+                    ColorUtils.blendARGB(targetColor,
+                            Color.BLACK,
+                            .5f);
+
             mBackgroundPaint.setColor(mAdaptiveBackgroundColor);
         }
 
         if (mAdaptText) {
-            if (mAdaptiveTextMode != -1 && mAdaptiveTextRatio != -1) {
-                mAdaptiveTextColor = ColorUtils.blendARGB(targetColor,
-                        (mAdaptiveTextMode == DARKER_COLOR) ? Color.BLACK : Color.WHITE,
-                        mAdaptiveTextRatio / 100);
-            } else {
-                mAdaptiveTextColor = ColorUtils.blendARGB(targetColor,
-                        Color.WHITE,
-                        .5f);
-            }
+            mAdaptiveTextColor = (mAdaptiveTextMode != -1 && mAdaptiveTextRatio != -1) ?
+                    ColorUtils.blendARGB(targetColor,
+                            (mAdaptiveTextMode == DARKER_COLOR) ? Color.BLACK : Color.WHITE,
+                            mAdaptiveTextRatio / 100) :
+                    ColorUtils.blendARGB(targetColor,
+                            Color.WHITE,
+                            .5f);
+
             mTextPaint.setColor(mAdaptiveTextColor);
         }
     }
@@ -200,12 +186,16 @@ public class PieModeRenderer extends BaseModeRenderer {
             mColorAnimator.cancel();
         }
 
+
         if (!animate) {
             if (mAdaptiveColors != null) {
                 updateAdaptiveColors(getAdaptiveColor(progress));
             }
             this.mProgress = progress;
             this.mTextProgress = (int) progress;
+            mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
+                    -(this.mProgress / DEFAULT_MAX * 360) :
+                    this.mProgress / DEFAULT_MAX * 360;
             mView.onProgressUpdated(mProgress);
             mView.requestInvalidate();
             return;

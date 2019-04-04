@@ -9,7 +9,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.InflateException;
@@ -34,24 +33,32 @@ import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
 public abstract class BaseModeRenderer {
 
+
     // CHART MODE
     public static final int MODE_RING = 0;
     public static final int MODE_PIE = 1;
+
 
     // ORIENTATION
     public static final int ORIENTATION_CLOCKWISE = 0;
     public static final int ORIENTATION_COUNTERCLOCKWISE = 1;
 
+
     // BACKGROUND
-    boolean drawBackground = true;
+    boolean drawBackground;
+    Paint mBackgroundPaint;
+    int mBackgroundColor;
+
     int mAdaptiveBackgroundMode;
     float mAdaptiveBackgroundRatio;
     int mAdaptiveBackgroundColor;
     boolean mAdaptBackground;
 
+
     // PROGRESS
     Paint mProgressPaint;
     int mProgressColor;
+
 
     // TEXT
     private static float DEFAULT_TEXT_SP_SIZE = 16;
@@ -63,10 +70,16 @@ public abstract class BaseModeRenderer {
     int mTextColor;
     int mTextProgress;
     Typeface mTypeface;
+    int mTextShadowColor;
+    float mTextShadowRadius;
+    float mTextShadowDistY;
+    float mTextShadowDistX;
+
     int mAdaptiveTextColor;
     int mAdaptiveTextMode;
     float mAdaptiveTextRatio;
     boolean mAdaptText;
+
 
     // COMMON
     private static final int DEFAULT_ANIMATION_INTERPOLATOR = 0;
@@ -97,7 +110,6 @@ public abstract class BaseModeRenderer {
     float mStartAngle;
     float mArcAngle;
     SparseIntArray mAdaptiveColors;
-    private SparseArray<Float> mAdaptiveDistribution;
     int mAdaptiveColor;
 
     @ProgressOrientation
@@ -116,6 +128,9 @@ public abstract class BaseModeRenderer {
 
         //BACKGROUND DRAW STATE
         drawBackground = true;
+
+        //BACKGROUND COLOR
+        mBackgroundColor = ColorUtils.blendARGB(getThemeAccentColor(), Color.BLACK, 0.8f);
 
         //PROGRESS
         mProgress = mTextProgress = 0;
@@ -141,6 +156,12 @@ public abstract class BaseModeRenderer {
         //TEXT STYLE
         mTextStyle = Typeface.NORMAL;
 
+        //TEXT SHADOW
+        mTextShadowColor = Color.TRANSPARENT;
+        mTextShadowRadius = 5f;
+        mTextShadowDistX = 5f;
+        mTextShadowDistY = 5f;
+
         //ADAPT COLORS
         mAdaptText = mAdaptBackground = false;
 
@@ -160,6 +181,9 @@ public abstract class BaseModeRenderer {
 
         //BACKGROUND DRAW STATE
         drawBackground = attrs.getBoolean(R.styleable.PercentageChartView_pcv_drawBackground, true);
+
+        //BACKGROUND COLOR
+        mBackgroundColor = attrs.getColor(R.styleable.PercentageChartView_pcv_backgroundColor, ColorUtils.blendARGB(getThemeAccentColor(), Color.BLACK, 0.8f));
 
         //PROGRESS
         mProgress = attrs.getFloat(R.styleable.PercentageChartView_pcv_progress, 0);
@@ -234,22 +258,31 @@ public abstract class BaseModeRenderer {
         //TEXT STYLE
         mTextStyle = attrs.getInt(R.styleable.PercentageChartView_pcv_textStyle, Typeface.NORMAL);
         if (mTextStyle > 0) {
-            if (mTypeface == null) {
-                mTypeface = Typeface.defaultFromStyle(mTextStyle);
-            } else {
-                mTypeface = Typeface.create(mTypeface, mTextStyle);
-            }
+            mTypeface = (mTypeface == null) ? Typeface.defaultFromStyle(mTextStyle) : Typeface.create(mTypeface, mTextStyle);
+        }
+
+        //TEXT SHADOW
+        mTextShadowColor = attrs.getColor(R.styleable.PercentageChartView_pcv_textShadowColor, Color.TRANSPARENT);
+        if (mTextShadowColor != Color.TRANSPARENT) {
+            mTextShadowRadius = attrs.getFloat(R.styleable.PercentageChartView_pcv_textShadowRadius, 5f);
+            mTextShadowDistX = attrs.getFloat(R.styleable.PercentageChartView_pcv_textShadowDistX, 5f);
+            mTextShadowDistY = attrs.getFloat(R.styleable.PercentageChartView_pcv_textShadowDistY, 5f);
         }
 
         initAdaptiveColors(attrs);
     }
 
-    private void initAdaptiveColors(TypedArray attrs) {
+    void initAdaptiveColors(TypedArray attrs) {
         //ADAPTIVE COLORS
         String adaptiveColors = attrs.getString(R.styleable.PercentageChartView_pcv_adaptiveColors);
         if (adaptiveColors != null) {
             try {
                 String[] colors = adaptiveColors.split(",");
+
+                if (colors.length == 1) {
+                    throw new InflateException("pcv_adaptiveColors attribute is for displaying colors per progress. For a single color, use the pcv_progressColor attribute instead.");
+                }
+
                 mAdaptiveColors = new SparseIntArray(colors.length);
 
                 for (int i = 0; i < colors.length; i++) {
@@ -260,25 +293,6 @@ public abstract class BaseModeRenderer {
                 throw new InflateException("pcv_adaptiveColors attribute contains an invalid hex color value.");
             }
 
-            //ADAPTIVE COLORS DISTRIBUTION
-            String distribution = attrs.getString(R.styleable.PercentageChartView_pcv_adaptiveDistribution);
-            if (distribution != null) {
-                try {
-                    String[] values = distribution.split(",");
-                    mAdaptiveDistribution = new SparseArray<>(distribution.length());
-
-                    for (int i = 0; i < values.length; i++) {
-                        mAdaptiveDistribution.append(i, Float.parseFloat(values[i].trim()));
-                    }
-
-                } catch (Exception e) {
-                    throw new InflateException("pcv_adaptiveDistribution attribute contains an invalid value.");
-                }
-            }
-
-            if (mAdaptiveDistribution != null && mAdaptiveDistribution.size() != mAdaptiveColors.size())
-                throw new InflateException("pcv_adaptiveDistribution and pcv_adaptiveColors attributes should have same number of elements contained.");
-
             mAdaptiveColor = getAdaptiveColor(mProgress);
 
             //ADAPTIVE BACKGROUND COLOR
@@ -286,15 +300,14 @@ public abstract class BaseModeRenderer {
             if (drawBackground && mAdaptBackground) {
                 mAdaptiveBackgroundRatio = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveBackgroundRatio, -1);
                 mAdaptiveBackgroundMode = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveBackgroundMode, -1);
-                if (mAdaptiveBackgroundMode != -1 && mAdaptiveBackgroundRatio != -1) {
-                    mAdaptiveBackgroundColor = ColorUtils.blendARGB(mAdaptiveColor,
-                            (mAdaptiveBackgroundMode == DARKER_COLOR) ? Color.BLACK : Color.WHITE,
-                            mAdaptiveBackgroundRatio / 100);
-                } else {
-                    mAdaptiveBackgroundColor = ColorUtils.blendARGB(mAdaptiveColor,
-                            Color.BLACK,
-                            .5f);
-                }
+
+                mAdaptiveBackgroundColor = (mAdaptiveBackgroundMode != -1 && mAdaptiveBackgroundRatio != -1) ?
+                        ColorUtils.blendARGB(mAdaptiveColor,
+                                (mAdaptiveBackgroundMode == DARKER_COLOR) ? Color.BLACK : Color.WHITE,
+                                mAdaptiveBackgroundRatio / 100) :
+                        ColorUtils.blendARGB(mAdaptiveColor,
+                                Color.BLACK,
+                                .5f);
             }
 
             //ADAPTIVE TEXT COLOR
@@ -302,15 +315,14 @@ public abstract class BaseModeRenderer {
             if (mAdaptText) {
                 mAdaptiveTextRatio = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveTextRatio, -1);
                 mAdaptiveTextMode = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveTextMode, -1);
-                if (mAdaptiveTextMode != -1 && mAdaptiveTextRatio != -1) {
-                    mAdaptiveTextColor = ColorUtils.blendARGB(mAdaptiveColor,
-                            (mAdaptiveTextMode == DARKER_COLOR) ? Color.BLACK : Color.WHITE,
-                            mAdaptiveTextRatio / 100);
-                } else {
-                    mAdaptiveTextColor = ColorUtils.blendARGB(mAdaptiveColor,
-                            Color.WHITE,
-                            .5f);
-                }
+
+                mAdaptiveTextColor = (mAdaptiveTextMode != -1 && mAdaptiveTextRatio != -1) ?
+                        ColorUtils.blendARGB(mAdaptiveColor,
+                                (mAdaptiveTextMode == DARKER_COLOR) ? Color.BLACK : Color.WHITE,
+                                mAdaptiveTextRatio / 100) :
+                        ColorUtils.blendARGB(mAdaptiveColor,
+                                Color.WHITE,
+                                .5f);
             }
 
         }
@@ -324,16 +336,15 @@ public abstract class BaseModeRenderer {
 
     //INTERNAL
     int getAdaptiveColor(float progress) {
+        if (mView.getProvidedColor(progress) != -1)
+            return mView.getProvidedColor(progress);
+
         if (progress == 0f) {
             return mAdaptiveColors.get(0);
         }
 
         if (progress == 100f) {
             return mAdaptiveColors.get(mAdaptiveColors.size() - 1);
-        }
-
-        if (mAdaptiveDistribution != null) {
-            return mAdaptiveColors.get(getColorIndex(progress));
         }
 
         float hueSlice = DEFAULT_MAX / mAdaptiveColors.size();
@@ -345,18 +356,18 @@ public abstract class BaseModeRenderer {
         return mAdaptiveColors.get(index);
     }
 
-    private int getColorIndex(float progress) {
-        int left = 0, right = mAdaptiveDistribution.size();
-        while (left != right) {
-            int mid = (left + right) / 2;
-            if (mAdaptiveDistribution.get(mid) <= progress) {
-                left = mid + 1;
-            } else {
-                right = mid;
-            }
-        }
-        return right;
-    }
+//    private int getColorIndex(float progress) {
+//        int left = 0, right = mAdaptiveDistribution.size();
+//        while (left != right) {
+//            int mid = (left + right) / 2;
+//            if (mAdaptiveDistribution.get(mid) <= progress) {
+//                left = mid + 1;
+//            } else {
+//                right = mid;
+//            }
+//        }
+//        return right;
+//    }
 
     int getThemeAccentColor() {
         int colorAttr;
