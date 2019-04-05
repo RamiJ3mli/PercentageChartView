@@ -1,5 +1,6 @@
 package com.ramijemli.percentagechartview.renderer;
 
+import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -18,14 +19,14 @@ import androidx.core.graphics.ColorUtils;
 
 public class RingModeRenderer extends BaseModeRenderer {
 
+
     // BACKGROUND
     private RectF mBackgroundBounds;
-
 
     // BACKGROUND BAR
     private static final float DEFAULT_BG_BAR_DP_WIDTH = 16;
     private Paint mBackgroundBarPaint;
-    private boolean drawBackgroundBar;
+    private boolean mDrawBackgroundBar;
     private float mBackgroundBarThickness;
     private int mBackgroundBarColor;
 
@@ -54,7 +55,7 @@ public class RingModeRenderer extends BaseModeRenderer {
 
     private void init(TypedArray attrs) {
         //BACKGROUND BAR DRAW STATE
-        drawBackgroundBar = attrs.getBoolean(R.styleable.PercentageChartView_pcv_drawBackgroundBar, true);
+        mDrawBackgroundBar = attrs.getBoolean(R.styleable.PercentageChartView_pcv_drawBackgroundBar, true);
 
         //BACKGROUND WIDTH
         mBackgroundBarThickness = attrs.getDimensionPixelSize(com.ramijemli.percentagechartview.R.styleable.PercentageChartView_pcv_backgroundBarThickness,
@@ -74,18 +75,15 @@ public class RingModeRenderer extends BaseModeRenderer {
         //ADAPTIVE BACKGROUND BAR COLOR
         mAdaptBackgroundBar = false;
         mAdaptBackgroundBar = attrs.getBoolean(R.styleable.PercentageChartView_pcv_adaptiveBackgroundBar, false);
-        if (drawBackgroundBar && mAdaptBackgroundBar) {
-            mAdaptiveBackgroundBarRatio = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveBackgroundBarRatio, -1);
-            mAdaptiveBackgroundBarMode = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveBackgroundBarMode, -1);
-        }
-
+        mAdaptiveBackgroundBarRatio = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveBackgroundBarRatio, -1);
+        mAdaptiveBackgroundBarMode = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveBackgroundBarMode, -1);
 
         setup();
     }
 
     private void init() {
         //DRAW BACKGROUND BAR
-        drawBackgroundBar = true;
+        mDrawBackgroundBar = true;
 
         //BACKGROUND WIDTH
         mBackgroundBarThickness = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DEFAULT_BG_BAR_DP_WIDTH, mView.getViewContext().getResources().getDisplayMetrics());
@@ -98,6 +96,10 @@ public class RingModeRenderer extends BaseModeRenderer {
 
         //PROGRESS BAR STROKE STYLE
         mProgressBarStyle = Paint.Cap.ROUND;
+
+        //ADAPTIVE BACKGROUND BAR COLOR
+        mAdaptBackgroundBar = false;
+        mAdaptiveBackgroundBarRatio = mAdaptiveBackgroundBarMode = -1;
 
         setup();
     }
@@ -113,19 +115,18 @@ public class RingModeRenderer extends BaseModeRenderer {
         //BACKGROUND
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBackgroundPaint.setStyle(Paint.Style.FILL);
-        mBackgroundPaint.setColor(mAdaptBackground ? mAdaptiveBackgroundColor : mBackgroundColor);
+        mBackgroundPaint.setColor(mBackgroundColor);
 
         //BACKGROUND BAR
         mBackgroundBarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBackgroundBarPaint.setStyle(Paint.Style.STROKE);
-        mBackgroundBarPaint.setColor(mAdaptBackgroundBar ? mAdaptiveBackgroundBarColor : mBackgroundBarColor);
+        mBackgroundBarPaint.setColor(mBackgroundBarColor);
         mBackgroundBarPaint.setStrokeWidth(mBackgroundBarThickness);
         mBackgroundBarPaint.setStrokeCap(mProgressBarStyle);
 
         //PROGRESS
         mProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mProgressPaint.setStyle(Paint.Style.STROKE);
-//        mProgressPaint.setColor((mAdaptiveColors != null || mView.getProvidedColor(mProgress) != -1) ? mAdaptiveColor : mProgressColor);
         mProgressPaint.setStrokeWidth(mProgressBarThickness);
         mProgressPaint.setStrokeCap(mProgressBarStyle);
 
@@ -134,7 +135,7 @@ public class RingModeRenderer extends BaseModeRenderer {
         mTextPaint.setStyle(Paint.Style.FILL);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setTextSize(mTextSize);
-        mTextPaint.setColor(mAdaptText ? mAdaptiveTextColor : mTextColor);
+        mTextPaint.setColor(mTextColor);
         if (mTypeface != null) {
             mTextPaint.setTypeface(mTypeface);
         }
@@ -162,20 +163,9 @@ public class RingModeRenderer extends BaseModeRenderer {
                         mProgress / DEFAULT_MAX * 360;
 
                 mView.onProgressUpdated(mProgress);
-                mView.requestInvalidate();
+                mView.invalidate();
             }
         });
-
-//        if (mAdaptiveColors != null || mView.getProvidedColor(mProgress) != -1) {
-//            mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mAdaptiveColor, getAdaptiveColor(mProgress));
-//            mColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                @Override
-//                public void onAnimationUpdate(ValueAnimator animation) {
-//                    updateAdaptiveColors((int) animation.getAnimatedValue());
-//                }
-//            });
-//            mColorAnimator.setDuration(mAnimDuration);
-//        }
     }
 
     @Override
@@ -207,7 +197,7 @@ public class RingModeRenderer extends BaseModeRenderer {
         }
 
         //BACKGROUND BAR
-        if (drawBackgroundBar) {
+        if (mDrawBackgroundBar) {
             if (mBackgroundBarThickness <= mProgressBarThickness) {
                 canvas.drawArc(mCircleBounds, mStartAngle + mArcAngle, 360 - mArcAngle, false, mBackgroundBarPaint);
             } else {
@@ -244,7 +234,7 @@ public class RingModeRenderer extends BaseModeRenderer {
         }
 
         mProgressAnimator = mColorAnimator = null;
-        mCircleBounds = null;
+        mCircleBounds = mBackgroundBounds = null;
         mTextBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
 
@@ -255,14 +245,73 @@ public class RingModeRenderer extends BaseModeRenderer {
 
     @Override
     public void setAdaptiveColorProvider(@Nullable PercentageChartView.AdaptiveColorProvider adaptiveColorProvider) {
+        if (adaptiveColorProvider == null) {
+            mColorAnimator = null;
+            this.adaptiveColorProvider = null;
+            return;
+        }
 
+        this.adaptiveColorProvider = adaptiveColorProvider;
+
+        if (mColorAnimator == null) {
+            updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
+
+            mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mProgressColor, mAdaptiveColor);
+            mColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    updateAdaptiveColors((int) animation.getAnimatedValue());
+                }
+            });
+            mColorAnimator.setDuration(mAnimDuration);
+
+            mView.invalidate();
+        }
+    }
+
+    @Override
+    public void setProgress(float progress, boolean animate) {
+        if (this.mProgress == progress) return;
+
+        if (mProgressAnimator.isRunning()) {
+            mProgressAnimator.cancel();
+        }
+
+
+        if (mColorAnimator != null && mColorAnimator.isRunning()) {
+            mColorAnimator.cancel();
+        }
+
+        if (!animate) {
+            if (adaptiveColorProvider != null) {
+                updateAdaptiveColors(adaptiveColorProvider.getColor(progress));
+            }
+            this.mProgress = progress;
+            this.mTextProgress = (int) progress;
+            mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
+                    -(this.mProgress / DEFAULT_MAX * 360) :
+                    this.mProgress / DEFAULT_MAX * 360;
+            mView.onProgressUpdated(mProgress);
+            mView.invalidate();
+            return;
+        }
+
+        mProgressAnimator.setFloatValues(mProgress, progress);
+        mProgressAnimator.start();
+
+        if (adaptiveColorProvider != null) {
+            int startColor = mAdaptiveColor != -1 ? mAdaptiveColor : mProgressColor;
+            int endColor = adaptiveColorProvider.getColor(progress);
+            mColorAnimator.setIntValues(startColor, endColor);
+            mColorAnimator.start();
+        }
     }
 
     private void updateAdaptiveColors(int targetColor) {
         mAdaptiveColor = targetColor;
         mProgressPaint.setColor(mAdaptiveColor);
 
-        if (drawBackgroundBar && mAdaptBackgroundBar) {
+        if (mDrawBackgroundBar && mAdaptBackgroundBar) {
             mAdaptiveBackgroundBarColor = (mAdaptiveBackgroundBarMode != -1 && mAdaptiveBackgroundBarRatio != -1) ?
                     ColorUtils.blendARGB(targetColor,
                             (mAdaptiveBackgroundBarMode == DARKER_MODE) ? Color.BLACK : Color.WHITE,
@@ -299,39 +348,102 @@ public class RingModeRenderer extends BaseModeRenderer {
         }
     }
 
-    @Override
-    public void setProgress(float progress, boolean animate) {
-        if (this.mProgress == progress) return;
+    // DRAW BACKGROUND BAR STATE
+    public boolean isDrawBackgroundBarEnabled() {
+        return mDrawBackgroundBar;
+    }
 
-        if (mProgressAnimator.isRunning()) {
-            mProgressAnimator.cancel();
-        }
+    public void setDrawBackgroundBarEnabled(boolean drawBackgroundBar) {
+        this.mDrawBackgroundBar = drawBackgroundBar;
+        mView.invalidate();
+    }
 
-//        if ((mAdaptiveColors != null || mView.getProvidedColor(mProgress) != -1) && mColorAnimator != null &&  mColorAnimator.isRunning()) {
-//            mColorAnimator.cancel();
-//        }
+    //ADAPTIVE BACKGROUND BAR
+    public boolean isAdaptiveBackgroundBarEnabled() {
+        return mAdaptBackgroundBar;
+    }
 
-        if (!animate) {
-//            if (mAdaptiveColors != null || mView.getProvidedColor(mProgress) != -1) {
-//                updateAdaptiveColors(getAdaptiveColor(progress));
-//            }
-            this.mProgress = progress;
-            this.mTextProgress = (int) progress;
-            mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
-                    -(this.mProgress / DEFAULT_MAX * 360) :
-                    this.mProgress / DEFAULT_MAX * 360;
-            mView.onProgressUpdated(mProgress);
-            mView.requestInvalidate();
+    public float getAdaptiveBackgroundBarRatio() {
+        return mAdaptiveBackgroundBarRatio;
+    }
+
+    public int getAdaptiveBackgroundBarMode() {
+        return mAdaptiveBackgroundBarMode;
+    }
+
+    public void setAdaptiveBackgroundBar(float ratio, int adaptiveMode) {
+        if (adaptiveColorProvider == null || !mDrawBackgroundBar) return;
+        mAdaptBackgroundBar = true;
+        mAdaptiveBackgroundBarRatio = ratio;
+        mAdaptiveBackgroundBarMode = adaptiveMode;
+        updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
+        mView.invalidate();
+    }
+
+    //ADAPTIVE BACKGROUND
+    public void setAdaptiveBackground(float ratio, int adaptiveMode) {
+        if (adaptiveColorProvider == null || !drawBackground) return;
+        mAdaptBackground = true;
+        mAdaptiveBackgroundRatio = ratio;
+        mAdaptiveBackgroundMode = adaptiveMode;
+        updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
+        mView.invalidate();
+    }
+
+    //ADAPTIVE TEXT
+    public void setAdaptiveText(float ratio, int adaptiveMode) {
+        if (adaptiveColorProvider == null) return;
+        mAdaptText = true;
+        mAdaptiveTextRatio = ratio;
+        mAdaptiveTextMode = adaptiveMode;
+        updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
+        mView.invalidate();
+    }
+
+    //BACKGROUND BAR COLOR
+    public int getBackgroundBarColor() {
+        if (!mDrawBackgroundBar) return -1;
+        return (!mAdaptBackgroundBar) ? mBackgroundBarColor : mAdaptiveBackgroundBarColor;
+    }
+
+    public void setBackgroundBarColor(int backgroundBarColor) {
+        if (!mDrawBackgroundBar || (adaptiveColorProvider != null && mAdaptBackgroundBar))
             return;
-        }
+        this.mBackgroundBarColor = backgroundBarColor;
+        mBackgroundBarPaint.setColor(mBackgroundBarColor);
+        mView.invalidate();
+    }
 
-        mProgressAnimator.setFloatValues(mProgress, progress);
-        mProgressAnimator.start();
+    //BACKGROUND BAR THICKNESS
+    public float getBackgroundBarThickness() {
+        return mBackgroundBarThickness;
+    }
 
-//        if (mAdaptiveColors != null || mView.getProvidedColor(mProgress) != -1) {
-//            updateAdaptiveColors(mAdaptiveColor);
-//            mColorAnimator.setIntValues(mAdaptiveColor, getAdaptiveColor(progress));
-//            mColorAnimator.start();
-//        }
+    public void setBackgroundBarThickness(float backgroundBarThickness) {
+        this.mBackgroundBarThickness = backgroundBarThickness;
+        mBackgroundBarPaint.setStrokeWidth(backgroundBarThickness);
+        mView.invalidate();
+    }
+
+    //PROGRESS BAR THICKNESS
+    public float getProgressBarThickness() {
+        return mProgressBarThickness;
+    }
+
+    public void setProgressBarThickness(float progressBarThickness) {
+        this.mProgressBarThickness = progressBarThickness;
+        mProgressPaint.setStrokeWidth(progressBarThickness);
+        mView.invalidate();
+    }
+
+    //PROGRESS BAR STYLE
+    public int getProgressBarStyle() {
+        return (mProgressBarStyle == Paint.Cap.ROUND) ? CAP_ROUND : CAP_SQUARE;
+    }
+
+    public void setProgressBarStyle(int progressBarStyle) {
+        mProgressBarStyle = (progressBarStyle == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
+        mProgressPaint.setStrokeCap(mProgressBarStyle);
+        mView.invalidate();
     }
 }

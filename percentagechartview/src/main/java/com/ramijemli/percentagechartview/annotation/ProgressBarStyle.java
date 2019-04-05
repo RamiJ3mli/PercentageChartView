@@ -10,5 +10,5 @@ import static com.ramijemli.percentagechartview.renderer.RingModeRenderer.CAP_SQ
 
 @Retention(RetentionPolicy.SOURCE)
 @IntDef({CAP_ROUND, CAP_SQUARE})
-public @interface PercentageStyle {
+public @interface ProgressBarStyle {
 }

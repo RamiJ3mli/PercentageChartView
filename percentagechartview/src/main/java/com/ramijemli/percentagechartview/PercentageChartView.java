@@ -4,6 +4,7 @@ import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -11,6 +12,7 @@ import android.view.View;
 
 import com.ramijemli.percentagechartview.annotation.AdaptiveMode;
 import com.ramijemli.percentagechartview.annotation.ChartMode;
+import com.ramijemli.percentagechartview.annotation.ProgressBarStyle;
 import com.ramijemli.percentagechartview.annotation.ProgressOrientation;
 import com.ramijemli.percentagechartview.annotation.TextStyle;
 import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
@@ -118,11 +120,6 @@ public class PercentageChartView extends View implements IPercentageChartView {
     }
 
     @Override
-    public void requestInvalidate() {
-        invalidate();
-    }
-
-    @Override
     public void onProgressUpdated(float progress) {
         if (onProgressChangeListener != null)
             onProgressChangeListener.onProgressChanged(progress);
@@ -136,7 +133,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
     }
 
     /**
-     * Sets a new progress value. Passing true in animate will result in animated progress update.
+     * Sets a new progress value. Passing true in animate will result in an animated progress update.
      *
      * @param progress New progress float value to set.
      * @param animate  Animation boolean value to set whether to animate progress change or not.
@@ -199,7 +196,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
         return renderer.isAdaptiveBackgroundEnabled();
     }
 
-    @FloatRange(from = 0f, to = 1f)
+    @FloatRange(from = -1f, to = 1f)
     public float getAdaptiveBackgroundRatio() {
         return renderer.getAdaptiveBackgroundRatio();
     }
@@ -213,11 +210,34 @@ public class PercentageChartView extends View implements IPercentageChartView {
         renderer.setAdaptiveBackground(ratio, adaptiveMode);
     }
 
+    //ADAPTIVE BACKGROUND BAR
+    public boolean isAdaptiveBackgroundBarEnabled() {
+        if(renderer instanceof PieModeRenderer) return false;
+        return ((RingModeRenderer) renderer).isAdaptiveBackgroundBarEnabled();
+    }
+
+    @FloatRange(from = -1f, to = 1f)
+    public float getAdaptiveBackgroundBarRatio() {
+        if(renderer instanceof PieModeRenderer) return -1f;
+        return ((RingModeRenderer) renderer).getAdaptiveBackgroundBarRatio();
+    }
+
+    public int getAdaptiveBackgroundBarMode() {
+        if(renderer instanceof PieModeRenderer) return -1;
+        return ((RingModeRenderer) renderer).getAdaptiveBackgroundBarMode();
+    }
+
+    public void setAdaptiveBackgroundBar(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
+        if(renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setAdaptiveBackgroundBar(ratio, adaptiveMode);
+    }
+
     //ADAPTIVE TEXT
     public boolean isAdaptiveTextEnabled() {
         return renderer.isAdaptiveTextEnabled();
     }
 
+    @FloatRange(from = -1f, to = 1f)
     public float getAdaptiveTextRatio() {
         return renderer.getAdaptiveTextRatio();
     }
@@ -310,6 +330,60 @@ public class PercentageChartView extends View implements IPercentageChartView {
 
     public void setTextShadow(@ColorInt int shadowColor, @FloatRange(from = 0) float shadowRadius, @FloatRange(from = 0) float shadowDistX, @FloatRange(from = 0) float shadowDistY) {
         renderer.setTextShadow(shadowColor, shadowRadius, shadowDistX, shadowDistY);
+    }
+
+    //DRAW BACKGROUND BAR STATE
+    public boolean isDrawBackgroundBarEnabled() {
+        if(renderer instanceof PieModeRenderer) return false;
+        return ((RingModeRenderer) renderer).isDrawBackgroundBarEnabled();
+    }
+
+    public void setDrawBackgroundBarEnabled(boolean enabled) {
+        if(renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
+    }
+
+    //BACKGROUND BAR COLOR
+    public int getBackgroundBarColor() {
+        if(renderer instanceof PieModeRenderer) return -1;
+        return ((RingModeRenderer) renderer).getBackgroundBarColor();
+    }
+
+    public void setBackgroundBarColor(@ColorInt int backgroundBarColor) {
+        ((RingModeRenderer) renderer).setBackgroundBarColor(backgroundBarColor);
+    }
+
+    //BACKGROUND BAR THICKNESS
+    public float getBackgroundBarThickness() {
+        if(renderer instanceof PieModeRenderer) return -1;
+        return ((RingModeRenderer) renderer).getBackgroundBarThickness();
+    }
+
+    public void setBackgroundBarThickness(@FloatRange(from = 0) float backgroundBarThickness) {
+        if(renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setBackgroundBarThickness(backgroundBarThickness);
+    }
+
+    //PROGRESS BAR THICKNESS
+    public float getProgressBarThickness() {
+        if(renderer instanceof PieModeRenderer) return -1;
+        return ((RingModeRenderer) renderer).getProgressBarThickness();
+    }
+
+    public void setProgressBarThickness(@FloatRange(from = 0) float progressBarThickness) {
+        if(renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setProgressBarThickness(progressBarThickness);
+    }
+
+    //PROGRESS BAR STYLE
+    public int getProgressBarStyle() {
+        if(renderer instanceof PieModeRenderer) return -1;
+        return ((RingModeRenderer) renderer).getProgressBarStyle();
+    }
+
+    public void setProgressBarStyle(@ProgressBarStyle int progressBarStyle) {
+        if(renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setProgressBarStyle(progressBarStyle);
     }
 
     //##############################################################################################   ADAPTIVE COLOR PROVIDER

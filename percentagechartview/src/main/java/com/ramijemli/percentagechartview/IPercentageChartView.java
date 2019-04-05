@@ -6,7 +6,9 @@ public interface IPercentageChartView {
 
     Context getViewContext();
 
-    void requestInvalidate();
+    void invalidate();
+
+    void requestLayout();
 
     void onProgressUpdated(float progress);
 

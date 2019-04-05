@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.ramijemli.percentagechartview.PercentageChartView;
+import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
 
 import java.util.Random;
 
@@ -26,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
             chart.setProgress(rand, true);
 //            chart.setStartAngle(new Random().nextInt(360));
 //            chart.setDrawBackgroundEnabled(rand % 2 == 0);
-//            chart.setOrientation((rand % 2 == 0)? BaseModeRenderer.ORIENTATION_CLOCKWISE: BaseModeRenderer.ORIENTATION_CLOCKWISE);
+            chart.setOrientation((rand % 2 == 0)? BaseModeRenderer.ORIENTATION_CLOCKWISE: BaseModeRenderer.ORIENTATION_CLOCKWISE);
             chart.setBackgroundColor((rand % 2 == 0) ? Color.BLACK : Color.GREEN);
             chart.setProgressColor((rand % 2 == 0) ? Color.GREEN : Color.BLACK);
         });

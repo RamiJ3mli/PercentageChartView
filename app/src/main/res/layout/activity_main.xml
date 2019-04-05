@@ -13,7 +13,7 @@
         android:layout_marginEnd="16dp"
         app:pcv_animDuration="300"
         app:pcv_drawBackground="true"
-        app:pcv_adaptiveBackground="false"
+        app:pcv_adaptiveBackground="true"
         app:pcv_adaptiveBackgroundRatio="60"
         app:pcv_adaptiveBackgroundMode="darker"
         app:pcv_adaptiveText="true"

@@ -79,7 +79,7 @@ public class PieModeRenderer extends BaseModeRenderer {
                         mProgress / DEFAULT_MAX * 360;
 
                 mView.onProgressUpdated(mProgress);
-                mView.requestInvalidate();
+                mView.invalidate();
             }
         });
     }
@@ -135,10 +135,10 @@ public class PieModeRenderer extends BaseModeRenderer {
         mCircleBounds = null;
         mTextBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
+
         if (adaptiveColorProvider != null) {
             adaptiveColorProvider = null;
         }
-
     }
 
     @Override
@@ -163,7 +163,7 @@ public class PieModeRenderer extends BaseModeRenderer {
             });
             mColorAnimator.setDuration(mAnimDuration);
 
-            mView.requestInvalidate();
+            mView.invalidate();
         }
     }
 
@@ -189,7 +189,7 @@ public class PieModeRenderer extends BaseModeRenderer {
                     -(this.mProgress / DEFAULT_MAX * 360) :
                     this.mProgress / DEFAULT_MAX * 360;
             mView.onProgressUpdated(mProgress);
-            mView.requestInvalidate();
+            mView.invalidate();
             return;
         }
 
@@ -239,7 +239,7 @@ public class PieModeRenderer extends BaseModeRenderer {
         mAdaptiveBackgroundRatio = ratio;
         mAdaptiveBackgroundMode = adaptiveMode;
         updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 
     public void setAdaptiveText(float ratio, int adaptiveMode) {
@@ -248,6 +248,6 @@ public class PieModeRenderer extends BaseModeRenderer {
         mAdaptiveTextRatio = ratio;
         mAdaptiveTextMode = adaptiveMode;
         updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 }

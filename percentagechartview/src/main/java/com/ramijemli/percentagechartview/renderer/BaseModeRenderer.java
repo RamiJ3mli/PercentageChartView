@@ -65,8 +65,8 @@ public abstract class BaseModeRenderer {
     private static final int LINEAR_OUT_SLOW_IN = 10;
 
     private static final int DEFAULT_START_ANGLE = 0;
-    static final float DEFAULT_MAX = 100;
     private static final int DEFAULT_ANIMATION_DURATION = 1000;
+    static final float DEFAULT_MAX = 100;
 
     //##############################################################################################
     // BACKGROUND
@@ -78,7 +78,6 @@ public abstract class BaseModeRenderer {
     float mAdaptiveBackgroundRatio;
     int mAdaptiveBackgroundColor;
     boolean mAdaptBackground;
-
 
     // PROGRESS
     Paint mProgressPaint;
@@ -101,7 +100,6 @@ public abstract class BaseModeRenderer {
     int mAdaptiveTextMode;
     float mAdaptiveTextRatio;
     boolean mAdaptText;
-
 
     // COMMON
     RectF mCircleBounds;
@@ -290,28 +288,12 @@ public abstract class BaseModeRenderer {
         mAdaptiveTextMode = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveTextMode, -1);
     }
 
-
+    //############################################################################################## BEHAVIOR
     public abstract void mesure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom);
 
     public abstract void draw(Canvas canvas);
 
     public abstract void destroy();
-
-    public abstract void setAdaptiveColorProvider(@Nullable PercentageChartView.AdaptiveColorProvider adaptiveColorProvider);
-
-    //INTERNAL
-//    private int getColorIndex(float progress) {
-//        int left = 0, right = mAdaptiveDistribution.size();
-//        while (left != right) {
-//            int mid = (left + right) / 2;
-//            if (mAdaptiveDistribution.get(mid) <= progress) {
-//                left = mid + 1;
-//            } else {
-//                right = mid;
-//            }
-//        }
-//        return right;
-//    }
 
     int getThemeAccentColor() {
         int colorAttr;
@@ -329,6 +311,8 @@ public abstract class BaseModeRenderer {
     }
 
     //############################################################################################## MODIFIERS
+    public abstract void setAdaptiveColorProvider(@Nullable PercentageChartView.AdaptiveColorProvider adaptiveColorProvider);
+
     //PROGRESS
     public float getProgress() {
         return mProgress;
@@ -343,7 +327,7 @@ public abstract class BaseModeRenderer {
 
     public void setDrawBackgroundEnabled(boolean drawBackground) {
         this.drawBackground = drawBackground;
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 
     //START ANGLE
@@ -353,7 +337,7 @@ public abstract class BaseModeRenderer {
 
     public void setStartAngle(float startAngle) {
         this.mStartAngle = startAngle;
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 
     //ORIENTATION
@@ -363,7 +347,7 @@ public abstract class BaseModeRenderer {
 
     public void setOrientation(int orientation) {
         this.orientation = orientation;
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 
     //BACKGROUND COLOR
@@ -377,7 +361,7 @@ public abstract class BaseModeRenderer {
             return;
         this.mBackgroundColor = backgroundColor;
         mBackgroundPaint.setColor(mBackgroundColor);
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 
     //PROGRESS COLOR
@@ -390,7 +374,7 @@ public abstract class BaseModeRenderer {
 
         this.mProgressColor = progressColor;
         mProgressPaint.setColor(progressColor);
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 
     //ADAPTIVE BACKGROUND
@@ -454,7 +438,7 @@ public abstract class BaseModeRenderer {
             return;
         this.mTextColor = textColor;
         mTextPaint.setColor(textColor);
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 
     //TEXT SIZE
@@ -477,7 +461,7 @@ public abstract class BaseModeRenderer {
         }
         this.mTypeface = typeface;
         mTextPaint.setTypeface(mTypeface);
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 
     //TEXT STYLE
@@ -490,16 +474,18 @@ public abstract class BaseModeRenderer {
         mTypeface = (mTypeface == null) ? Typeface.defaultFromStyle(mTextStyle) : Typeface.create(mTypeface, mTextStyle);
 
         mTextPaint.setTypeface(mTypeface);
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 
     //TEXT SHADOW
     public int getTextShadowColor() {
         return mTextShadowColor;
     }
+
     public float getTextShadowRadius() {
         return mTextShadowRadius;
     }
+
     public float getTextShadowDistY() {
         return mTextShadowDistY;
     }
@@ -515,6 +501,6 @@ public abstract class BaseModeRenderer {
         this.mTextShadowDistY = shadowDistY;
 
         mTextPaint.setShadowLayer(mTextShadowRadius, mTextShadowDistX, mTextShadowDistY, mTextShadowColor);
-        mView.requestInvalidate();
+        mView.invalidate();
     }
 }
