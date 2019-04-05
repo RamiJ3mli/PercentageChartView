@@ -20,8 +20,6 @@ import androidx.core.graphics.ColorUtils;
 public class RingModeRenderer extends BaseModeRenderer {
 
 
-    // BACKGROUND
-    private RectF mBackgroundBounds;
 
     // BACKGROUND BAR
     private static final float DEFAULT_BG_BAR_DP_WIDTH = 16;

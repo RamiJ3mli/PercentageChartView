@@ -29,6 +29,7 @@ public class PieModeRenderer extends BaseModeRenderer {
 
     private void setup() {
         mCircleBounds = new RectF();
+        mBackgroundBounds = new RectF();
         mTextBounds = new Rect();
         mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
                 -(this.mProgress / DEFAULT_MAX * 360) :
@@ -94,6 +95,11 @@ public class PieModeRenderer extends BaseModeRenderer {
         mCircleBounds.top = centerY - radius;
         mCircleBounds.right = centerX + radius;
         mCircleBounds.bottom = centerY + radius;
+
+        mBackgroundBounds.left = mCircleBounds.left + mBackgroundOffset;
+        mBackgroundBounds.top = mCircleBounds.top + mBackgroundOffset;
+        mBackgroundBounds.right = mCircleBounds.right - mBackgroundOffset;
+        mBackgroundBounds.bottom = mCircleBounds.bottom - mBackgroundOffset;
     }
 
     @Override
@@ -105,7 +111,7 @@ public class PieModeRenderer extends BaseModeRenderer {
 
         //BACKGROUND
         if (drawBackground) {
-            canvas.drawArc(mCircleBounds, mStartAngle + mArcAngle, 360 - mArcAngle, true, mBackgroundPaint);
+            canvas.drawArc(mBackgroundBounds, mStartAngle + mArcAngle, 360 - mArcAngle, true, mBackgroundPaint);
         }
 
         //TEXT

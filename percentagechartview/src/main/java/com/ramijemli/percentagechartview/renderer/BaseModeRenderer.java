@@ -73,6 +73,7 @@ public abstract class BaseModeRenderer {
     boolean drawBackground;
     Paint mBackgroundPaint;
     int mBackgroundColor;
+    int mBackgroundOffset;
 
     int mAdaptiveBackgroundMode;
     float mAdaptiveBackgroundRatio;
@@ -102,6 +103,7 @@ public abstract class BaseModeRenderer {
     boolean mAdaptText;
 
     // COMMON
+    RectF mBackgroundBounds;
     RectF mCircleBounds;
     ValueAnimator mColorAnimator;
     ValueAnimator mProgressAnimator;
@@ -172,6 +174,9 @@ public abstract class BaseModeRenderer {
         //ADAPTIVE TEXT COLOR
         mAdaptText = false;
         mAdaptiveTextRatio = mAdaptiveTextMode = -1;
+
+        //BACKGROUND OFFSET
+        mBackgroundOffset = 0;
     }
 
     BaseModeRenderer(IPercentageChartView view, TypedArray attrs) {
@@ -286,6 +291,11 @@ public abstract class BaseModeRenderer {
         mAdaptText = attrs.getBoolean(R.styleable.PercentageChartView_pcv_adaptiveText, false);
         mAdaptiveTextRatio = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveTextRatio, -1);
         mAdaptiveTextMode = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveTextMode, -1);
+
+        //BACKGROUND OFFSET
+        mBackgroundOffset = attrs.getDimensionPixelSize(
+                R.styleable.PercentageChartView_pcv_backgroundOffset,
+                0);
     }
 
     //############################################################################################## BEHAVIOR
@@ -347,6 +357,9 @@ public abstract class BaseModeRenderer {
 
     public void setOrientation(int orientation) {
         this.orientation = orientation;
+//        mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
+//                -(this.mProgress / DEFAULT_MAX * 360) :
+//                this.mProgress / DEFAULT_MAX * 360;
         mView.invalidate();
     }
 
@@ -363,6 +376,20 @@ public abstract class BaseModeRenderer {
         mBackgroundPaint.setColor(mBackgroundColor);
         mView.invalidate();
     }
+
+    //BACKGROUND OFFSET
+    public float getBackgroundOffset() {
+        if (!drawBackground) return -1;
+        return mBackgroundOffset;
+    }
+
+    public void setBackgroundOffset(int backgroundOffset) {
+        if (!drawBackground)
+            return;
+        this.mBackgroundOffset = backgroundOffset;
+        mView.invalidate();
+    }
+
 
     //PROGRESS COLOR
     public int getProgressColor() {
