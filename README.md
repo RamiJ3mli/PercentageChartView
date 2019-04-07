@@ -1,14 +1,20 @@
 # Percentage Chart View
 [![Platform](https://img.shields.io/badge/platform-android-green.svg)](http://developer.android.com/index.html)
 [![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=16)
-[![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.1.3) ](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.1.3/link)
+[ ![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.2.0) ](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.2.0/link)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-PercentageChartView-yellow.svg?style=flat)](https://android-arsenal.com/details/1/7600)
-[![Twitter](https://img.shields.io/badge/Twitter-@RamiJemli-blue.svg?style=flat)](http://twitter.com/rami_jemli)
-<br/>A customizable Android percentage chart that displays the progress of any single given task or information.    
+[![Twitter](https://img.shields.io/badge/Twitter-@RamiJemli-blue.svg?style=flat)](http://twitter.com/rami_jemli)<br/>
+<br/><img src="art/cover.jpg" /><br/>
 
-<img src="art/showcase_01.gif" width="33%"/> <img src="art/showcase_02.gif" width="33%"/> <img src="art/showcase_03.gif" width="33%"/> <br/> <img src="art/showcase_04.gif" width="33%"/>
+A Java-based easy to use and highly adjustable custom view that displays the progress of a single given task.
+<br/>Please feel free to see the library in action in a showcase app available on Google play.
 
-## Setup
+<a href="https://play.google.com/store/apps/details?id=com.ramijemli.percentagechartview"><img src="art/google-play-badge.png" title="Percentage Chart View google play demo"  width="30%"></a>
+
+
+<img src="art/showcase_01.gif" width="30%"/> <img src="art/showcase_02.gif" width="30%"/> <img src="art/showcase_03.gif" width="30%"/><br/> <img src="art/showcase_04.gif" width="30%"/> <img src="art/showcase_05.gif" width="30%"/> <img src="art/showcase_06.gif" width="30%"/><br/> <img src="art/showcase_07.gif" width="30%"/> <img src="art/showcase_08.gif" width="30%"/> <img src="art/showcase_09.gif" width="30%"/>
+
+## SETUP
 Dependency should be declared in your app module level  `build.gradle` file:  
   
 ```  
@@ -19,37 +25,66 @@ dependencies {
 }  
 ```  
 
-## How to use
-
+## HOW TO USE
 ```  
-<com.ramijemli.percentagechartview.PercentageChartView
-    android:id="@+id/chart"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent"
-    app:pcv_animDuration="1000"
-    app:pcv_animInterpolator="accelerate_decelerate"
-    app:pcv_backgroundColor="#0ffff0"
-    app:pcv_backgroundWidth="8dp"
-    app:pcv_fillBackground="true"
-    app:pcv_fillBackgroundColor="#37474F"
-    app:pcv_mode="ring"
-    app:pcv_percentageColor="#0ffff0"
-    app:pcv_percentageStyle="round"
-    app:pcv_percentageWidth="50dp"
-    app:pcv_progress="50"
-    app:pcv_startAngle="90"
-    app:pcv_textColor="#0ffff0"
-    app:pcv_textSize="50sp"
-    app:pcv_textStyle="bold|italic"
-    app:pcv_typeface="Interstellar.ttf" />
+    <com.ramijemli.percentagechartview.PercentageChartView
+        android:id="@+id/view_id"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:pcv_mode="pie"
+        app:pcv_orientation="counter_clockwise"
+        app:pcv_animDuration="800"
+        app:pcv_animInterpolator="anticipate_overshoot"
+        app:pcv_progress="10"
+        app:pcv_startAngle="90"/>
   ```  
 
-To use the color per progress feature, you have to pass a **`ColorProvider`** class using the **`setColorProvider()`** method.
+### Attributes
+|Name|Format|Default|Supported modes|Description| 
+|---|:---:|:---:|:---:|---| 
+| `pcv_mode` | `enum` | `pie` |-| Sets percentage chart appearance to **`"ring"`** or **`"pie"`**.
+| `pcv_orientation` | `enum` | `clockwise` |Both| Sets progress's drawing direction to **`"clockwise"`** or **`"counter_clockwise"`**.
+| `pcv_startAngle` | `integer` | `0` |Both| Sets progress's drawing start angle to **[0..360]**.
+| `pcv_animDuration` | `integer` |  `400` |Both| Sets progress update's animation duration. 
+| `pcv_animInterpolator` | `enum` | `linear` |Both| Sets progress update's animation interpolator to **`"linear"`**, **`"accelerate"`**, **`"decelerate"`**, **`"accelerate_decelerate"`**, **`"anticipate"`**, **`"overshoot"`**, **`"anticipate_overshoot"`**, **`"bounce"`**, **`"fast_out_linear_in"`**, **`"fast_out_slow_in"`**, **`"linear_out_slow_in"`**.    
+| `pcv_drawBackground` | `boolean` | `true` for pie mode <br/>`false` for ring mode|Both| Sets whether to draw background or not. 
+| `pcv_backgroundColor` | `color` | `#000000` |Both| Sets background color.
+| `pcv_progress` | `integer` |  `0` |Both| Sets current progress.
+| `pcv_progressColor` | `color` | Accent color |Both| Sets progress color. 
+| `pcv_textColor` | `color` | `#ffffff` |Both| Sets text color.
+| `pcv_textSize` | `dimension` | `#12sp` | Both| Sets text size in SP.
+| `pcv_typeface` | `string` |  System font | Both| Sets progress text's typeface file path in assets folder.
+| `pcv_textStyle` | `flag` | `normal` | Both| Sets progress text's style to **`"normal"`**, **`"bold"`**, **`"italic"`**, **`"bold\|italic"`**.
+| `pcv_textShadowColor` |  `color` | `#00ffffff` | Both | Sets text shadow/glow color.
+| `pcv_textShadowRadius` | `string` | `0` | Both | Sets text shadow/glow radius.
+| `pcv_textShadowDistX` | `float` | `0` | Both | Sets text shadow/glow's x-axis distance.
+| `pcv_textShadowDistY` | `float` | `0` | Both | Sets text shadow/glow's y-axis distance.
+| `pcv_backgroundOffset` | `dimension` | `0dp` | Pie | Sets a margin only for background.
+| `pcv_drawBackgroundBar` | `boolean` | `true` | Ring | Sets whether to draw background bar or not.    
+| `pcv_backgroundBarThickness` | `dimension` | `16dp` | Ring | Sets background bar's thickness in DP.
+| `pcv_backgroundBarColor` | `color` | `#000000` | Ring | Sets background color.
+| `pcv_progressBarThickness` | `dimension` | `16dp` | Ring |Sets progress bar's thickness in DP.
+| `pcv_progressBarStyle` | `enum` | `round` | Ring | Sets progress bar's style to **`"round"`** or **`"square"`**.
+| `pcv_adaptiveText` | `boolean` | `false` | Both | Makes the text color synchronize with progress color. If **`true`**, text color will be 50% lighter than progress color. This works only when an **`AdaptiveColorProvider`** is used.
+| `pcv_adaptiveTextMode` | `enum` | `lighter` | Both | Changes whether text color should be darker or lighter than progress color. It accepts **`"darker"`** or **`"lighter"`** and this works only when an **`AdaptiveColorProvider`** is used.
+| `pcv_adaptiveTextRatio` | `integer` | `50` | Both | Changes how much darker or lighter text color should be. It accepts values from to **[0..100]** and this works only when an **`AdaptiveColorProvider`** is used.
+| `pcv_adaptiveBackground` | `boolean` | `false` | Both | Makes the background color synchronize with progress color. If **`true`**, background color will be 50% darker than progress color. This works only when an **`AdaptiveColorProvider`** is used.
+| `pcv_adaptiveBackgroundMode` | `enum` | `darker` | Both | Changes whether background color should be darker or lighter than progress color. It accepts **`"darker"`** or **`"lighter"`** and this works only when an **`AdaptiveColorProvider`** is used.
+| `pcv_adaptiveBackgroundRatio` | `integer` | `50` | Both | Changes how much darker or lighter background color should be. It accepts values from to **[0..100]** and this works only when an **`AdaptiveColorProvider`** is used.
+| `pcv_adaptiveBackgroundBar` | `boolean` | `false` | Ring | Makes the background bar color synchronize with progress color. If **`true`**, background bar color will be 50% darker than progress color. This works only when an **`AdaptiveColorProvider`** is used.
+| `pcv_adaptiveBackgroundBarMode` | `enum` | `darker` | Ring | Changes whether background bar color should be darker or lighter than progress color. It accepts **`"darker"`** or **`"lighter"`** and this works only when an **`AdaptiveColorProvider`** is used.
+| `pcv_adaptiveBackgroundBarRatio` | `integer` | `50` | Ring | Changes how much darker or lighter background bar color should be. It accepts values from to **[0..100]** and this works only when an **`AdaptiveColorProvider`** is used.
+
+All xml attributes have their Java counterparts except the `pcv_mode` attribute (for now).
+
+### Progress-based adaptive colors
+
+To use the color per progress feature, you have to pass a **`AdaptiveColorProvider`** class using the **`setAdaptiveColorProvider()`** method.
 
 ``` 
 PercentageChartView chart = findViewById(R.id.chart);  
 chart.setOnClickListener(view -> chart.setPercentage(new Random().nextInt(100), true));  
-chart.setColorProvider(value -> {  
+chart.setAdaptiveColorProvider(value -> {  
     String color;  
 
     if (value <= 25)  
@@ -63,7 +98,9 @@ chart.setColorProvider(value -> {
     return Color.parseColor(color);  
 });
 ``` 
-It's possible to get progress updates by settings an **`OnProgressChangeListener`**.
+### Progress changed listener
+
+It's possible to get progress updates by setting an **`OnProgressChangeListener`**.
 ``` 
 chart.setOnProgressChangeListener(new PercentageChartView.OnProgressChangeListener() {
     @Override
@@ -73,45 +110,33 @@ chart.setOnProgressChangeListener(new PercentageChartView.OnProgressChangeListen
 });
 ``` 
 
-## Attributes
-|Name|Format|Description| 
-|---|:---:|---| 
-| `pcv_mode` | `enum` | Set percentage chart appearance to **`"ring"`** or **`"pie"`** | `pcv_orientation` | `enum` | Set progress bar's direction to **`"clockwise"`** or **`"counter_clockwise"`** 
-| `pcv_startAngle` | `integer` | Set progress bar's start angle to **[0..360]** 
-| `pcv_backgroundColor` | `color` | Change progress background color    
-| `pcv_backgroundWidth` | `dimension` | set progress background bar width **if `pcv_mode="ring"`** 
-| `pcv_fillBackground` | `boolean` | Sets whether to draw a filled background or not when **`pcv_mode="ring"`**   
-| `pcv_fillBackgroundColor` | `color` | set background fill color **if `pcv_mode="ring"`** 
-| `pcv_progress` | `integer` | Set current progress
-| `pcv_percentageColor` | `color` | Change progress foreground color    
-| `pcv_percentageWidth` | `dimension` | set progress foreground bar width **if `pcv_mode="ring"`** 
-| `pcv_percentageStyle` | `enum` | Change progress foreground bar style to **`"round"`** or **`"square"`** 
-| `pcv_textColor` | `color` | Change text color    
-| `pcv_textSize` | `dimension` | Set text size in SP    
-| `pcv_typeface` | `string` | Set progress text's typeface file path in assets folder
-| `pcv_textStyle` | `flag` | Set progress text's style to **`"normal"`** (default), **`"bold"`**, **`"italic"`**, **`"bold\|italic"`**
-| `pcv_animDuration` | `integer` | Set progress update's animation duration    
-| `pcv_animInterpolator` | `enum` | Set progress update's animation interpolator to **`"linear"`** (default), **`"accelerate"`**, **`"decelerate"`**, **`"accelerate_decelerate"`**, **`"anticipate"`**, **`"overshoot"`**, **`"anticipate_overshoot"`**, **`"bounce"`**, **`"fast_out_linear_in"`**, **`"fast_out_slow_in"`**, **`"linear_out_slow_in"`**.    
-
 ## To do
 - [x] ~~Initial release~~  
 - [x] ~~Progress based adaptive color support~~ 
 - [x] ~~Text style support~~ 
-- [ ] Color states support  
 - [x] ~~Filled background support for ring mode~~  
 - [x] ~~Text typeface support~~  
 - [x] ~~Progress change listener~~  
-- [ ] New mode/appearance  
-- [ ] Dynamic text suffix support  
+- [x] ~~Progress based adaptive color support for text, background and background bar~~
+- [x] ~~Draw orientation support~~
+- [x] ~~Text shadow/glow support~~
+- [ ] Demo app optimization using a RecyclerView  
+- [ ] Background bar and progress bar offset support  
 - [ ] Text formatter support  
 - [ ] Gradient colors support  
-- [ ] Component's lifecycle awareness  
-- [ ] Segmented progress support for ring mode  
+- [ ] Builder pattern based update pipeline  
+- [ ] New mode/appearance
+- [ ] Segmented style support for ring mode  
 
-## Feedback    
-All bugs, feature requests, pull requests, feedback, etc. are welcome. Please, feel free to [create an issue](https://github.com/RamiJ3mli/PercentageChartView/issues).  
+## CONTRIBUTION
+All bugs, feature requests, feedback, etc. are welcome. Please, feel free to [create an issue](https://github.com/RamiJ3mli/PercentageChartView/issues).  
 
-## Contributors    
+You can contribute by opening pull requests on dev branch. Please try to push commits per feature for a clean commit history.
+
+## APPS USING IT
+Are you using this library in your app? Let us know and we'll show it here.
+
+## CONTRIBUTORS    
 <table>    
 <tr>    
 <td>    
@@ -120,9 +145,19 @@ All bugs, feature requests, pull requests, feedback, etc. are welcome. Please, f
 </tr>    
 </table>    
 
-## License    
+## LICENSE    
+``` 
+Copyright 2019 Rami Jemli
 
-Copyright 2019 Rami Jemli<br/>
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at    
-http://www.apache.org/licenses/LICENSE-2.0<br/>
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.<br/>
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, 
+software distributed under the License is distributed on an "AS IS" BASIS, 
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+See the License for the specific language governing permissions 
+and limitations under the License.
+``` 
