@@ -17,6 +17,9 @@ import androidx.core.graphics.ColorUtils;
 
 public class PieModeRenderer extends BaseModeRenderer {
 
+    float mBgStartAngle;
+    float mBgSweepAngle;
+
     public PieModeRenderer(IPercentageChartView view) {
         super(view);
         setup();
@@ -31,9 +34,11 @@ public class PieModeRenderer extends BaseModeRenderer {
         mCircleBounds = new RectF();
         mBackgroundBounds = new RectF();
         mTextBounds = new Rect();
-        mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
+        mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
                 -(this.mProgress / DEFAULT_MAX * 360) :
                 this.mProgress / DEFAULT_MAX * 360;
+        mBgStartAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ? mStartAngle : mStartAngle + mSweepAngle;
+        mBgSweepAngle = 360 - ((orientation == ORIENTATION_COUNTERCLOCKWISE) ? -(mSweepAngle) : mSweepAngle);
         mAdaptiveColor = -1;
 
         //BACKGROUND
@@ -59,6 +64,7 @@ public class PieModeRenderer extends BaseModeRenderer {
         if (mTextShadowColor != Color.TRANSPARENT) {
             mTextPaint.setShadowLayer(mTextShadowRadius, mTextShadowDistX, mTextShadowDistY, mTextShadowColor);
         }
+        updateText();
 
         //ANIMATIONS
         mProgressAnimator = ValueAnimator.ofFloat(0, mProgress);
@@ -69,16 +75,21 @@ public class PieModeRenderer extends BaseModeRenderer {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 mProgress = (float) valueAnimator.getAnimatedValue();
 
-                if (mProgress > 0 && mProgress <= 100)
+                if (mProgress > 0 && mProgress <= 100) {
                     mTextProgress = (int) mProgress;
-                else if (mProgress > 100)
-                    mTextProgress = 100;
-                else mTextProgress = 0;
+                } else if (mProgress > 100) {
+                    mProgress = mTextProgress = 100;
+                } else {
+                    mProgress = mTextProgress = 0;
+                }
 
-                mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
+                mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
                         -(mProgress / DEFAULT_MAX * 360) :
                         mProgress / DEFAULT_MAX * 360;
+                mBgStartAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ? mStartAngle : mStartAngle + mSweepAngle;
+                mBgSweepAngle = 360 - ((orientation == ORIENTATION_COUNTERCLOCKWISE) ? -(mSweepAngle) : mSweepAngle);
 
+                updateText();
                 mView.onProgressUpdated(mProgress);
                 mView.invalidate();
             }
@@ -105,20 +116,15 @@ public class PieModeRenderer extends BaseModeRenderer {
     @Override
     public void draw(Canvas canvas) {
         //FOREGROUND
-        if (mProgress != 0) {
-            canvas.drawArc(mCircleBounds, mStartAngle, mArcAngle, true, mProgressPaint);
-        }
+        canvas.drawArc(mCircleBounds, mStartAngle, mSweepAngle, true, mProgressPaint);
 
         //BACKGROUND
-        if (drawBackground) {
-            canvas.drawArc(mBackgroundBounds, mStartAngle + mArcAngle, 360 - mArcAngle, true, mBackgroundPaint);
+        if (mDrawBackground) {
+            canvas.drawArc(mBackgroundBounds, mBgStartAngle, mBgSweepAngle, true, mBackgroundPaint);
         }
 
         //TEXT
-        String text = String.valueOf(mTextProgress) + "%";
-        mTextPaint.getTextBounds(text, 0, text.length(), mTextBounds);
-        int textHeight = mTextBounds.height();
-        canvas.drawText(text, mCircleBounds.centerX(), mCircleBounds.centerY() + (textHeight / 2f), mTextPaint);
+        canvas.drawText(textValue, mCircleBounds.centerX(), mCircleBounds.centerY() + (textHeight / 2f), mTextPaint);
     }
 
     @Override
@@ -142,8 +148,8 @@ public class PieModeRenderer extends BaseModeRenderer {
         mTextBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
 
-        if (adaptiveColorProvider != null) {
-            adaptiveColorProvider = null;
+        if (mAdaptiveColorProvider != null) {
+            mAdaptiveColorProvider = null;
         }
     }
 
@@ -151,15 +157,18 @@ public class PieModeRenderer extends BaseModeRenderer {
     public void setAdaptiveColorProvider(@Nullable PercentageChartView.AdaptiveColorProvider adaptiveColorProvider) {
         if (adaptiveColorProvider == null) {
             mColorAnimator = null;
-            this.adaptiveColorProvider = null;
+            this.mAdaptiveColorProvider = null;
+            mAdaptBackground = mAdaptText = false;
+            mTextPaint.setColor(mTextColor);
+            mBackgroundPaint.setColor(mBackgroundColor);
+            mProgressPaint.setColor(mProgressColor);
+            mView.invalidate();
             return;
         }
 
-        this.adaptiveColorProvider = adaptiveColorProvider;
+        this.mAdaptiveColorProvider = adaptiveColorProvider;
 
         if (mColorAnimator == null) {
-            updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
-
             mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mProgressColor, mAdaptiveColor);
             mColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
@@ -168,9 +177,10 @@ public class PieModeRenderer extends BaseModeRenderer {
                 }
             });
             mColorAnimator.setDuration(mAnimDuration);
-
-            mView.invalidate();
         }
+
+        updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
+        mView.invalidate();
     }
 
     @Override
@@ -186,14 +196,20 @@ public class PieModeRenderer extends BaseModeRenderer {
         }
 
         if (!animate) {
-            if (adaptiveColorProvider != null) {
-                updateAdaptiveColors(adaptiveColorProvider.getColor(progress));
+            if (mAdaptiveColorProvider != null) {
+                updateAdaptiveColors(mAdaptiveColorProvider.getColor(progress));
             }
             this.mProgress = progress;
             this.mTextProgress = (int) progress;
-            mArcAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
+
+            mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
                     -(this.mProgress / DEFAULT_MAX * 360) :
                     this.mProgress / DEFAULT_MAX * 360;
+            mBgStartAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ? mStartAngle : mStartAngle + mSweepAngle;
+            mBgSweepAngle = 360 - ((orientation == ORIENTATION_COUNTERCLOCKWISE) ? -(mSweepAngle) : mSweepAngle);
+
+            updateText();
+
             mView.onProgressUpdated(mProgress);
             mView.invalidate();
             return;
@@ -202,9 +218,9 @@ public class PieModeRenderer extends BaseModeRenderer {
         mProgressAnimator.setFloatValues(mProgress, progress);
         mProgressAnimator.start();
 
-        if (adaptiveColorProvider != null) {
+        if (mAdaptiveColorProvider != null) {
             int startColor = mAdaptiveColor != -1 ? mAdaptiveColor : mProgressColor;
-            int endColor = adaptiveColorProvider.getColor(progress);
+            int endColor = mAdaptiveColorProvider.getColor(progress);
             mColorAnimator.setIntValues(startColor, endColor);
             mColorAnimator.start();
         }
@@ -214,7 +230,7 @@ public class PieModeRenderer extends BaseModeRenderer {
         mAdaptiveColor = targetColor;
         mProgressPaint.setColor(mAdaptiveColor);
 
-        if (drawBackground && mAdaptBackground) {
+        if (mDrawBackground && mAdaptBackground) {
             mAdaptiveBackgroundColor = (mAdaptiveBackgroundMode != -1 && mAdaptiveBackgroundRatio != -1) ?
                     ColorUtils.blendARGB(targetColor,
                             (mAdaptiveBackgroundMode == DARKER_MODE) ? Color.BLACK : Color.WHITE,
@@ -239,21 +255,77 @@ public class PieModeRenderer extends BaseModeRenderer {
         }
     }
 
-    public void setAdaptiveBackground(float ratio, int adaptiveMode) {
-        if (adaptiveColorProvider == null || !drawBackground) return;
-        mAdaptBackground = true;
-        mAdaptiveBackgroundRatio = ratio;
-        mAdaptiveBackgroundMode = adaptiveMode;
-        updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
+    @Override
+    public void setOrientation(int orientation) {
+        this.orientation = orientation;
+        mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
+                -(mProgress / DEFAULT_MAX * 360) :
+                mProgress / DEFAULT_MAX * 360;
+        mBgStartAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ? mStartAngle : mStartAngle + mSweepAngle;
+        mBgSweepAngle = 360 - ((orientation == ORIENTATION_COUNTERCLOCKWISE) ? -(mSweepAngle) : mSweepAngle);
         mView.invalidate();
     }
 
+    @Override
+    public void setStartAngle(float startAngle) {
+        this.mStartAngle = startAngle;
+        mBgStartAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ? mStartAngle : mStartAngle + mSweepAngle;
+        mBgSweepAngle = 360 - ((orientation == ORIENTATION_COUNTERCLOCKWISE) ? -(mSweepAngle) : mSweepAngle);
+        mView.invalidate();
+    }
+
+    @Override
+    void updateText() {
+        textValue = String.valueOf(mTextProgress) + "%";
+        mTextPaint.getTextBounds(textValue, 0, textValue.length(), mTextBounds);
+        textHeight = mTextBounds.height();
+    }
+
+    //ADAPTIVE BACKGROUND
+    @Override
+    public void setAdaptiveBgEnabled(boolean enable) {
+        if (mAdaptiveColorProvider == null || !mDrawBackground) return;
+        mAdaptBackground = enable;
+        if (mAdaptBackground) {
+            updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
+        } else {
+            mAdaptiveBackgroundRatio = mAdaptiveBackgroundMode = -1;
+            mBackgroundPaint.setColor(mBackgroundColor);
+        }
+        mView.invalidate();
+    }
+
+    @Override
+    public void setAdaptiveBackground(float ratio, int adaptiveMode) {
+        if (mAdaptiveColorProvider == null || !mDrawBackground) return;
+        mAdaptBackground = true;
+        mAdaptiveBackgroundRatio = ratio;
+        mAdaptiveBackgroundMode = adaptiveMode;
+        updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
+        mView.invalidate();
+    }
+
+    //ADAPTIVE TEXT
+    @Override
+    public void setAdaptiveTextEnabled(boolean enable) {
+        if (mAdaptiveColorProvider == null) return;
+        mAdaptText = enable;
+        if (mAdaptText) {
+            updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
+        } else {
+            mAdaptiveTextRatio = mAdaptiveTextMode = -1;
+            mTextPaint.setColor(mTextColor);
+        }
+        mView.invalidate();
+    }
+
+    @Override
     public void setAdaptiveText(float ratio, int adaptiveMode) {
-        if (adaptiveColorProvider == null) return;
+        if (mAdaptiveColorProvider == null) return;
         mAdaptText = true;
         mAdaptiveTextRatio = ratio;
         mAdaptiveTextMode = adaptiveMode;
-        updateAdaptiveColors(adaptiveColorProvider.getColor(mProgress));
+        updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
         mView.invalidate();
     }
 }

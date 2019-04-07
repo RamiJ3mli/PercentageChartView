@@ -90,9 +90,9 @@ public class PercentageChartView extends View implements IPercentageChartView {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        renderer.mesure(w, h, getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        renderer.mesure(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec), getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
     }
 
     @Override
@@ -138,6 +138,8 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param animate  Animation boolean value to set whether to animate progress change or not.
      */
     public void setProgress(@FloatRange(from = 0f, to = 100f) float progress, boolean animate) {
+        if (progress < 0) progress = 0;
+        if (progress > 100) progress = 100;
         renderer.setProgress(progress, animate);
     }
 
@@ -167,6 +169,8 @@ public class PercentageChartView extends View implements IPercentageChartView {
     }
 
     public void setStartAngle(@FloatRange(from = 0f, to = 360f) float startAngle) {
+        if (startAngle < 0) startAngle = 0;
+        if (startAngle > 360) startAngle = 360;
         this.renderer.setStartAngle(startAngle);
     }
 
@@ -178,6 +182,15 @@ public class PercentageChartView extends View implements IPercentageChartView {
 
     public void setBackgroundColor(@ColorInt int backgroundColor) {
         this.renderer.setBackgroundColor(backgroundColor);
+    }
+
+    //BACKGROUND OFFSET
+    public float getBackgroundOffset() {
+        return renderer.getBackgroundOffset();
+    }
+
+    public void setBackgroundOffset(int backgroundOffset) {
+        this.renderer.setBackgroundOffset(backgroundOffset);
     }
 
     //PROGRESS COLOR
@@ -205,29 +218,38 @@ public class PercentageChartView extends View implements IPercentageChartView {
         return renderer.getAdaptiveBackgroundMode();
     }
 
+    public void setAdaptiveBgEnabled(boolean enable) {
+        renderer.setAdaptiveBgEnabled(enable);
+    }
+
     public void setAdaptiveBackground(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
         renderer.setAdaptiveBackground(ratio, adaptiveMode);
     }
 
     //ADAPTIVE BACKGROUND BAR
     public boolean isAdaptiveBackgroundBarEnabled() {
-        if(renderer instanceof PieModeRenderer) return false;
+        if (renderer instanceof PieModeRenderer) return false;
         return ((RingModeRenderer) renderer).isAdaptiveBackgroundBarEnabled();
     }
 
     @FloatRange(from = -1f, to = 1f)
     public float getAdaptiveBackgroundBarRatio() {
-        if(renderer instanceof PieModeRenderer) return -1f;
+        if (renderer instanceof PieModeRenderer) return -1f;
         return ((RingModeRenderer) renderer).getAdaptiveBackgroundBarRatio();
     }
 
     public int getAdaptiveBackgroundBarMode() {
-        if(renderer instanceof PieModeRenderer) return -1;
+        if (renderer instanceof PieModeRenderer) return -1;
         return ((RingModeRenderer) renderer).getAdaptiveBackgroundBarMode();
     }
 
+    public void setAdaptiveBgBarEnabled(boolean enable) {
+        if (renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setAdaptiveBgBarEnabled(enable);
+    }
+
     public void setAdaptiveBackgroundBar(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
-        if(renderer instanceof PieModeRenderer) return;
+        if (renderer instanceof PieModeRenderer) return;
         ((RingModeRenderer) renderer).setAdaptiveBackgroundBar(ratio, adaptiveMode);
     }
 
@@ -243,6 +265,10 @@ public class PercentageChartView extends View implements IPercentageChartView {
 
     public int getAdaptiveTextMode() {
         return renderer.getAdaptiveTextMode();
+    }
+
+    public void setAdaptiveTextEnabled(boolean enable) {
+        renderer.setAdaptiveTextEnabled(enable);
     }
 
     public void setAdaptiveText(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
@@ -264,7 +290,11 @@ public class PercentageChartView extends View implements IPercentageChartView {
         return renderer.getAnimationInterpolator();
     }
 
-    public void setAnimationInterpolator(TimeInterpolator interpolator) {
+    public void setAnimationInterpolator(@NonNull TimeInterpolator interpolator) {
+        if (interpolator == null) {
+            throw new NullPointerException("Animation interpolator cannot be null");
+        }
+
         renderer.setAnimationInterpolator(interpolator);
     }
 
@@ -292,9 +322,9 @@ public class PercentageChartView extends View implements IPercentageChartView {
         return renderer.getTypeface();
     }
 
-    public void setTypeface(Typeface typeface) {
+    public void setTypeface(@NonNull Typeface typeface) {
         if (typeface == null) {
-            throw new NullPointerException("Text typface cannot be null");
+            throw new NullPointerException("Text TypeFace cannot be null");
         }
         renderer.setTypeface(typeface);
     }
@@ -333,18 +363,18 @@ public class PercentageChartView extends View implements IPercentageChartView {
 
     //DRAW BACKGROUND BAR STATE
     public boolean isDrawBackgroundBarEnabled() {
-        if(renderer instanceof PieModeRenderer) return false;
+        if (renderer instanceof PieModeRenderer) return false;
         return ((RingModeRenderer) renderer).isDrawBackgroundBarEnabled();
     }
 
     public void setDrawBackgroundBarEnabled(boolean enabled) {
-        if(renderer instanceof PieModeRenderer) return;
+        if (renderer instanceof PieModeRenderer) return;
         ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
     }
 
     //BACKGROUND BAR COLOR
     public int getBackgroundBarColor() {
-        if(renderer instanceof PieModeRenderer) return -1;
+        if (renderer instanceof PieModeRenderer) return -1;
         return ((RingModeRenderer) renderer).getBackgroundBarColor();
     }
 
@@ -354,34 +384,34 @@ public class PercentageChartView extends View implements IPercentageChartView {
 
     //BACKGROUND BAR THICKNESS
     public float getBackgroundBarThickness() {
-        if(renderer instanceof PieModeRenderer) return -1;
+        if (renderer instanceof PieModeRenderer) return -1;
         return ((RingModeRenderer) renderer).getBackgroundBarThickness();
     }
 
     public void setBackgroundBarThickness(@FloatRange(from = 0) float backgroundBarThickness) {
-        if(renderer instanceof PieModeRenderer) return;
+        if (renderer instanceof PieModeRenderer) return;
         ((RingModeRenderer) renderer).setBackgroundBarThickness(backgroundBarThickness);
     }
 
     //PROGRESS BAR THICKNESS
     public float getProgressBarThickness() {
-        if(renderer instanceof PieModeRenderer) return -1;
+        if (renderer instanceof PieModeRenderer) return -1;
         return ((RingModeRenderer) renderer).getProgressBarThickness();
     }
 
     public void setProgressBarThickness(@FloatRange(from = 0) float progressBarThickness) {
-        if(renderer instanceof PieModeRenderer) return;
+        if (renderer instanceof PieModeRenderer) return;
         ((RingModeRenderer) renderer).setProgressBarThickness(progressBarThickness);
     }
 
     //PROGRESS BAR STYLE
     public int getProgressBarStyle() {
-        if(renderer instanceof PieModeRenderer) return -1;
+        if (renderer instanceof PieModeRenderer) return -1;
         return ((RingModeRenderer) renderer).getProgressBarStyle();
     }
 
     public void setProgressBarStyle(@ProgressBarStyle int progressBarStyle) {
-        if(renderer instanceof PieModeRenderer) return;
+        if (renderer instanceof PieModeRenderer) return;
         ((RingModeRenderer) renderer).setProgressBarStyle(progressBarStyle);
     }
 

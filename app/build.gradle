@@ -3,8 +3,8 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.ramijemli.sample"
-        minSdkVersion 16
+        applicationId "com.ramijemli.percentagechartview"
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -24,10 +24,15 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-//    implementation 'com.ramijemli.percentagechartview:percentagechartview:0.1.2'
     implementation project(':percentagechartview')
+
+    implementation 'com.github.rtugeek:colorseekbar:1.7.3'
+    implementation 'com.shawnlin:number-picker:2.4.8'
+    implementation 'com.github.QuadFlask:colorpicker:0.0.13'
+
+    implementation 'com.jakewharton:butterknife:10.1.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
+
     implementation 'androidx.appcompat:appcompat:1.0.2'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 }
