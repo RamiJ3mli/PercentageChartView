@@ -1,132 +1,42 @@
 package com.ramijemli.percentagechartview;
 
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
+import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Outline;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewOutlineProvider;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AnticipateInterpolator;
-import android.view.animation.AnticipateOvershootInterpolator;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.OvershootInterpolator;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import com.ramijemli.percentagechartview.annotation.AdaptiveMode;
+import com.ramijemli.percentagechartview.annotation.ChartMode;
+import com.ramijemli.percentagechartview.annotation.ProgressBarStyle;
+import com.ramijemli.percentagechartview.annotation.ProgressOrientation;
+import com.ramijemli.percentagechartview.annotation.TextStyle;
+import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
+import com.ramijemli.percentagechartview.renderer.PieModeRenderer;
+import com.ramijemli.percentagechartview.renderer.RingModeRenderer;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
-import androidx.annotation.IntDef;
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
-public class PercentageChartView extends View {
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_PIE;
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_RING;
 
-    // CHART MODE
-    public static final int MODE_RING = 0;
-    public static final int MODE_PIE = 1;
+public class PercentageChartView extends View implements IPercentageChartView {
 
+    private BaseModeRenderer renderer;
 
-    // ORIENTATION
-    public static final int ORIENTATION_CLOCKWISE = 0;
-    public static final int ORIENTATION_COUNTERCLOCKWISE = 1;
-
-
-    // BACKGROUND
-    private static final float DEFAULT_BACKGROUND_DP_WIDTH = 16;
-    private static final int DEFAULT_BACKGROUND_COLOR = Color.BLACK;
-
-    private Paint mBackgroundPaint;
-    private float mBackgroundWidth;
-    private int mBackgroundColor;
-
-    // BACKGROUND FILL
-    private Paint mFillBackgroundPaint;
-    private int mBackgroundFillColor;
-    private boolean mFillBackground;
-    private RectF mBackgroundFillBounds;
-
-    // PROGRESS
-    private static final float DEFAULT_PERCENTAGE_DP_WIDTH = 16;
-    private static final int DEFAULT_PERCENTAGE_COLOR = Color.RED;
-    public static final int CAP_ROUND = 0;
-    public static final int CAP_SQUARE = 1;
-
-    private Paint mPercentagePaint;
-    private Paint.Cap percentageStyle;
-    private float mPercentageWidth;
-    private int mPercentageColor;
-    private int mProvidedPercentageColor;
-
-
-    // TEXT
-    private static float DEFAULT_TEXT_SP_SIZE = 100;
-
-    private Rect mTextBounds;
-    private Paint mTextPaint;
-    private float mTextSize;
-    private int mTextStyle;
-    private int mTextColor;
-    private int mTextPercentage;
-    private Typeface mTypeface;
-
-
-    // ANIMATION INTERPOLATORS
-    public static final int LINEAR = 0;
-    public static final int ACCELERATE = 1;
-    public static final int DECELERATE = 2;
-    public static final int ACCELERATE_DECELERATE = 3;
-    public static final int ANTICIPATE = 4;
-    public static final int OVERSHOOT = 5;
-    public static final int ANTICIPATE_OVERSHOOT = 6;
-    public static final int BOUNCE = 7;
-    public static final int FAST_OUT_LINEAR_IN = 8;
-    public static final int FAST_OUT_SLOW_IN = 9;
-    public static final int LINEAR_OUT_SLOW_IN = 10;
-
-
-    // COMMON
-    private static final int DEFAULT_START_ANGLE = 0;
-    private static final float MAX = 100;
-    private static final int DEFAULT_ANIMATION_DURATION = 1000;
-    private static final int DEFAULT_ANIMATION_INTERPOLATOR = 0;
-
-    @Nullable
-    private OnProgressChangeListener onProgressChangeListener;
-    private ValueAnimator mValueAnimator;
-    private ValueAnimator mColorAnimator;
-    private Interpolator mAnimInterpolator;
-    private RectF mCircleBounds;
-    private int mAnimDuration;
-    private float mPercentage;
-    private float startAngle;
-    private float arcAngle;
-    @PercentageOrientation
-    private int orientation;
     @ChartMode
     private int mode;
 
-    private ColorProvider mColorProvider;
+    @Nullable
+    private OnProgressChangeListener onProgressChangeListener;
 
     public PercentageChartView(Context context) {
         super(context);
@@ -149,511 +59,373 @@ public class PercentageChartView extends View {
         init(context, attrs);
     }
 
-    private void init(@NonNull Context context, @Nullable AttributeSet attrs) {
-        mCircleBounds = new RectF();
-        mBackgroundFillBounds = new RectF();
-        mTextBounds = new Rect();
-
-        initAttributes(context, attrs);
-
-        mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBackgroundPaint.setColor(mBackgroundColor);
-
-        mPercentagePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPercentagePaint.setColor(mPercentageColor);
-
-        switch (mode) {
-            case MODE_RING:
-                mBackgroundPaint.setStyle(Paint.Style.STROKE);
-                mBackgroundPaint.setStrokeCap(percentageStyle);
-                mBackgroundPaint.setStrokeWidth(mBackgroundWidth);
-
-                mFillBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                mFillBackgroundPaint.setStyle(Paint.Style.FILL);
-                mFillBackgroundPaint.setColor(mBackgroundFillColor);
-
-                mPercentagePaint.setStyle(Paint.Style.STROKE);
-                mPercentagePaint.setStrokeCap(percentageStyle);
-                mPercentagePaint.setStrokeWidth(mPercentageWidth);
-                break;
-
-            case MODE_PIE:
-                mBackgroundPaint.setStyle(Paint.Style.FILL);
-                mPercentagePaint.setStyle(Paint.Style.FILL);
-                break;
-        }
-
-        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setStyle(Paint.Style.FILL);
-        mTextPaint.setTextAlign(Paint.Align.CENTER);
-        mTextPaint.setTextSize(mTextSize);
-        mTextPaint.setColor(mTextColor);
-        if (mTypeface != null) {
-            mTextPaint.setTypeface(mTypeface);
-        }
-
-        //ANIMATION
-        mValueAnimator = ValueAnimator.ofFloat(0, mPercentage);
-        mValueAnimator.setDuration(mAnimDuration);
-        mValueAnimator.setInterpolator(mAnimInterpolator);
-        mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                mPercentage = (float) valueAnimator.getAnimatedValue();
-
-                if (mPercentage > 0 && mPercentage <= 100)
-                    mTextPercentage = (int) mPercentage;
-                else if (mPercentage > 100)
-                    mTextPercentage = 100;
-                else mTextPercentage = 0;
-
-                if (onProgressChangeListener != null) {
-                    onProgressChangeListener.onProgressChanged(mPercentage);
-                }
-                invalidate();
-            }
-        });
-
-    }
-
-    private void initAttributes(@NonNull Context context, @Nullable AttributeSet attrs) {
-
-        //ATTRIBUTES
-        if (attrs != null) {
-
-            TypedArray a = context.getTheme().obtainStyledAttributes(
-                    attrs,
+    private void init(@NonNull Context context, @Nullable AttributeSet attributeSet) {
+        if (attributeSet != null) {
+            TypedArray attrs = context.getTheme().obtainStyledAttributes(
+                    attributeSet,
                     R.styleable.PercentageChartView,
                     0, 0
             );
 
             try {
-
-                //BACKGROUND COLOR
-                mBackgroundColor = a.getColor(R.styleable.PercentageChartView_pcv_backgroundColor, DEFAULT_BACKGROUND_COLOR);
-
-                //BACKGROUND WIDTH
-                mBackgroundWidth = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_backgroundWidth, dp2px(DEFAULT_BACKGROUND_DP_WIDTH));
-
-                //BACKGROUND FILL ENABLE STATE
-                mFillBackground = a.getBoolean(R.styleable.PercentageChartView_pcv_fillBackground, false);
-
-                //BACKGROUND FILL COLOR
-                mBackgroundFillColor = a.getColor(R.styleable.PercentageChartView_pcv_fillBackgroundColor, DEFAULT_BACKGROUND_COLOR);
-
-                //PROGRESS
-                mPercentage = mTextPercentage = a.getInt(R.styleable.PercentageChartView_pcv_progress, 0);
-
-                //PROGRESS COLOR
-                mPercentageColor = a.getColor(R.styleable.PercentageChartView_pcv_percentageColor, DEFAULT_PERCENTAGE_COLOR);
-
-                //PROGRESS WIDTH
-                mPercentageWidth = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_percentageWidth, dp2px(DEFAULT_PERCENTAGE_DP_WIDTH));
-
-                //PROGRESS BAR STROKE STYLE
-                int cap = a.getInt(R.styleable.PercentageChartView_pcv_percentageStyle, CAP_ROUND);
-                percentageStyle = (cap == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
-
-                //TEXT COLOR
-                mTextColor = a.getColor(R.styleable.PercentageChartView_pcv_textColor, DEFAULT_PERCENTAGE_COLOR);
-
-                //TEXT SIZE
-                mTextSize = a.getDimensionPixelSize(R.styleable.PercentageChartView_pcv_textSize, sp2px(DEFAULT_TEXT_SP_SIZE));
-
-                //TEXT TYPEFACE
-                String typeface = a.getString(R.styleable.PercentageChartView_pcv_typeface);
-                if (typeface != null && !typeface.isEmpty()) {
-                    mTypeface = Typeface.createFromAsset(getResources().getAssets(), typeface);
-                }
-
-                //TEXT STYLE
-                mTextStyle = a.getInt(R.styleable.PercentageChartView_pcv_textStyle, Typeface.NORMAL);
-                if (mTextStyle > 0) {
-                    if (mTypeface == null) {
-                        mTypeface = Typeface.defaultFromStyle(mTextStyle);
-                    } else {
-                        mTypeface = Typeface.create(mTypeface, mTextStyle);
-                    }
-                }
-
-                //START DRAWING ANGLE
-                startAngle = a.getInt(R.styleable.PercentageChartView_pcv_startAngle, DEFAULT_START_ANGLE);
-                if (startAngle < 0 || startAngle > 360) {
-                    startAngle = DEFAULT_START_ANGLE;
-                }
-
-                //DRAWING ORIENTATION
-                orientation = a.getInt(R.styleable.PercentageChartView_pcv_orientation, ORIENTATION_CLOCKWISE);
-
-                //CHART MODE
-                mode = a.getInt(R.styleable.PercentageChartView_pcv_mode, MODE_RING);
-
-                //PROGRESS ANIMATION DURATION
-                mAnimDuration = a.getInt(R.styleable.PercentageChartView_pcv_animDuration, DEFAULT_ANIMATION_DURATION);
-
-                //PROGRESS ANIMATION INTERPOLATOR
-                int interpolator = a.getInt(R.styleable.PercentageChartView_pcv_animInterpolator, DEFAULT_ANIMATION_INTERPOLATOR);
-                switch (interpolator) {
-                    case LINEAR:
-                        mAnimInterpolator = new LinearInterpolator();
+                //CHART MODE (DEFAULT PIE MODE)
+                mode = attrs.getInt(R.styleable.PercentageChartView_pcv_mode, MODE_PIE);
+                switch (mode) {
+                    case MODE_RING:
+                        renderer = new RingModeRenderer(this, attrs);
                         break;
-                    case ACCELERATE:
-                        mAnimInterpolator = new AccelerateInterpolator();
-                        break;
-                    case DECELERATE:
-                        mAnimInterpolator = new DecelerateInterpolator();
-                        break;
-                    case ACCELERATE_DECELERATE:
-                        mAnimInterpolator = new AccelerateDecelerateInterpolator();
-                        break;
-                    case ANTICIPATE:
-                        mAnimInterpolator = new AnticipateInterpolator();
-                        break;
-                    case OVERSHOOT:
-                        mAnimInterpolator = new OvershootInterpolator();
-                        break;
-                    case ANTICIPATE_OVERSHOOT:
-                        mAnimInterpolator = new AnticipateOvershootInterpolator();
-                        break;
-                    case BOUNCE:
-                        mAnimInterpolator = new BounceInterpolator();
-                        break;
-                    case FAST_OUT_LINEAR_IN:
-                        mAnimInterpolator = new FastOutLinearInInterpolator();
-                        break;
-                    case FAST_OUT_SLOW_IN:
-                        mAnimInterpolator = new FastOutSlowInInterpolator();
-                        break;
-                    case LINEAR_OUT_SLOW_IN:
-                        mAnimInterpolator = new LinearOutSlowInInterpolator();
+                    case MODE_PIE:
+                        renderer = new PieModeRenderer(this, attrs);
                         break;
                 }
 
             } finally {
-                a.recycle();
+                attrs.recycle();
+                attrs = null;
             }
 
         } else {
-
-            //DEFAULTS
-            mPercentage = mTextPercentage = 0;
-            mBackgroundColor = mBackgroundFillColor = DEFAULT_BACKGROUND_COLOR;
-            mBackgroundWidth = dp2px(DEFAULT_BACKGROUND_DP_WIDTH);
-            mFillBackground = false;
-
-            percentageStyle = Paint.Cap.ROUND;
-            mPercentageColor = DEFAULT_PERCENTAGE_COLOR;
-            mPercentageWidth = dp2px(DEFAULT_PERCENTAGE_DP_WIDTH);
-
-            mTextColor = mPercentageColor;
-            mTextSize = sp2px(DEFAULT_TEXT_SP_SIZE);
-            mTextStyle = Typeface.NORMAL;
-
-            startAngle = DEFAULT_START_ANGLE;
-            orientation = ORIENTATION_CLOCKWISE;
-            mode = MODE_RING;
-            mAnimDuration = DEFAULT_ANIMATION_DURATION;
-            mAnimInterpolator = new LinearInterpolator();
-
+            renderer = new PieModeRenderer(this);
         }
-
-        arcAngle = mPercentage / MAX * 360;
-        mProvidedPercentageColor = -1;
     }
 
-
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        int diameter = Math.min(w, h);
-        float maxOffset = Math.max(mPercentageWidth, mBackgroundWidth);
-
-        if (mode == MODE_PIE) maxOffset = 0;
-
-        int centerX = w / 2;
-        int centerY = h / 2;
-        float radius = (diameter - maxOffset) / 2;
-
-        mCircleBounds.left = centerX - radius;
-        mCircleBounds.top = centerY - radius;
-        mCircleBounds.right = centerX + radius;
-        mCircleBounds.bottom = centerY + radius;
-
-        float fillBackgroundRadius = radius - (mBackgroundWidth / 2);
-        mBackgroundFillBounds.left = centerX - fillBackgroundRadius;
-        mBackgroundFillBounds.top = centerY - fillBackgroundRadius;
-        mBackgroundFillBounds.right = centerX + fillBackgroundRadius;
-        mBackgroundFillBounds.bottom = centerY + fillBackgroundRadius;
-
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        renderer.mesure(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec), getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mValueAnimator != null) {
-            if (mValueAnimator.isRunning()) mValueAnimator.cancel();
-            mValueAnimator.removeAllUpdateListeners();
-            mValueAnimator = null;
+        renderer.destroy();
+        renderer = null;
+
+        if (onProgressChangeListener != null) {
+            onProgressChangeListener = null;
         }
-        if (mColorAnimator != null) {
-            if (mColorAnimator.isRunning()) mColorAnimator.cancel();
-            mColorAnimator.removeAllUpdateListeners();
-            mColorAnimator = null;
-        }
-
-        mColorProvider = null;
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    public ViewOutlineProvider getOutlineProvider() {
-        return new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                if (mode == MODE_PIE) {
-                    try {
-                        outline.setOval((int) mCircleBounds.left,
-                                (int) mCircleBounds.top,
-                                (int) mCircleBounds.right,
-                                (int) mCircleBounds.bottom);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }
-        };
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        //BACKGROUND FILL
-        if (mode == MODE_RING && mFillBackground) {
-            canvas.drawArc(mBackgroundFillBounds, 0, 360, true, mFillBackgroundPaint);
-        }
-
-        //BACKGROUND
-        canvas.drawArc(mCircleBounds, 0, 360, (mode == MODE_PIE), mBackgroundPaint);
-
-        //FOREGROUND
-        if (mPercentage != 0) {
-            if (mColorProvider != null)
-                mPercentagePaint.setColor(mProvidedPercentageColor);
-            arcAngle = this.mPercentage / MAX * 360;
-            canvas.drawArc(mCircleBounds, startAngle, arcAngle, (mode == MODE_PIE), mPercentagePaint);
-        }
-
-        //TEXT
-        String text = String.valueOf(mTextPercentage) + "%";
-        mTextPaint.getTextBounds(text, 0, text.length(), mTextBounds);
-        int textHeight = mTextBounds.height();
-        canvas.drawText(text, mCircleBounds.centerX(), mCircleBounds.centerY() + (textHeight / 2f), mTextPaint);
+        renderer.draw(canvas);
     }
 
-    public float getPercentage() {
-        return mPercentage;
+    //RENDERER CALLBACKS
+    @Override
+    public Context getViewContext() {
+        return getContext();
     }
 
-    public void setPercentage(@FloatRange(from = 0f, to = 100f) float percentage, boolean animate) {
-        if (this.mPercentage == percentage) return;
-
-        if (mValueAnimator.isRunning()) mValueAnimator.cancel();
-        if (mColorAnimator != null && mColorAnimator.isRunning()) mColorAnimator.cancel();
-
-        if (!animate) {
-            this.mPercentage = percentage;
-            this.mTextPercentage = (int) percentage;
-            if (onProgressChangeListener != null) {
-                onProgressChangeListener.onProgressChanged(mPercentage);
-            }
-            invalidate();
-            return;
-        }
-
-        mValueAnimator.setFloatValues(mPercentage, percentage);
-        mValueAnimator.start();
-
-        if (mColorProvider != null) {
-            int startColor = mProvidedPercentageColor != -1 ? mProvidedPercentageColor : mPercentageColor;
-            int endColor = mColorProvider.getColor(percentage);
-            mColorAnimator.setIntValues(startColor, endColor);
-            mColorAnimator.start();
-        }
+    @Override
+    public void onProgressUpdated(float progress) {
+        if (onProgressChangeListener != null)
+            onProgressChangeListener.onProgressChanged(progress);
     }
 
-    public @PercentageStyle
-    int getPercentageStyle() {
-        return (percentageStyle == Paint.Cap.ROUND) ? CAP_ROUND : CAP_SQUARE;
+    //##############################################################################################   STYLE MODIFIERS
+    //PROGRESS
+    @FloatRange(from = -1f, to = 100f)
+    public float getProgress() {
+        return renderer.getProgress();
     }
 
-    public void setPercentageStyle(@PercentageStyle int percentageStyle) {
-        if (mode == MODE_PIE) return;
-        this.percentageStyle = (percentageStyle == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
-        invalidate();
+    /**
+     * Sets a new progress value. Passing true in animate will result in an animated progress update.
+     *
+     * @param progress New progress float value to set.
+     * @param animate  Animation boolean value to set whether to animate progress change or not.
+     */
+    public void setProgress(@FloatRange(from = 0f, to = 100f) float progress, boolean animate) {
+        if (progress < 0) progress = 0;
+        if (progress > 100) progress = 100;
+        renderer.setProgress(progress, animate);
     }
 
-    public float getPercentageWidth() {
-        return mPercentageWidth;
+    //ORIENTATION
+    @ProgressOrientation
+    public int getOrientation() {
+        return renderer.getOrientation();
     }
 
-    public void setPercentageWidth(float mPercentageWidth) {
-        if (mode == MODE_PIE) return;
-        this.mPercentageWidth = mPercentageWidth;
-        invalidate();
+    public void setOrientation(@ProgressOrientation int orientation) {
+        this.renderer.setOrientation(orientation);
     }
 
-    public int getPercentageColor() {
-        return mPercentageColor;
+    //DRAW BACKGROUND STATE
+    public boolean isDrawBackgroundEnabled() {
+        return renderer.isDrawBackgroundEnabled();
     }
 
-    public void setPercentageColor(int mPercentageColor) {
-        this.mPercentageColor = mPercentageColor;
-        invalidate();
+    public void setDrawBackgroundEnabled(boolean enabled) {
+        this.renderer.setDrawBackgroundEnabled(enabled);
     }
 
-    public float getTextSize() {
-        return mTextSize;
-    }
-
-    public void setTextSize(float mTextSize) {
-        this.mTextSize = mTextSize;
-        invalidate();
-    }
-
-    public int getTextColor() {
-        return mTextColor;
-    }
-
-    public void setTextColor(int mTextColor) {
-        this.mTextColor = mTextColor;
-        invalidate();
-    }
-
-    public int getAnimDuration() {
-        return mAnimDuration;
-    }
-
-    public void setAnimDuration(int mAnimDuration) {
-        this.mAnimDuration = mAnimDuration;
-        invalidate();
-    }
-
+    //START ANGLE
+    @FloatRange(from = 0f, to = 360f)
     public float getStartAngle() {
-        return startAngle;
+        return renderer.getStartAngle();
     }
 
     public void setStartAngle(@FloatRange(from = 0f, to = 360f) float startAngle) {
-        this.startAngle = startAngle;
-        invalidate();
+        if (startAngle < 0) startAngle = 0;
+        if (startAngle > 360) startAngle = 360;
+        this.renderer.setStartAngle(startAngle);
     }
 
-    public @PercentageOrientation
-    int getOrientation() {
-        return orientation;
+    //BACKGROUND COLOR
+    @ColorInt
+    public int getBackgroundColor() {
+        return renderer.getBackgroundColor();
     }
 
-    public void setOrientation(@PercentageOrientation int orientation) {
-        this.orientation = orientation;
+    public void setBackgroundColor(@ColorInt int backgroundColor) {
+        this.renderer.setBackgroundColor(backgroundColor);
     }
 
-    public @ChartMode
-    int getMode() {
-        return mode;
+    //BACKGROUND OFFSET
+    public float getBackgroundOffset() {
+        return renderer.getBackgroundOffset();
     }
 
-    public @TextStyle
-    int getTextStyle() {
-        return mTextStyle;
+    public void setBackgroundOffset(int backgroundOffset) {
+        this.renderer.setBackgroundOffset(backgroundOffset);
     }
 
-    public void setTextStyle(@TextStyle int mTextStyle) {
-        this.mTextStyle = mTextStyle;
-        if (mTextStyle > 0) {
-            if (mTypeface == null) {
-                mTypeface = Typeface.defaultFromStyle(mTextStyle);
-            } else {
-                mTypeface = Typeface.create(mTypeface, mTextStyle);
-            }
+    //PROGRESS COLOR
+    @ColorInt
+    public int getProgressColor() {
+        return renderer.getProgressColor();
+    }
+
+    public void setProgressColor(@ColorInt int progressColor) {
+        this.renderer.setProgressColor(progressColor);
+    }
+
+    //ADAPTIVE BACKGROUND
+    public boolean isAdaptiveBackgroundEnabled() {
+        return renderer.isAdaptiveBackgroundEnabled();
+    }
+
+    @FloatRange(from = -1f, to = 1f)
+    public float getAdaptiveBackgroundRatio() {
+        return renderer.getAdaptiveBackgroundRatio();
+    }
+
+    @AdaptiveMode
+    public int getAdaptiveBackgroundMode() {
+        return renderer.getAdaptiveBackgroundMode();
+    }
+
+    public void setAdaptiveBgEnabled(boolean enable) {
+        renderer.setAdaptiveBgEnabled(enable);
+    }
+
+    public void setAdaptiveBackground(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
+        renderer.setAdaptiveBackground(ratio, adaptiveMode);
+    }
+
+    //ADAPTIVE BACKGROUND BAR
+    public boolean isAdaptiveBackgroundBarEnabled() {
+        if (renderer instanceof PieModeRenderer) return false;
+        return ((RingModeRenderer) renderer).isAdaptiveBackgroundBarEnabled();
+    }
+
+    @FloatRange(from = -1f, to = 1f)
+    public float getAdaptiveBackgroundBarRatio() {
+        if (renderer instanceof PieModeRenderer) return -1f;
+        return ((RingModeRenderer) renderer).getAdaptiveBackgroundBarRatio();
+    }
+
+    public int getAdaptiveBackgroundBarMode() {
+        if (renderer instanceof PieModeRenderer) return -1;
+        return ((RingModeRenderer) renderer).getAdaptiveBackgroundBarMode();
+    }
+
+    public void setAdaptiveBgBarEnabled(boolean enable) {
+        if (renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setAdaptiveBgBarEnabled(enable);
+    }
+
+    public void setAdaptiveBackgroundBar(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
+        if (renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setAdaptiveBackgroundBar(ratio, adaptiveMode);
+    }
+
+    //ADAPTIVE TEXT
+    public boolean isAdaptiveTextEnabled() {
+        return renderer.isAdaptiveTextEnabled();
+    }
+
+    @FloatRange(from = -1f, to = 1f)
+    public float getAdaptiveTextRatio() {
+        return renderer.getAdaptiveTextRatio();
+    }
+
+    public int getAdaptiveTextMode() {
+        return renderer.getAdaptiveTextMode();
+    }
+
+    public void setAdaptiveTextEnabled(boolean enable) {
+        renderer.setAdaptiveTextEnabled(enable);
+    }
+
+    public void setAdaptiveText(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
+        renderer.setAdaptiveText(ratio, adaptiveMode);
+    }
+
+    //ANIMATION DURATION
+    @IntRange(from = 0)
+    public int getAnimationDuration() {
+        return renderer.getAnimationDuration();
+    }
+
+    public void setAnimationDuration(@IntRange(from = 50) int duration) {
+        renderer.setAnimationDuration(duration);
+    }
+
+    //ANIMATION INTERPOLATOR
+    public TimeInterpolator getAnimationInterpolator() {
+        return renderer.getAnimationInterpolator();
+    }
+
+    public void setAnimationInterpolator(@NonNull TimeInterpolator interpolator) {
+        if (interpolator == null) {
+            throw new NullPointerException("Animation interpolator cannot be null");
         }
-        invalidate();
+
+        renderer.setAnimationInterpolator(interpolator);
     }
 
+    //TEXT COLOR
+    @ColorInt
+    public int getTextColor() {
+        return renderer.getTextColor();
+    }
+
+    public void setTextColor(@ColorInt int textColor) {
+        renderer.setTextColor(textColor);
+    }
+
+    //TEXT SIZE
+    public float getTextSize() {
+        return renderer.getTextSize();
+    }
+
+    public void setTextSize(float textSize) {
+        renderer.setTextSize(textSize);
+    }
+
+    //TEXT TYPEFACE
     public Typeface getTypeface() {
-        return mTypeface;
+        return renderer.getTypeface();
     }
 
-    public void setTypeface(@NonNull Typeface typeFace) {
-        if (mTextStyle > 0) {
-            mTypeface = Typeface.create(mTypeface, mTextStyle);
-        } else {
-            mTypeface = typeFace;
+    public void setTypeface(@NonNull Typeface typeface) {
+        if (typeface == null) {
+            throw new NullPointerException("Text TypeFace cannot be null");
         }
-        mTextPaint.setTypeface(mTypeface);
-        invalidate();
+        renderer.setTypeface(typeface);
     }
 
-
-    public void setColorProvider(ColorProvider colorProvider) {
-        this.mColorProvider = colorProvider;
-        if (mColorProvider != null && mColorAnimator == null) {
-
-            mColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mPercentageColor, mColorProvider.getColor(mTextPercentage));
-            mColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mProvidedPercentageColor = (int) animation.getAnimatedValue();
-                }
-            });
-            mColorAnimator.setDuration(mAnimDuration);
-            mColorAnimator.setInterpolator(mAnimInterpolator);
-            mProvidedPercentageColor = mColorProvider.getColor(mTextPercentage);
-            invalidate();
-        } else if (mColorProvider == null)
-            mColorAnimator = null;
+    //TEXT STYLE
+    @TextStyle
+    public int getTextStyle() {
+        return renderer.getTextStyle();
     }
 
+    public void setTextStyle(@TextStyle int textStyle) {
+        renderer.setTextStyle(textStyle);
+    }
+
+    //TEXT SHADOW
+    @ColorInt
+    public int getTextShadowColor() {
+        return renderer.getTextShadowColor();
+    }
+
+    public float getTextShadowRadius() {
+        return renderer.getTextShadowRadius();
+    }
+
+    public float getTextShadowDistY() {
+        return renderer.getTextShadowDistY();
+    }
+
+    public float getTextShadowDistX() {
+        return renderer.getTextShadowDistX();
+    }
+
+    public void setTextShadow(@ColorInt int shadowColor, @FloatRange(from = 0) float shadowRadius, @FloatRange(from = 0) float shadowDistX, @FloatRange(from = 0) float shadowDistY) {
+        renderer.setTextShadow(shadowColor, shadowRadius, shadowDistX, shadowDistY);
+    }
+
+    //DRAW BACKGROUND BAR STATE
+    public boolean isDrawBackgroundBarEnabled() {
+        if (renderer instanceof PieModeRenderer) return false;
+        return ((RingModeRenderer) renderer).isDrawBackgroundBarEnabled();
+    }
+
+    public void setDrawBackgroundBarEnabled(boolean enabled) {
+        if (renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
+    }
+
+    //BACKGROUND BAR COLOR
+    public int getBackgroundBarColor() {
+        if (renderer instanceof PieModeRenderer) return -1;
+        return ((RingModeRenderer) renderer).getBackgroundBarColor();
+    }
+
+    public void setBackgroundBarColor(@ColorInt int backgroundBarColor) {
+        ((RingModeRenderer) renderer).setBackgroundBarColor(backgroundBarColor);
+    }
+
+    //BACKGROUND BAR THICKNESS
+    public float getBackgroundBarThickness() {
+        if (renderer instanceof PieModeRenderer) return -1;
+        return ((RingModeRenderer) renderer).getBackgroundBarThickness();
+    }
+
+    public void setBackgroundBarThickness(@FloatRange(from = 0) float backgroundBarThickness) {
+        if (renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setBackgroundBarThickness(backgroundBarThickness);
+    }
+
+    //PROGRESS BAR THICKNESS
+    public float getProgressBarThickness() {
+        if (renderer instanceof PieModeRenderer) return -1;
+        return ((RingModeRenderer) renderer).getProgressBarThickness();
+    }
+
+    public void setProgressBarThickness(@FloatRange(from = 0) float progressBarThickness) {
+        if (renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setProgressBarThickness(progressBarThickness);
+    }
+
+    //PROGRESS BAR STYLE
+    public int getProgressBarStyle() {
+        if (renderer instanceof PieModeRenderer) return -1;
+        return ((RingModeRenderer) renderer).getProgressBarStyle();
+    }
+
+    public void setProgressBarStyle(@ProgressBarStyle int progressBarStyle) {
+        if (renderer instanceof PieModeRenderer) return;
+        ((RingModeRenderer) renderer).setProgressBarStyle(progressBarStyle);
+    }
+
+    //##############################################################################################   ADAPTIVE COLOR PROVIDER
+    public void setAdaptiveColorProvider(@Nullable PercentageChartView.AdaptiveColorProvider adaptiveColorProvider) {
+        this.renderer.setAdaptiveColorProvider(adaptiveColorProvider);
+    }
+
+    //##############################################################################################   LISTENER
     public void setOnProgressChangeListener(@Nullable OnProgressChangeListener onProgressChangeListener) {
         this.onProgressChangeListener = onProgressChangeListener;
     }
 
-    @Nullable
-    public OnProgressChangeListener getOnProgressChangeListener() {
-        return onProgressChangeListener;
-    }
-
-    private int dp2px(float dp) {
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics);
-    }
-
-    private int sp2px(float sp) {
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, metrics);
-    }
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({MODE_PIE, MODE_RING})
-    public @interface ChartMode {
-    }
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ORIENTATION_CLOCKWISE, ORIENTATION_COUNTERCLOCKWISE})
-    public @interface PercentageOrientation {
-    }
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CAP_ROUND, CAP_SQUARE})
-    public @interface PercentageStyle {
-    }
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Typeface.NORMAL, Typeface.ITALIC, Typeface.BOLD, Typeface.BOLD_ITALIC})
-    public @interface TextStyle {
-    }
-
-    public interface ColorProvider {
+    public interface AdaptiveColorProvider {
         int getColor(float value);
     }
 

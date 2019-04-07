@@ -2,50 +2,86 @@
 <resources>
     <declare-styleable name="PercentageChartView">
 
-        <attr name="pcv_orientation" format="enum">
-            <enum name="clockwise" value="0"/>
-            <enum name="counter_clockwise" value="1"/>
-        </attr>
-        <attr name="pcv_startAngle" format="integer"/>
+        <!--COMMON ATTRIBUTES-->
         <attr name="pcv_mode" format="enum">
-            <enum name="ring" value="0"/>
-            <enum name="pie" value="1"/>
-        </attr>
-        <attr name="pcv_backgroundColor" format="color|reference"/>
-        <attr name="pcv_backgroundWidth" format="dimension"/>
-        <attr name="pcv_fillBackground" format="boolean"/>
-        <attr name="pcv_fillBackgroundColor" format="color|reference"/>
-
-        <attr name="pcv_progress" format="integer"/>
-        <attr name="pcv_percentageColor" format="color|reference"/>
-        <attr name="pcv_percentageWidth" format="dimension"/>
-        <attr name="pcv_percentageStyle" format="enum">
-            <enum name="round" value="0"/>
-            <enum name="square" value="1"/>
+            <enum name="ring" value="0" />
+            <enum name="pie" value="1" />
         </attr>
 
-        <attr name="pcv_textColor" format="color|reference"/>
-        <attr name="pcv_textSize" format="dimension"/>
-        <attr name="pcv_typeface" format="string"/>
+        <attr name="pcv_orientation" format="enum">
+            <enum name="clockwise" value="0" />
+            <enum name="counter_clockwise" value="1" />
+        </attr>
+
+        <attr name="pcv_startAngle" format="integer" />
+
+        <attr name="pcv_drawBackground" format="boolean" />
+        <attr name="pcv_backgroundColor" format="color" />
+
+        <attr name="pcv_progress" format="float" />
+        <attr name="pcv_progressColor" format="color" />
+
+        <attr name="pcv_adaptiveBackground" format="boolean" />
+        <attr name="pcv_adaptiveBackgroundRatio" format="integer" />
+        <attr name="pcv_adaptiveBackgroundMode"  format="enum">
+            <enum name="darker" value="0" />
+            <enum name="lighter" value="1" />
+        </attr>
+
+        <attr name="pcv_adaptiveText" format="boolean" />
+        <attr name="pcv_adaptiveTextRatio" format="integer" />
+        <attr name="pcv_adaptiveTextMode"  format="enum">
+            <enum name="darker" value="0" />
+            <enum name="lighter" value="1" />
+        </attr>
+
+        <attr name="pcv_animDuration" format="integer" />
+        <attr name="pcv_animInterpolator" format="enum">
+            <enum name="linear" value="0" />
+            <enum name="accelerate" value="1" />
+            <enum name="decelerate" value="2" />
+            <enum name="accelerate_decelerate" value="3" />
+            <enum name="anticipate" value="4" />
+            <enum name="overshoot" value="5" />
+            <enum name="anticipate_overshoot" value="6" />
+            <enum name="bounce" value="7" />
+            <enum name="fast_out_linear_in" value="8" />
+            <enum name="fast_out_slow_in" value="9" />
+            <enum name="linear_out_slow_in" value="10" />
+        </attr>
+
+        <attr name="pcv_textColor" format="color" />
+        <attr name="pcv_textSize" format="dimension" />
+        <attr name="pcv_typeface" format="string" />
         <attr name="pcv_textStyle">
             <flag name="normal" value="0" />
             <flag name="bold" value="1" />
             <flag name="italic" value="2" />
         </attr>
+        <attr name="pcv_textShadowRadius" format="float" />
+        <attr name="pcv_textShadowDistY" format="float" />
+        <attr name="pcv_textShadowDistX" format="float" />
+        <attr name="pcv_textShadowColor" format="color" />
 
-        <attr name="pcv_animDuration" format="integer"/>
-        <attr name="pcv_animInterpolator" format="enum">
-            <enum name="linear" value="0"/>
-            <enum name="accelerate" value="1"/>
-            <enum name="decelerate" value="2"/>
-            <enum name="accelerate_decelerate" value="3"/>
-            <enum name="anticipate" value="4"/>
-            <enum name="overshoot" value="5"/>
-            <enum name="anticipate_overshoot" value="6"/>
-            <enum name="bounce" value="7"/>
-            <enum name="fast_out_linear_in" value="8"/>
-            <enum name="fast_out_slow_in" value="9"/>
-            <enum name="linear_out_slow_in" value="10"/>
+        <!--PIE MODE ATTRIBUTES-->
+        <attr name="pcv_backgroundOffset" format="dimension" />
+
+        <!--RING MODE ATTRIBUTES-->
+        <attr name="pcv_drawBackgroundBar" format="boolean" />
+        <attr name="pcv_backgroundBarThickness" format="dimension" />
+        <attr name="pcv_backgroundBarColor" format="color" />
+
+        <attr name="pcv_progressBarThickness" format="dimension" />
+        <attr name="pcv_progressBarStyle" format="enum">
+            <enum name="round" value="0" />
+            <enum name="square" value="1" />
+        </attr>
+
+        <attr name="pcv_adaptiveBackgroundBar" format="boolean" />
+        <attr name="pcv_adaptiveBackgroundBarRatio" format="integer" />
+        <attr name="pcv_adaptiveBackgroundBarMode"  format="enum">
+            <enum name="darker" value="0" />
+            <enum name="lighter" value="1" />
         </attr>
 
     </declare-styleable>
