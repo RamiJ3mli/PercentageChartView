@@ -310,18 +310,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/animate" />
 
-            <TextView
-                android:id="@+id/duration_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/default_duration"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/duration_label"
-                app:layout_constraintEnd_toEndOf="parent" />
-
             <ImageButton
                 android:id="@+id/increment_duration"
                 android:layout_width="46dp"
@@ -357,6 +345,19 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/duration_label" />
 
+            <TextView
+                android:id="@+id/duration_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/default_duration"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@+id/decrement_duration"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <!--########################################## INTERPOLATOR-->
             <TextView
                 android:id="@+id/interpolator_label"
@@ -369,19 +370,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/decrement_duration" />
-
-            <TextView
-                android:id="@+id/interpolator_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/default_interpolator"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/interpolator_label"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/duration_default" />
 
             <Spinner
                 android:id="@+id/interpolator_value"
@@ -395,6 +384,19 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/interpolator_label" />
 
+            <TextView
+                android:id="@+id/interpolator_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/default_interpolator"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@+id/interpolator_value"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <!--########################################## TEXT COLOR-->
             <TextView
                 android:id="@+id/text_color_label"
@@ -407,19 +409,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/interpolator_value" />
-
-            <TextView
-                android:id="@+id/text_color_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/default_text_color"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/text_color_label"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/interpolator_default" />
 
             <Button
                 android:id="@+id/text_color"
@@ -435,6 +425,19 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_color_label" />
 
+            <TextView
+                android:id="@+id/text_color_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/default_text_color"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@+id/text_color"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <!--########################################## TEXT SIZE-->
             <TextView
                 android:id="@+id/text_size_label"
@@ -447,19 +450,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_color" />
-
-            <TextView
-                android:id="@+id/text_size_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/default_text_size"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/text_size_label"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/text_color_default" />
 
             <ImageButton
                 android:id="@+id/increment_text_size"
@@ -496,6 +487,19 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_size_label" />
 
+            <TextView
+                android:id="@+id/text_size_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/default_text_size"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@+id/decrement_text_size"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <!--########################################## TEXT FONT-->
             <TextView
                 android:id="@+id/font_label"
@@ -508,7 +512,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/decrement_text_size" />
+                app:layout_constraintTop_toBottomOf="@+id/text_size_default" />
 
             <Spinner
                 android:id="@+id/font_value"
@@ -768,18 +772,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/increment_disty" />
 
-            <TextView
-                android:id="@+id/draw_background_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/default_draw_background"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/draw_background_label"
-                app:layout_constraintEnd_toEndOf="parent" />
-
             <CheckBox
                 android:id="@+id/draw_background"
                 android:layout_width="wrap_content"
@@ -794,6 +786,22 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/draw_background_label" />
 
+            <TextView
+                android:id="@+id/draw_background_default"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/default_draw_background"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                android:gravity="start"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/draw_background"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <!--########################################## BACKGROUND COLOR-->
             <TextView
                 android:id="@+id/background_color_label"
@@ -806,19 +814,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/draw_background" />
-
-            <TextView
-                android:id="@+id/background_color_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/background_color_default"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/background_color_label"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/draw_background_default" />
 
             <Button
                 android:id="@+id/background_color"
@@ -834,6 +830,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/background_color_label" />
 
+            <TextView
+                android:id="@+id/background_color_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/background_color_default"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/background_color"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <!--########################################## BACKGROUND OFFSET-->
             <TextView
                 android:id="@+id/offset_label"
@@ -846,19 +856,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/background_color" />
-
-            <TextView
-                android:id="@+id/offset_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/background_offset_default"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/offset_label"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/background_color_default" />
 
             <ImageButton
                 android:id="@+id/increment_offset"
@@ -897,14 +895,16 @@
 
             <TextView
                 android:id="@+id/offset_info"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginTop="8dp"
                 android:fontFamily="sans-serif-light"
                 android:text="@string/background_offset_info"
                 android:textColor="@color/colorAccent"
                 android:textSize="10sp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/decrement_offset" />
 
@@ -922,18 +922,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/offset_info" />
 
-            <TextView
-                android:id="@+id/progress_color_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/progress_color_default"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/progress_color_label"
-                app:layout_constraintEnd_toEndOf="parent" />
-
             <Button
                 android:id="@+id/progress_color"
                 android:layout_width="0dp"
@@ -948,6 +936,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/progress_color_label" />
 
+            <TextView
+                android:id="@+id/progress_color_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/progress_color_default"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/progress_color"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <!--########################################## PROGRESS BAR THICKNESS-->
             <TextView
                 android:id="@+id/prog_thickness_label"
@@ -960,19 +962,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/progress_color" />
-
-            <TextView
-                android:id="@+id/prog_thickness_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/progress_bar_thickness_default"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/prog_thickness_label"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/progress_color_default" />
 
             <ImageButton
                 android:id="@+id/increment_prog_thickness"
@@ -1011,14 +1001,16 @@
 
             <TextView
                 android:id="@+id/prog_thickness_info"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginTop="8dp"
                 android:fontFamily="sans-serif-light"
                 android:text="@string/progress_bar_thickness_info"
                 android:textColor="@color/colorAccent"
                 android:textSize="10sp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/decrement_prog_thickness" />
 
@@ -1083,18 +1075,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/prog_bar_style_value" />
 
-            <TextView
-                android:id="@+id/draw_bg_bar_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/draw_bg_bar_default"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/draw_bg_bar_label"
-                app:layout_constraintEnd_toEndOf="parent" />
-
             <CheckBox
                 android:id="@+id/draw_bg_bar"
                 android:layout_width="wrap_content"
@@ -1109,6 +1089,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/draw_bg_bar_label" />
 
+            <TextView
+                android:id="@+id/draw_bg_bar_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/draw_bg_bar_default"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/draw_bg_bar"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <!--########################################## BACKGROUND BAR COLOR-->
             <TextView
                 android:id="@+id/bg_bar_color_label"
@@ -1121,19 +1115,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/draw_bg_bar" />
-
-            <TextView
-                android:id="@+id/bg_bar_color_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/bg_bar_color_default"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/bg_bar_color_label"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/draw_bg_bar_default" />
 
             <Button
                 android:id="@+id/bg_bar_color"
@@ -1149,6 +1131,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/bg_bar_color_label" />
 
+            <TextView
+                android:id="@+id/bg_bar_color_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/bg_bar_color_default"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/bg_bar_color"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <!--########################################## BACKGROUND BAR THICKNESS-->
             <TextView
                 android:id="@+id/bg_bar_thickness_label"
@@ -1162,18 +1158,6 @@
                 android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/bg_bar_color" />
-
-            <TextView
-                android:id="@+id/bg_bar_thickness_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/bg_bar_thickness_default"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/bg_bar_thickness_label"
-                app:layout_constraintEnd_toEndOf="parent" />
 
             <ImageButton
                 android:id="@+id/increment_bg_bar_thickness"
@@ -1212,14 +1196,16 @@
 
             <TextView
                 android:id="@+id/bg_bar_thickness_info"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginTop="8dp"
                 android:fontFamily="sans-serif-light"
                 android:text="@string/bg_bar_thickness_info"
                 android:textColor="@color/colorAccent"
                 android:textSize="10sp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/decrement_bg_bar_thickness" />
 
@@ -1705,16 +1691,16 @@
                 android:id="@+id/github"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
-                android:layout_marginTop="40dp"
                 android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
                 android:layout_marginEnd="16dp"
+                android:backgroundTint="@android:color/white"
+                android:drawableStart="@drawable/all_ico_github"
+                android:fontFamily="sans-serif-condensed-medium"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-condensed-medium"
-                android:drawableStart="@drawable/all_ico_github"
-                android:backgroundTint="@android:color/white"
                 android:text="@string/github_lbl"
+                android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/bg_bar_mode_value" />
@@ -1733,5 +1719,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 
