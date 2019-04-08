@@ -63,7 +63,6 @@ import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.BOUNCE
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.DECELERATE;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.FAST_OUT_LINEAR_IN;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.FAST_OUT_SLOW_IN;
-import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.LINEAR;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.LINEAR_OUT_SLOW_IN;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.OVERSHOOT;
 
