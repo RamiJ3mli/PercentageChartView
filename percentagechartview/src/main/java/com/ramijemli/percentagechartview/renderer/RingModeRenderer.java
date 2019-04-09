@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Rami Jemli
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.ramijemli.percentagechartview.renderer;
 
 import android.animation.ArgbEvaluator;
@@ -381,6 +397,7 @@ public class RingModeRenderer extends BaseModeRenderer {
     }
 
     public void setDrawBackgroundBarEnabled(boolean drawBackgroundBar) {
+        if(mDrawBackgroundBar == drawBackgroundBar) return;
         this.mDrawBackgroundBar = drawBackgroundBar;
         mView.invalidate();
     }
@@ -422,7 +439,8 @@ public class RingModeRenderer extends BaseModeRenderer {
     //ADAPTIVE BACKGROUND
     @Override
     public void setAdaptiveBgEnabled(boolean enable) {
-        if (mAdaptiveColorProvider == null || !mDrawBackground) return;
+        if (mAdaptiveColorProvider == null || !mDrawBackground || mAdaptBackground == enable)
+            return;
         mAdaptBackground = enable;
         if (mAdaptBackground) {
             updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
@@ -446,7 +464,7 @@ public class RingModeRenderer extends BaseModeRenderer {
     //ADAPTIVE TEXT
     @Override
     public void setAdaptiveTextEnabled(boolean enable) {
-        if (mAdaptiveColorProvider == null) return;
+        if (mAdaptiveColorProvider == null || mAdaptText == enable) return;
         mAdaptText = enable;
         if (mAdaptText) {
             updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
@@ -474,7 +492,7 @@ public class RingModeRenderer extends BaseModeRenderer {
     }
 
     public void setBackgroundBarColor(int backgroundBarColor) {
-        if (!mDrawBackgroundBar || (mAdaptiveColorProvider != null && mAdaptBackgroundBar))
+        if (!mDrawBackgroundBar || (mAdaptiveColorProvider != null && mAdaptBackgroundBar) || this.mBackgroundBarColor == backgroundBarColor)
             return;
         this.mBackgroundBarColor = backgroundBarColor;
         mBackgroundBarPaint.setColor(mBackgroundBarColor);
@@ -487,6 +505,7 @@ public class RingModeRenderer extends BaseModeRenderer {
     }
 
     public void setBackgroundBarThickness(float backgroundBarThickness) {
+        if (this.mBackgroundBarThickness == backgroundBarThickness) return;
         this.mBackgroundBarThickness = backgroundBarThickness;
         mBackgroundBarPaint.setStrokeWidth(backgroundBarThickness);
         mView.invalidate();
@@ -499,6 +518,7 @@ public class RingModeRenderer extends BaseModeRenderer {
     }
 
     public void setProgressBarThickness(float progressBarThickness) {
+        if (this.mProgressBarThickness == progressBarThickness) return;
         this.mProgressBarThickness = progressBarThickness;
         mProgressPaint.setStrokeWidth(progressBarThickness);
         mView.invalidate();

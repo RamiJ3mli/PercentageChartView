@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Rami Jemli
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.ramijemli.percentagechartview.renderer;
 
 import android.animation.ArgbEvaluator;
@@ -257,6 +273,7 @@ public class PieModeRenderer extends BaseModeRenderer {
 
     @Override
     public void setOrientation(int orientation) {
+        if(this.orientation ==  orientation) return;
         this.orientation = orientation;
         mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
                 -(mProgress / DEFAULT_MAX * 360) :
@@ -268,6 +285,7 @@ public class PieModeRenderer extends BaseModeRenderer {
 
     @Override
     public void setStartAngle(float startAngle) {
+        if (this.mStartAngle == startAngle) return;
         this.mStartAngle = startAngle;
         mBgStartAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ? mStartAngle : mStartAngle + mSweepAngle;
         mBgSweepAngle = 360 - ((orientation == ORIENTATION_COUNTERCLOCKWISE) ? -(mSweepAngle) : mSweepAngle);
@@ -284,7 +302,7 @@ public class PieModeRenderer extends BaseModeRenderer {
     //ADAPTIVE BACKGROUND
     @Override
     public void setAdaptiveBgEnabled(boolean enable) {
-        if (mAdaptiveColorProvider == null || !mDrawBackground) return;
+        if (mAdaptiveColorProvider == null || !mDrawBackground || mAdaptBackground == enable) return;
         mAdaptBackground = enable;
         if (mAdaptBackground) {
             updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
@@ -308,7 +326,7 @@ public class PieModeRenderer extends BaseModeRenderer {
     //ADAPTIVE TEXT
     @Override
     public void setAdaptiveTextEnabled(boolean enable) {
-        if (mAdaptiveColorProvider == null) return;
+        if (mAdaptiveColorProvider == null || mAdaptText == enable) return;
         mAdaptText = enable;
         if (mAdaptText) {
             updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));

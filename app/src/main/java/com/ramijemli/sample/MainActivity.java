@@ -720,9 +720,9 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             if (isPieDisplayed) {
-                pieChart.setAdaptiveBgEnabled(isChecked);
+                pieChart.setAdaptiveBackgroundEnabled(isChecked);
             } else {
-                ringChart.setAdaptiveBgEnabled(isChecked);
+                ringChart.setAdaptiveBackgroundEnabled(isChecked);
             }
         });
 

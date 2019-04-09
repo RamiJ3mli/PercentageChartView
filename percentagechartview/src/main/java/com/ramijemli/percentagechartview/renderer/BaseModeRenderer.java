@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Rami Jemli
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.ramijemli.percentagechartview.renderer;
 
 import android.animation.TimeInterpolator;
@@ -51,7 +67,7 @@ public abstract class BaseModeRenderer {
     public static final int LIGHTER_MODE = 1;
 
     //ANIMATIONS
-    public static final int DEFAULT_ANIMATION_INTERPOLATOR = 0;
+    private static final int DEFAULT_ANIMATION_INTERPOLATOR = 0;
     public static final int LINEAR = 0;
     public static final int ACCELERATE = 1;
     public static final int DECELERATE = 2;
@@ -64,8 +80,8 @@ public abstract class BaseModeRenderer {
     public static final int FAST_OUT_SLOW_IN = 9;
     public static final int LINEAR_OUT_SLOW_IN = 10;
 
-    public static final int DEFAULT_START_ANGLE = 0;
-    public static final int DEFAULT_ANIMATION_DURATION = 400;
+    private static final int DEFAULT_START_ANGLE = 0;
+    private static final int DEFAULT_ANIMATION_DURATION = 400;
     static final float DEFAULT_MAX = 100;
 
     //##############################################################################################
@@ -344,6 +360,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setDrawBackgroundEnabled(boolean drawBackground) {
+        if(this.mDrawBackground == drawBackground) return;
         this.mDrawBackground = drawBackground;
         mView.invalidate();
     }
@@ -365,7 +382,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setBackgroundColor(int backgroundColor) {
-        if (mAdaptiveColorProvider != null && mAdaptBackground) return;
+        if ((mAdaptiveColorProvider != null && mAdaptBackground) || this.mBackgroundColor == backgroundColor ) return;
         this.mBackgroundColor = backgroundColor;
         if (!mDrawBackground) return;
         mBackgroundPaint.setColor(mBackgroundColor);
@@ -374,12 +391,11 @@ public abstract class BaseModeRenderer {
 
     //BACKGROUND OFFSET
     public float getBackgroundOffset() {
-        if (!mDrawBackground) return -1;
         return mBackgroundOffset;
     }
 
     public void setBackgroundOffset(int backgroundOffset) {
-        if (!mDrawBackground)
+        if (!mDrawBackground || this.mBackgroundOffset == backgroundOffset)
             return;
         this.mBackgroundOffset = backgroundOffset;
         mView.invalidate();
@@ -392,7 +408,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setProgressColor(int progressColor) {
-        if (mAdaptiveColorProvider != null) return;
+        if (mAdaptiveColorProvider != null || this.mProgressColor == progressColor) return;
 
         this.mProgressColor = progressColor;
         mProgressPaint.setColor(progressColor);
@@ -439,6 +455,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setAnimationDuration(int duration) {
+        if(this.mAnimDuration ==  duration) return;
         mAnimDuration = duration;
         mProgressAnimator.setDuration(mAnimDuration);
         if (mColorAnimator != null)
@@ -460,7 +477,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setTextColor(@ColorInt int textColor) {
-        if (mAdaptiveColorProvider != null && mAdaptText)
+        if ((mAdaptiveColorProvider != null && mAdaptText) || this.mTextColor ==  textColor)
             return;
         this.mTextColor = textColor;
         mTextPaint.setColor(textColor);
@@ -473,6 +490,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setTextSize(float textSize) {
+        if(this.mTextSize ==  textSize) return;
         this.mTextSize = textSize;
         mTextPaint.setTextSize(textSize);
         updateText();
@@ -485,6 +503,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setTypeface(Typeface typeface) {
+        if(this.mTypeface.equals(typeface) ) return;
         this.mTypeface = (mTextStyle > 0) ?
                 Typeface.create(typeface, mTextStyle) :
                 typeface;
@@ -499,6 +518,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setTextStyle(int mTextStyle) {
+        if(this.mTextStyle ==  mTextStyle) return;
         this.mTextStyle = mTextStyle;
         mTypeface = (mTypeface == null) ? Typeface.defaultFromStyle(mTextStyle) : Typeface.create(mTypeface, mTextStyle);
 
@@ -525,6 +545,10 @@ public abstract class BaseModeRenderer {
     }
 
     public void setTextShadow(int shadowColor, float shadowRadius, float shadowDistX, float shadowDistY) {
+        if(this.mTextShadowColor ==  shadowColor
+                && this.mTextShadowRadius ==  shadowRadius
+                && this.mTextShadowDistX ==  shadowDistX
+                && this.mTextShadowDistY ==  shadowDistY) return;
         this.mTextShadowColor = shadowColor;
         this.mTextShadowRadius = shadowRadius;
         this.mTextShadowDistX = shadowDistX;
