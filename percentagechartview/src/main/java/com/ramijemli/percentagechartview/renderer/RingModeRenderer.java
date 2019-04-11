@@ -378,15 +378,17 @@ public class RingModeRenderer extends BaseModeRenderer {
 
     @Override
     public void setOrientation(int orientation) {
-        mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
+        if (this.orientation == orientation) return;
+        this.orientation = orientation;
+        this.mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
                 -(mProgress / DEFAULT_MAX * 360) :
                 mProgress / DEFAULT_MAX * 360;
     }
 
     @Override
     public void setStartAngle(float startAngle) {
+        if (this.mStartAngle == startAngle) return;
         this.mStartAngle = startAngle;
-        mView.invalidate();
     }
 
     @Override
@@ -404,7 +406,6 @@ public class RingModeRenderer extends BaseModeRenderer {
     public void setDrawBackgroundBarEnabled(boolean drawBackgroundBar) {
         if (mDrawBackgroundBar == drawBackgroundBar) return;
         this.mDrawBackgroundBar = drawBackgroundBar;
-        mView.invalidate();
     }
 
     //ADAPTIVE BACKGROUND BAR
@@ -429,7 +430,6 @@ public class RingModeRenderer extends BaseModeRenderer {
             mAdaptiveBackgroundBarRatio = mAdaptiveBackgroundBarMode = -1;
             mBackgroundBarPaint.setColor(mBackgroundBarColor);
         }
-        mView.invalidate();
     }
 
     public void setAdaptiveBackgroundBar(float ratio, int adaptiveMode) {
@@ -438,7 +438,6 @@ public class RingModeRenderer extends BaseModeRenderer {
         mAdaptiveBackgroundBarRatio = ratio;
         mAdaptiveBackgroundBarMode = adaptiveMode;
         updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
-        mView.invalidate();
     }
 
     //ADAPTIVE BACKGROUND
@@ -453,7 +452,6 @@ public class RingModeRenderer extends BaseModeRenderer {
             mAdaptiveBackgroundRatio = mAdaptiveBackgroundMode = -1;
             mBackgroundPaint.setColor(mBackgroundColor);
         }
-        mView.invalidate();
     }
 
     @Override
@@ -463,7 +461,6 @@ public class RingModeRenderer extends BaseModeRenderer {
         mAdaptiveBackgroundRatio = ratio;
         mAdaptiveBackgroundMode = adaptiveMode;
         updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
-        mView.invalidate();
     }
 
     //ADAPTIVE TEXT
@@ -477,7 +474,6 @@ public class RingModeRenderer extends BaseModeRenderer {
             mAdaptiveTextRatio = mAdaptiveTextMode = -1;
             mTextPaint.setColor(mTextColor);
         }
-        mView.invalidate();
     }
 
     @Override
@@ -487,7 +483,6 @@ public class RingModeRenderer extends BaseModeRenderer {
         mAdaptiveTextRatio = ratio;
         mAdaptiveTextMode = adaptiveMode;
         updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
-        mView.invalidate();
     }
 
     //BACKGROUND BAR COLOR
@@ -501,7 +496,6 @@ public class RingModeRenderer extends BaseModeRenderer {
             return;
         this.mBackgroundBarColor = backgroundBarColor;
         mBackgroundBarPaint.setColor(mBackgroundBarColor);
-        mView.invalidate();
     }
 
     //BACKGROUND BAR THICKNESS
@@ -514,7 +508,6 @@ public class RingModeRenderer extends BaseModeRenderer {
         this.mBackgroundBarThickness = backgroundBarThickness;
         mBackgroundBarPaint.setStrokeWidth(backgroundBarThickness);
         mesure(mView.getWidth(), mView.getHeight(), 0,0,0,0);
-        mView.invalidate();
     }
 
     //PROGRESS BAR THICKNESS
@@ -527,7 +520,6 @@ public class RingModeRenderer extends BaseModeRenderer {
         this.mProgressBarThickness = progressBarThickness;
         mProgressPaint.setStrokeWidth(progressBarThickness);
         mesure(mView.getWidth(), mView.getHeight(), 0,0,0,0);
-        mView.invalidate();
     }
 
     //PROGRESS BAR STYLE
@@ -536,8 +528,10 @@ public class RingModeRenderer extends BaseModeRenderer {
     }
 
     public void setProgressBarStyle(int progressBarStyle) {
+        if (progressBarStyle < 0 || progressBarStyle > 1) {
+            throw new IllegalArgumentException("Text style must be a valid TextStyle constant.");
+        }
         mProgressBarStyle = (progressBarStyle == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
         mProgressPaint.setStrokeCap(mProgressBarStyle);
-        mView.invalidate();
     }
 }

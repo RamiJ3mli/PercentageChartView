@@ -144,6 +144,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
     }
 
     //##############################################################################################   STYLE MODIFIERS
+
     /**
      * Gets the current drawing orientation.
      *
@@ -165,6 +166,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Orientation must be a ProgressOrientation constant.");
         }
         this.renderer.setOrientation(orientation);
+        invalidate();
     }
 
     /**
@@ -188,6 +190,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Start angle value must be positive and less or equal to 360.");
         }
         this.renderer.setStartAngle(startAngle);
+        invalidate();
     }
 
     /**
@@ -206,6 +209,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setDrawBackgroundEnabled(boolean enabled) {
         this.renderer.setDrawBackgroundEnabled(enabled);
+        invalidate();
     }
 
     /**
@@ -225,6 +229,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setBackgroundColor(@ColorInt int color) {
         this.renderer.setBackgroundColor(color);
+        invalidate();
     }
 
     /**
@@ -269,6 +274,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setProgressColor(@ColorInt int color) {
         this.renderer.setProgressColor(color);
+        invalidate();
     }
 
     /**
@@ -334,6 +340,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setTextColor(@ColorInt int color) {
         renderer.setTextColor(color);
+        invalidate();
     }
 
     /**
@@ -356,6 +363,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Text size must be a nonzero positive value.");
         }
         renderer.setTextSize(size);
+        invalidate();
     }
 
     /**
@@ -378,6 +386,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new NullPointerException("Text TypeFace cannot be null");
         }
         renderer.setTypeface(typeface);
+        invalidate();
     }
 
     /**
@@ -401,6 +410,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Text style must be a valid TextStyle constant.");
         }
         renderer.setTextStyle(style);
+        invalidate();
     }
 
     /**
@@ -450,6 +460,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setTextShadow(@ColorInt int shadowColor, @FloatRange(from = 0) float shadowRadius, @FloatRange(from = 0) float shadowDistX, @FloatRange(from = 0) float shadowDistY) {
         renderer.setTextShadow(shadowColor, shadowRadius, shadowDistX, shadowDistY);
+        invalidate();
     }
 
     /**
@@ -474,6 +485,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Background offset must be a positive value.");
         }
         ((PieModeRenderer) renderer).setBackgroundOffset(offset);
+        invalidate();
     }
 
     /**
@@ -494,6 +506,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
     public void setDrawBackgroundBarEnabled(boolean enabled) {
         if (renderer instanceof PieModeRenderer) return;
         ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
+        invalidate();
     }
 
     /**
@@ -513,6 +526,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setBackgroundBarColor(@ColorInt int color) {
         ((RingModeRenderer) renderer).setBackgroundBarColor(color);
+        invalidate();
     }
 
     /**
@@ -537,6 +551,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Background bar thickness must be a positive value.");
         }
         ((RingModeRenderer) renderer).setBackgroundBarThickness(thickness);
+        invalidate();
     }
 
     /**
@@ -561,6 +576,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Progress bar thickness must be a positive value.");
         }
         ((RingModeRenderer) renderer).setProgressBarThickness(thickness);
+        invalidate();
     }
 
     /**
@@ -585,6 +601,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Text style must be a valid TextStyle constant.");
         }
         ((RingModeRenderer) renderer).setProgressBarStyle(style);
+        invalidate();
     }
 
     /**
@@ -603,6 +620,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setAdaptiveTextEnabled(boolean enable) {
         renderer.setAdaptiveTextEnabled(enable);
+        invalidate();
     }
 
     /**
@@ -640,6 +658,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Adaptive text mode must be a valid AdaptiveMode constant.");
         }
         renderer.setAdaptiveText(ratio, adaptiveMode);
+        invalidate();
     }
 
     /**
@@ -658,6 +677,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setAdaptiveBackgroundEnabled(boolean enable) {
         renderer.setAdaptiveBgEnabled(enable);
+        invalidate();
     }
 
     /**
@@ -696,6 +716,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Adaptive background mode must be a valid AdaptiveMode constant.");
         }
         renderer.setAdaptiveBackground(ratio, adaptiveMode);
+        invalidate();
     }
 
     /**
@@ -716,6 +737,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
     public void setAdaptiveBgBarEnabled(boolean enable) {
         if (renderer instanceof PieModeRenderer) return;
         ((RingModeRenderer) renderer).setAdaptiveBgBarEnabled(enable);
+        invalidate();
     }
 
     /**
@@ -756,6 +778,339 @@ public class PercentageChartView extends View implements IPercentageChartView {
             throw new IllegalArgumentException("Adaptive background bar mode must be a valid AdaptiveMode constant.");
         }
         ((RingModeRenderer) renderer).setAdaptiveBackgroundBar(ratio, adaptiveMode);
+        invalidate();
+    }
+
+    //############################################################################################## UPDATE PIPELINE AS A FLUENT API
+
+    /**
+     * Sets the circular drawing direction. Default orientation is ORIENTATION_CLOCKWISE.
+     *
+     * @param orientation non-negative orientation constant.
+     * @throws IllegalArgumentException if the given orientation is not a non-negative ProgressOrientation constant.
+     */
+    public PercentageChartView orientation(@ProgressOrientation int orientation) {
+        if (orientation != ORIENTATION_CLOCKWISE && orientation != ORIENTATION_COUNTERCLOCKWISE) {
+            throw new IllegalArgumentException("Orientation must be a ProgressOrientation constant.");
+        }
+        this.renderer.setOrientation(orientation);
+        return this;
+    }
+
+    /**
+     * Sets the current circular drawing's start angle in degrees. Default start angle is0.
+     *
+     * @param startAngle A positive start angle value that is less or equal to 360.
+     * @throws IllegalArgumentException if the given start angle is not positive, or, less or equal to 360.
+     */
+    public PercentageChartView startAngle(@FloatRange(from = 0f, to = 360f) float startAngle) {
+        if (startAngle < 0 || startAngle > 360) {
+            throw new IllegalArgumentException("Start angle value must be positive and less or equal to 360.");
+        }
+        this.renderer.setStartAngle(startAngle);
+        return this;
+    }
+
+    /**
+     * Sets whether background should be drawn.
+     *
+     * @param enabled True if background have to be drawn, false otherwise.
+     */
+    public PercentageChartView drawBackgroundEnabled(boolean enabled) {
+        this.renderer.setDrawBackgroundEnabled(enabled);
+        return this;
+    }
+
+    /**
+     * Sets the circular background color for this view.
+     *
+     * @param color the color of the circular background
+     */
+    public PercentageChartView backgroundColor(@ColorInt int color) {
+        this.renderer.setBackgroundColor(color);
+        return this;
+    }
+
+    /**
+     * Sets the progress/progress bar color for this view.
+     *
+     * @param color the color of the progress/progress bar
+     */
+    public PercentageChartView progressColor(@ColorInt int color) {
+        this.renderer.setProgressColor(color);
+        return this;
+    }
+
+    /**
+     * Sets the duration of the progress change's animation.
+     *
+     * @param duration non-negative duration value.
+     * @throws IllegalArgumentException if the given duration is less than 50.
+     */
+    public PercentageChartView animationDuration(@IntRange(from = 50) int duration) {
+        if (duration < 50) {
+            throw new IllegalArgumentException("Duration must be equal or greater than 50.");
+        }
+        renderer.setAnimationDuration(duration);
+        return this;
+    }
+
+    /**
+     * Sets the interpolator of the progress change's animation.
+     *
+     * @param interpolator TimeInterpolator instance.
+     * @throws NullPointerException if the given TimeInterpolator instance is null.
+     */
+    public PercentageChartView animationInterpolator(@NonNull TimeInterpolator interpolator) {
+        if (interpolator == null) {
+            throw new NullPointerException("Animation interpolator cannot be null");
+        }
+
+        renderer.setAnimationInterpolator(interpolator);
+        return this;
+    }
+
+    /**
+     * Sets the text color for this view.
+     *
+     * @param color the text color
+     */
+    public PercentageChartView textColor(@ColorInt int color) {
+        renderer.setTextColor(color);
+        return this;
+    }
+
+    /**
+     * Sets the text size.
+     *
+     * @param size the text size
+     * @throws IllegalArgumentException if the given text size is zero or a negative value.
+     */
+    public PercentageChartView textSize(float size) {
+        if (size <= 0) {
+            throw new IllegalArgumentException("Text size must be a nonzero positive value.");
+        }
+        renderer.setTextSize(size);
+        return this;
+    }
+
+    /**
+     * Sets the text font.
+     *
+     * @param typeface the text font as a Typeface instance
+     * @throws NullPointerException if the given typeface is null.
+     */
+    public PercentageChartView typeface(@NonNull Typeface typeface) {
+        if (typeface == null) {
+            throw new NullPointerException("Text TypeFace cannot be null");
+        }
+        renderer.setTypeface(typeface);
+        return this;
+    }
+
+    /**
+     * Sets the text style.
+     *
+     * @param style the text style.
+     * @throws IllegalArgumentException if the given text style is not a valid TextStyle constant.
+     */
+    public PercentageChartView textStyle(@TextStyle int style) {
+        if (style < 0 || style > 3) {
+            throw new IllegalArgumentException("Text style must be a valid TextStyle constant.");
+        }
+        renderer.setTextStyle(style);
+        return this;
+    }
+
+    /**
+     * Sets the text shadow. Passing zeros will remove the shadow.
+     *
+     * @param shadowColor  text shadow color value.
+     * @param shadowRadius text shadow radius.
+     * @param shadowDistX  text shadow y-axis distance.
+     * @param shadowDistY  text shadow x-axis distance.
+     */
+    public PercentageChartView textShadow(@ColorInt int shadowColor, @FloatRange(from = 0) float shadowRadius, @FloatRange(from = 0) float shadowDistX, @FloatRange(from = 0) float shadowDistY) {
+        renderer.setTextShadow(shadowColor, shadowRadius, shadowDistX, shadowDistY);
+        return this;
+    }
+
+    /**
+     * Sets the offset of the circular background. Works only if chart mode is set to pie.
+     *
+     * @param offset A positive offset value.
+     * @throws IllegalArgumentException if the given offset is a negative value.
+     */
+    public PercentageChartView backgroundOffset(@IntRange(from = 0) int offset) {
+        if (renderer instanceof RingModeRenderer)
+            throw new IllegalStateException("Background offset can be altered only if chart mode is set to pie.");
+        if (offset < 0) {
+            throw new IllegalArgumentException("Background offset must be a positive value.");
+        }
+        ((PieModeRenderer) renderer).setBackgroundOffset(offset);
+        return this;
+    }
+
+    /**
+     * Sets whether background bar should be drawn.
+     *
+     * @param enabled True if background bar have to be drawn, false otherwise.
+     */
+    public PercentageChartView drawBackgroundBarEnabled(boolean enabled) {
+        if (renderer instanceof PieModeRenderer)
+            throw new IllegalStateException("Background bar's drawing state can be altered only if chart mode is set to ring.");
+        ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
+        return this;
+    }
+
+    /**
+     * Sets the background bar color.
+     *
+     * @param color the background bar color
+     */
+    public PercentageChartView backgroundBarColor(@ColorInt int color) {
+        ((RingModeRenderer) renderer).setBackgroundBarColor(color);
+        return this;
+    }
+
+    /**
+     * Sets the background bar thickness in pixels. Works only if chart mode is set to ring.
+     *
+     * @param thickness non-negative thickness value in pixels.
+     * @throws IllegalArgumentException if the given value is negative.
+     */
+    public PercentageChartView backgroundBarThickness(@FloatRange(from = 0) float thickness) {
+        if (renderer instanceof PieModeRenderer)
+            throw new IllegalStateException("Background bar's thickness can be altered only if chart mode is set to ring.");
+        if (thickness < 0) {
+            throw new IllegalArgumentException("Background bar thickness must be a positive value.");
+        }
+        ((RingModeRenderer) renderer).setBackgroundBarThickness(thickness);
+        return this;
+    }
+
+    /**
+     * Sets the progress bar thickness in pixels. Works only if chart mode is set to ring.
+     *
+     * @param thickness non-negative thickness value in pixels.
+     * @throws IllegalArgumentException if the given value is negative.
+     */
+    public PercentageChartView progressBarThickness(@FloatRange(from = 0) float thickness) {
+        if (renderer instanceof PieModeRenderer)
+            throw new IllegalStateException("Progress bar's thickness can be altered only if chart mode is set to ring.");
+        if (thickness < 0) {
+            throw new IllegalArgumentException("Progress bar thickness must be a positive value.");
+        }
+        ((RingModeRenderer) renderer).setProgressBarThickness(thickness);
+        return this;
+    }
+
+    /**
+     * Sets the progress bar stroke style. Works only if chart mode is set to ring.
+     *
+     * @param style Progress bar stroke style as a ProgressStyle constant.
+     * @throws IllegalArgumentException if the given progress bar style is not a valid ProgressBarStyle constant.
+     */
+    public PercentageChartView progressBarStyle(@ProgressBarStyle int style) {
+        if (renderer instanceof PieModeRenderer)
+            throw new IllegalStateException("Progress bar style can be altered only if chart mode is set to ring.");
+        ((RingModeRenderer) renderer).setProgressBarStyle(style);
+        return this;
+    }
+
+    /**
+     * Sets whether adaptive text should be enabled.
+     *
+     * @param enable True if adaptive text should be enabled, false otherwise.
+     */
+    public PercentageChartView adaptiveTextEnabled(boolean enable) {
+        renderer.setAdaptiveTextEnabled(enable);
+        return this;
+    }
+
+    /**
+     * Sets adaptive text's ratio and mode.
+     *
+     * @param ratio        A float ratio value be between 0 and 1.
+     * @param adaptiveMode An adaptiveMode constant.
+     * @throws IllegalArgumentException If the given adaptive text ratio is not a float value between 0 and 1, or,
+     *                                  if the given adaptive text mode is not a valid AdaptiveMode constant.
+     */
+    public PercentageChartView adaptiveText(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
+        if (ratio < 0 || ratio > 1f) {
+            throw new IllegalArgumentException("Adaptive text ratio must be a float value between 0 and 1.");
+        }
+        if (adaptiveMode != BaseModeRenderer.DARKER_MODE && adaptiveMode != BaseModeRenderer.LIGHTER_MODE) {
+            throw new IllegalArgumentException("Adaptive text mode must be a valid AdaptiveMode constant.");
+        }
+        renderer.setAdaptiveText(ratio, adaptiveMode);
+        return this;
+    }
+
+    /**
+     * Sets whether adaptive background should be enabled.
+     *
+     * @param enable True if adaptive background should be enabled, false otherwise.
+     */
+    public PercentageChartView adaptiveBackgroundEnabled(boolean enable) {
+        renderer.setAdaptiveBgEnabled(enable);
+        return this;
+    }
+
+    /**
+     * Sets adaptive background's ratio and mode.
+     *
+     * @param ratio        A float ratio value be between 0 and 1.
+     * @param adaptiveMode An adaptiveMode constant.
+     * @throws IllegalArgumentException If the given adaptive background ratio is not a float value between 0 and 1, or,
+     *                                  if the given adaptive background mode is not a valid AdaptiveMode constant.
+     */
+    public PercentageChartView adaptiveBackground(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
+        if (ratio < 0 || ratio > 1f) {
+            throw new IllegalArgumentException("Adaptive background ratio must be a float value between 0 and 1.");
+        }
+        if (adaptiveMode != BaseModeRenderer.DARKER_MODE && adaptiveMode != BaseModeRenderer.LIGHTER_MODE) {
+            throw new IllegalArgumentException("Adaptive background mode must be a valid AdaptiveMode constant.");
+        }
+        renderer.setAdaptiveBackground(ratio, adaptiveMode);
+        return this;
+    }
+
+    /**
+     * Sets whether adaptive background bar should be enabled.
+     *
+     * @param enable True if adaptive background bar should be enabled, false otherwise.
+     */
+    public PercentageChartView adaptiveBgBarEnabled(boolean enable) {
+        if (renderer instanceof PieModeRenderer)
+            throw new IllegalStateException("Adaptive background bar can be enabled/disabled only if chart mode is set to ring.");
+        ((RingModeRenderer) renderer).setAdaptiveBgBarEnabled(enable);
+        return this;
+    }
+
+    /**
+     * Sets adaptive background bar's ratio and mode. Works only if chart mode is set to ring.
+     *
+     * @param ratio        A float ratio value be between 0 and 1.
+     * @param adaptiveMode An adaptiveMode constant.
+     * @throws IllegalArgumentException If the given adaptive background bar ratio is not a float value between 0 and 1, or,
+     *                                  if the given adaptive background bar mode is not a valid AdaptiveMode constant.
+     */
+    public PercentageChartView adaptiveBackgroundBar(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
+        if (renderer instanceof PieModeRenderer)
+            throw new IllegalStateException("Adaptive background bar can be updated only if chart mode is set to ring.");
+        if (ratio < 0 || ratio > 1f) {
+            throw new IllegalArgumentException("Adaptive background bar ratio must be a float value between 0 and 1.");
+        }
+        if (adaptiveMode != BaseModeRenderer.DARKER_MODE && adaptiveMode != BaseModeRenderer.LIGHTER_MODE) {
+            throw new IllegalArgumentException("Adaptive background bar mode must be a valid AdaptiveMode constant.");
+        }
+        ((RingModeRenderer) renderer).setAdaptiveBackgroundBar(ratio, adaptiveMode);
+        return this;
+    }
+
+    public void apply() {
+        invalidate();
     }
 
     //##############################################################################################   ADAPTIVE COLOR PROVIDER

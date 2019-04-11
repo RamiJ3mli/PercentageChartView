@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.transition.ChangeBounds;
 import android.transition.Transition;
 import android.transition.TransitionManager;
@@ -46,7 +47,6 @@ import java.util.Random;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.constraintlayout.widget.Constraints;
 import androidx.core.content.ContextCompat;
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
@@ -253,13 +253,14 @@ public class MainActivity extends AppCompatActivity {
     private int colorFour;
     private int darkColor;
     private int lightColor;
+    int i = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         unbinder = ButterKnife.bind(this);
-
+        
         setupLayoutAnimation();
         setupOrientation();
         setupStartAngle();
@@ -1060,7 +1061,7 @@ public class MainActivity extends AppCompatActivity {
 
         mProgressColor.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccent)));
 
-        if(mUseProvider.isChecked()){
+        if (mUseProvider.isChecked()) {
             mAdaptText.setChecked(false);
             mAdaptBackground.setChecked(false);
             mAdaptBgBar.setChecked(false);
@@ -1098,7 +1099,7 @@ public class MainActivity extends AppCompatActivity {
                     50,
                     getResources().getDisplayMetrics()));
             pieChart.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            pieChart.setTextShadow(0,0,0,0);
+            pieChart.setTextShadow(0, 0, 0, 0);
             pieChart.setDrawBackgroundEnabled(true);
             pieChart.setBackgroundColor(Color.BLACK);
             pieChart.setBackgroundOffset(0);
@@ -1115,7 +1116,7 @@ public class MainActivity extends AppCompatActivity {
                     50,
                     getResources().getDisplayMetrics()));
             ringChart.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            ringChart.setTextShadow(0,0,0,0);
+            ringChart.setTextShadow(0, 0, 0, 0);
             ringChart.setDrawBackgroundEnabled(false);
             ringChart.setBackgroundColor(Color.BLACK);
             ringChart.setProgressColor(ContextCompat.getColor(this, R.color.colorAccent));

@@ -283,7 +283,6 @@ public class PieModeRenderer extends BaseModeRenderer {
                 mProgress / DEFAULT_MAX * 360;
         mBgStartAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ? mStartAngle : mStartAngle + mSweepAngle;
         mBgSweepAngle = 360 - ((orientation == ORIENTATION_COUNTERCLOCKWISE) ? -(mSweepAngle) : mSweepAngle);
-        mView.invalidate();
     }
 
     @Override
@@ -292,7 +291,6 @@ public class PieModeRenderer extends BaseModeRenderer {
         this.mStartAngle = startAngle;
         mBgStartAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ? mStartAngle : mStartAngle + mSweepAngle;
         mBgSweepAngle = 360 - ((orientation == ORIENTATION_COUNTERCLOCKWISE) ? -(mSweepAngle) : mSweepAngle);
-        mView.invalidate();
     }
 
     @Override
@@ -312,7 +310,6 @@ public class PieModeRenderer extends BaseModeRenderer {
             return;
         this.mBackgroundOffset = backgroundOffset;
         mesureBackgroundBounds();
-        mView.invalidate();
     }
 
     //ADAPTIVE BACKGROUND
@@ -327,7 +324,6 @@ public class PieModeRenderer extends BaseModeRenderer {
             mAdaptiveBackgroundRatio = mAdaptiveBackgroundMode = -1;
             mBackgroundPaint.setColor(mBackgroundColor);
         }
-        mView.invalidate();
     }
 
     @Override
@@ -337,7 +333,6 @@ public class PieModeRenderer extends BaseModeRenderer {
         mAdaptiveBackgroundRatio = ratio;
         mAdaptiveBackgroundMode = adaptiveMode;
         updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
-        mView.invalidate();
     }
 
     //ADAPTIVE TEXT
@@ -351,7 +346,6 @@ public class PieModeRenderer extends BaseModeRenderer {
             mAdaptiveTextRatio = mAdaptiveTextMode = -1;
             mTextPaint.setColor(mTextColor);
         }
-        mView.invalidate();
     }
 
     @Override
@@ -361,6 +355,5 @@ public class PieModeRenderer extends BaseModeRenderer {
         mAdaptiveTextRatio = ratio;
         mAdaptiveTextMode = adaptiveMode;
         updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));
-        mView.invalidate();
     }
 }

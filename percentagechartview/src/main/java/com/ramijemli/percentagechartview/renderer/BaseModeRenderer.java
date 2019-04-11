@@ -362,7 +362,6 @@ public abstract class BaseModeRenderer {
     public void setDrawBackgroundEnabled(boolean drawBackground) {
         if(this.mDrawBackground == drawBackground) return;
         this.mDrawBackground = drawBackground;
-        mView.invalidate();
     }
 
     //START ANGLE
@@ -386,7 +385,6 @@ public abstract class BaseModeRenderer {
         this.mBackgroundColor = backgroundColor;
         if (!mDrawBackground) return;
         mBackgroundPaint.setColor(mBackgroundColor);
-        mView.invalidate();
     }
 
     //PROGRESS COLOR
@@ -399,7 +397,6 @@ public abstract class BaseModeRenderer {
 
         this.mProgressColor = progressColor;
         mProgressPaint.setColor(progressColor);
-        mView.invalidate();
     }
 
     //ADAPTIVE BACKGROUND
@@ -468,7 +465,6 @@ public abstract class BaseModeRenderer {
             return;
         this.mTextColor = textColor;
         mTextPaint.setColor(textColor);
-        mView.invalidate();
     }
 
     //TEXT SIZE
@@ -481,7 +477,6 @@ public abstract class BaseModeRenderer {
         this.mTextSize = textSize;
         mTextPaint.setTextSize(textSize);
         updateText();
-        mView.invalidate();
     }
 
     //TEXT TYPEFACE
@@ -496,7 +491,6 @@ public abstract class BaseModeRenderer {
                 typeface;
         mTextPaint.setTypeface(mTypeface);
         updateText();
-        mView.invalidate();
     }
 
     //TEXT STYLE
@@ -511,7 +505,6 @@ public abstract class BaseModeRenderer {
 
         mTextPaint.setTypeface(mTypeface);
         updateText();
-        mView.invalidate();
     }
 
     //TEXT SHADOW
@@ -543,7 +536,6 @@ public abstract class BaseModeRenderer {
 
         mTextPaint.setShadowLayer(mTextShadowRadius, mTextShadowDistX, mTextShadowDistY, mTextShadowColor);
         updateText();
-        mView.invalidate();
     }
 
     //COPY RENDERER
