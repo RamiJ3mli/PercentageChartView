@@ -459,7 +459,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public float getBackgroundOffset() {
         if (renderer instanceof RingModeRenderer) return -1;
-        return renderer.getBackgroundOffset();
+        return ((PieModeRenderer) renderer).getBackgroundOffset();
     }
 
     /**
@@ -473,7 +473,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
         if (offset < 0) {
             throw new IllegalArgumentException("Background offset must be a positive value.");
         }
-        this.renderer.setBackgroundOffset(offset);
+        ((PieModeRenderer) renderer).setBackgroundOffset(offset);
     }
 
     /**

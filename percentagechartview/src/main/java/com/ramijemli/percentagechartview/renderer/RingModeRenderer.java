@@ -21,10 +21,14 @@ import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.SweepGradient;
+import android.util.Log;
 import android.util.TypedValue;
+import android.widget.Toast;
 
 import com.ramijemli.percentagechartview.IPercentageChartView;
 import com.ramijemli.percentagechartview.PercentageChartView;
@@ -205,6 +209,7 @@ public class RingModeRenderer extends BaseModeRenderer {
         mBackgroundBounds.right = centerX + backgroundRadius;
         mBackgroundBounds.bottom = centerY + backgroundRadius;
     }
+
 
     @Override
     public void draw(Canvas canvas) {
@@ -397,7 +402,7 @@ public class RingModeRenderer extends BaseModeRenderer {
     }
 
     public void setDrawBackgroundBarEnabled(boolean drawBackgroundBar) {
-        if(mDrawBackgroundBar == drawBackgroundBar) return;
+        if (mDrawBackgroundBar == drawBackgroundBar) return;
         this.mDrawBackgroundBar = drawBackgroundBar;
         mView.invalidate();
     }
@@ -508,8 +513,8 @@ public class RingModeRenderer extends BaseModeRenderer {
         if (this.mBackgroundBarThickness == backgroundBarThickness) return;
         this.mBackgroundBarThickness = backgroundBarThickness;
         mBackgroundBarPaint.setStrokeWidth(backgroundBarThickness);
+        mesure(mView.getWidth(), mView.getHeight(), 0,0,0,0);
         mView.invalidate();
-        mView.requestLayout();
     }
 
     //PROGRESS BAR THICKNESS
@@ -521,8 +526,8 @@ public class RingModeRenderer extends BaseModeRenderer {
         if (this.mProgressBarThickness == progressBarThickness) return;
         this.mProgressBarThickness = progressBarThickness;
         mProgressPaint.setStrokeWidth(progressBarThickness);
+        mesure(mView.getWidth(), mView.getHeight(), 0,0,0,0);
         mView.invalidate();
-        mView.requestLayout();
     }
 
     //PROGRESS BAR STYLE

@@ -122,11 +122,7 @@ public class PieModeRenderer extends BaseModeRenderer {
         mCircleBounds.top = centerY - radius;
         mCircleBounds.right = centerX + radius;
         mCircleBounds.bottom = centerY + radius;
-
-        mBackgroundBounds.left = mCircleBounds.left + mBackgroundOffset;
-        mBackgroundBounds.top = mCircleBounds.top + mBackgroundOffset;
-        mBackgroundBounds.right = mCircleBounds.right - mBackgroundOffset;
-        mBackgroundBounds.bottom = mCircleBounds.bottom - mBackgroundOffset;
+        mesureBackgroundBounds();
     }
 
     @Override
@@ -167,6 +163,13 @@ public class PieModeRenderer extends BaseModeRenderer {
         if (mAdaptiveColorProvider != null) {
             mAdaptiveColorProvider = null;
         }
+    }
+
+    private void mesureBackgroundBounds() {
+        mBackgroundBounds.left = mCircleBounds.left + mBackgroundOffset;
+        mBackgroundBounds.top = mCircleBounds.top + mBackgroundOffset;
+        mBackgroundBounds.right = mCircleBounds.right - mBackgroundOffset;
+        mBackgroundBounds.bottom = mCircleBounds.bottom - mBackgroundOffset;
     }
 
     @Override
@@ -273,7 +276,7 @@ public class PieModeRenderer extends BaseModeRenderer {
 
     @Override
     public void setOrientation(int orientation) {
-        if(this.orientation ==  orientation) return;
+        if (this.orientation == orientation) return;
         this.orientation = orientation;
         mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
                 -(mProgress / DEFAULT_MAX * 360) :
@@ -299,10 +302,24 @@ public class PieModeRenderer extends BaseModeRenderer {
         textHeight = mTextBounds.height();
     }
 
+    //BACKGROUND OFFSET
+    public float getBackgroundOffset() {
+        return mBackgroundOffset;
+    }
+
+    public void setBackgroundOffset(int backgroundOffset) {
+        if (!mDrawBackground || this.mBackgroundOffset == backgroundOffset)
+            return;
+        this.mBackgroundOffset = backgroundOffset;
+        mesureBackgroundBounds();
+        mView.invalidate();
+    }
+
     //ADAPTIVE BACKGROUND
     @Override
     public void setAdaptiveBgEnabled(boolean enable) {
-        if (mAdaptiveColorProvider == null || !mDrawBackground || mAdaptBackground == enable) return;
+        if (mAdaptiveColorProvider == null || !mDrawBackground || mAdaptBackground == enable)
+            return;
         mAdaptBackground = enable;
         if (mAdaptBackground) {
             updateAdaptiveColors(mAdaptiveColorProvider.getColor(mProgress));

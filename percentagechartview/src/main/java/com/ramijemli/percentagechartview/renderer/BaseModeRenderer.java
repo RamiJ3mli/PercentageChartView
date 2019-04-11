@@ -389,19 +389,6 @@ public abstract class BaseModeRenderer {
         mView.invalidate();
     }
 
-    //BACKGROUND OFFSET
-    public float getBackgroundOffset() {
-        return mBackgroundOffset;
-    }
-
-    public void setBackgroundOffset(int backgroundOffset) {
-        if (!mDrawBackground || this.mBackgroundOffset == backgroundOffset)
-            return;
-        this.mBackgroundOffset = backgroundOffset;
-        mView.invalidate();
-        mView.requestLayout();
-    }
-
     //PROGRESS COLOR
     public int getProgressColor() {
         return (mAdaptiveColorProvider != null) ? mAdaptiveColor : mProgressColor;
@@ -503,7 +490,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setTypeface(Typeface typeface) {
-        if(this.mTypeface.equals(typeface) ) return;
+        if(this.mTypeface != null && this.mTypeface.equals(typeface) ) return;
         this.mTypeface = (mTextStyle > 0) ?
                 Typeface.create(typeface, mTextStyle) :
                 typeface;

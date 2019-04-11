@@ -24,10 +24,12 @@ public interface IPercentageChartView {
 
     void invalidate();
 
-    void requestLayout();
+    boolean isInEditMode();
+
+    int getWidth();
+
+    int getHeight();
 
     void onProgressUpdated(float progress);
-
-    boolean isInEditMode();
 
 }
