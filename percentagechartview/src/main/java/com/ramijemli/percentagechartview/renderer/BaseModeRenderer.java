@@ -101,18 +101,18 @@ public abstract class BaseModeRenderer {
     // TEXT
     Rect mTextBounds;
     Paint mTextPaint;
+    int mTextColor;
+    int mProvidedTextColor;
+    int mTextProgress;
     float mTextSize;
     private int mTextStyle;
-    int mTextColor;
-    int mTextProgress;
     Typeface mTypeface;
     int mTextShadowColor;
     float mTextShadowRadius;
     float mTextShadowDistY;
     float mTextShadowDistX;
     int textHeight;
-
-    int mProvidedTextColor;
+    String textValue;
 
     // COMMON
     RectF mBackgroundBounds;
@@ -224,7 +224,7 @@ public abstract class BaseModeRenderer {
         //PROGRESS ANIMATION INTERPOLATOR
         int interpolator = attrs.getInt(R.styleable.PercentageChartView_pcv_animInterpolator, DEFAULT_ANIMATION_INTERPOLATOR);
         switch (interpolator) {
-            case LINEAR:
+            default:
                 mAnimInterpolator = new LinearInterpolator();
                 break;
             case ACCELERATE:

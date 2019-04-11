@@ -95,7 +95,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
                     case MODE_RING:
                         renderer = new RingModeRenderer(this, attrs);
                         break;
-                    case MODE_PIE:
+                    default:
                         renderer = new PieModeRenderer(this, attrs);
                         break;
                 }
@@ -315,12 +315,12 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the interpolator of the progress change's animation.
      *
      * @param interpolator TimeInterpolator instance.
-     * @throws NullPointerException if the given TimeInterpolator instance is null.
+     * @throws IllegalArgumentException if the given TimeInterpolator instance is null.
      */
     @SuppressWarnings("ConstantConditions")
     public void setAnimationInterpolator(@NonNull TimeInterpolator interpolator) {
         if (interpolator == null) {
-            throw new NullPointerException("Animation interpolator cannot be null");
+            throw new IllegalArgumentException("Animation interpolator cannot be null");
         }
         renderer.setAnimationInterpolator(interpolator);
     }
@@ -381,12 +381,12 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the text font.
      *
      * @param typeface the text font as a Typeface instance
-     * @throws NullPointerException if the given typeface is null.
+     * @throws IllegalArgumentException if the given typeface is null.
      */
     @SuppressWarnings("ConstantConditions")
     public void setTypeface(@NonNull Typeface typeface) {
         if (typeface == null) {
-            throw new NullPointerException("Text TypeFace cannot be null");
+            throw new IllegalArgumentException("Text TypeFace cannot be null");
         }
         renderer.setTypeface(typeface);
         invalidate();
@@ -685,12 +685,12 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the interpolator of the progress change's animation.
      *
      * @param interpolator TimeInterpolator instance.
-     * @throws NullPointerException if the given TimeInterpolator instance is null.
+     * @throws IllegalArgumentException if the given TimeInterpolator instance is null.
      */
     @SuppressWarnings("ConstantConditions")
     public PercentageChartView animationInterpolator(@NonNull TimeInterpolator interpolator) {
         if (interpolator == null) {
-            throw new NullPointerException("Animation interpolator cannot be null");
+            throw new IllegalArgumentException("Animation interpolator cannot be null");
         }
 
         renderer.setAnimationInterpolator(interpolator);
@@ -725,12 +725,12 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the text font.
      *
      * @param typeface the text font as a Typeface instance
-     * @throws NullPointerException if the given typeface is null.
+     * @throws IllegalArgumentException if the given typeface is null.
      */
     @SuppressWarnings("ConstantConditions")
     public PercentageChartView typeface(@NonNull Typeface typeface) {
         if (typeface == null) {
-            throw new NullPointerException("Text TypeFace cannot be null");
+            throw new IllegalArgumentException("Text TypeFace cannot be null");
         }
         renderer.setTypeface(typeface);
         return this;
