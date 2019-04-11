@@ -38,6 +38,7 @@ import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.ramijemli.percentagechartview.PercentageChartView;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
+import com.ramijemli.percentagechartview.callback.ProgressTextFormatter;
 import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
 import com.ramijemli.percentagechartview.renderer.RingModeRenderer;
 
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -645,6 +647,10 @@ public class MainActivity extends AppCompatActivity {
         colorTwo = Color.parseColor("#FFEA00");
         colorThree = Color.parseColor("#03A9F4");
         colorFour = Color.parseColor("#00E676");
+
+
+        pieChart.setTextFormatter(progress -> (int)(progress * 0.6) + " min");
+        ringChart.setTextFormatter(progress -> (int)(progress * 0.3) + " days");
 
         //COLOR PROVIDER
         colorProvider = new AdaptiveColorProvider() {

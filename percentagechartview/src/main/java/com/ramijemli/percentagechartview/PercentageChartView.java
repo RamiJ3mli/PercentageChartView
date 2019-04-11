@@ -25,13 +25,13 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.ramijemli.percentagechartview.annotation.AdaptiveMode;
 import com.ramijemli.percentagechartview.annotation.ChartMode;
 import com.ramijemli.percentagechartview.annotation.ProgressBarStyle;
 import com.ramijemli.percentagechartview.annotation.ProgressOrientation;
 import com.ramijemli.percentagechartview.annotation.TextStyle;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
 import com.ramijemli.percentagechartview.callback.OnProgressChangeListener;
+import com.ramijemli.percentagechartview.callback.ProgressTextFormatter;
 import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
 import com.ramijemli.percentagechartview.renderer.PieModeRenderer;
 import com.ramijemli.percentagechartview.renderer.RingModeRenderer;
@@ -848,7 +848,6 @@ public class PercentageChartView extends View implements IPercentageChartView {
 
     /**
      * Apply all the requested changes.
-     *
      */
     public void apply() {
         invalidate();
@@ -857,6 +856,11 @@ public class PercentageChartView extends View implements IPercentageChartView {
     //##############################################################################################   ADAPTIVE COLOR PROVIDER
     public void setAdaptiveColorProvider(@Nullable AdaptiveColorProvider adaptiveColorProvider) {
         this.renderer.setAdaptiveColorProvider(adaptiveColorProvider);
+    }
+
+    //##############################################################################################   TEXT FORMATTER
+    public void setTextFormatter(@Nullable ProgressTextFormatter textFormatter) {
+        this.renderer.setTextFormatter(textFormatter);
     }
 
     //##############################################################################################   LISTENER

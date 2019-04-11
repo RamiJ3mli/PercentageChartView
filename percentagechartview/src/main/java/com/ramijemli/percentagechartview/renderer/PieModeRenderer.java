@@ -135,7 +135,12 @@ public class PieModeRenderer extends BaseModeRenderer {
         }
 
         //TEXT
-        canvas.drawText(textValue, mCircleBounds.centerX(), mCircleBounds.centerY() + (textHeight / 2f), mTextPaint);
+        canvas.drawText((mProvidedTextFormatter != null) ?
+                        mProvidedTextFormatter.provideFormattedText(mTextProgress) :
+                        defaultTextFormatter.provideFormattedText(mTextProgress),
+                mCircleBounds.centerX(),
+                mCircleBounds.centerY() + (textHeight / 2f),
+                mTextPaint);
     }
 
     @Override
@@ -361,7 +366,10 @@ public class PieModeRenderer extends BaseModeRenderer {
 
     @Override
     void updateText() {
-        textValue = String.valueOf(mTextProgress) + "%";
+        String textValue = (mProvidedTextFormatter != null) ?
+                mProvidedTextFormatter.provideFormattedText(mTextProgress) :
+                defaultTextFormatter.provideFormattedText(mTextProgress);
+
         mTextPaint.getTextBounds(textValue, 0, textValue.length(), mTextBounds);
         textHeight = mTextBounds.height();
     }

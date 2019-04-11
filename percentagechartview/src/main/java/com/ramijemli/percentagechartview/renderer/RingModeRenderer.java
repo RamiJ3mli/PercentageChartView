@@ -213,7 +213,12 @@ public class RingModeRenderer extends BaseModeRenderer {
         }
 
         //TEXT
-        canvas.drawText(textValue, mCircleBounds.centerX(), mCircleBounds.centerY() + (textHeight / 2f), mTextPaint);
+        canvas.drawText((mProvidedTextFormatter != null) ?
+                        mProvidedTextFormatter.provideFormattedText(mTextProgress) :
+                        defaultTextFormatter.provideFormattedText(mTextProgress),
+                mCircleBounds.centerX(),
+                mCircleBounds.centerY() + (textHeight / 2f),
+                mTextPaint);
     }
 
     @Override
@@ -258,9 +263,9 @@ public class RingModeRenderer extends BaseModeRenderer {
         mTextBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
 
-        if (mAdaptiveColorProvider != null) {
-            mAdaptiveColorProvider = null;
-        }
+
+        mAdaptiveColorProvider = null;
+        defaultTextFormatter = mProvidedTextFormatter = null;
     }
 
     @Override
@@ -464,7 +469,10 @@ public class RingModeRenderer extends BaseModeRenderer {
 
     @Override
     void updateText() {
-        textValue = String.valueOf(mTextProgress) + "%";
+        String textValue = (mProvidedTextFormatter != null) ?
+                mProvidedTextFormatter.provideFormattedText(mTextProgress) :
+                defaultTextFormatter.provideFormattedText(mTextProgress);
+
         mTextPaint.getTextBounds(textValue, 0, textValue.length(), mTextBounds);
         textHeight = mTextBounds.height();
     }

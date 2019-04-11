@@ -41,6 +41,7 @@ import com.ramijemli.percentagechartview.IPercentageChartView;
 import com.ramijemli.percentagechartview.R;
 import com.ramijemli.percentagechartview.annotation.ProgressOrientation;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
+import com.ramijemli.percentagechartview.callback.ProgressTextFormatter;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
@@ -110,7 +111,6 @@ public abstract class BaseModeRenderer {
     float mTextShadowDistY;
     float mTextShadowDistX;
     int textHeight;
-    String textValue;
 
     int mProvidedTextColor;
 
@@ -131,6 +131,8 @@ public abstract class BaseModeRenderer {
     int orientation;
     @Nullable
     AdaptiveColorProvider mAdaptiveColorProvider;
+    @Nullable
+    ProgressTextFormatter mProvidedTextFormatter, defaultTextFormatter;
 
     IPercentageChartView mView;
 
@@ -181,6 +183,9 @@ public abstract class BaseModeRenderer {
 
         //BACKGROUND OFFSET
         mBackgroundOffset = 0;
+
+        //TEXT FORMATTER
+        defaultTextFormatter = progress -> (int)progress + "%";
     }
 
     BaseModeRenderer(IPercentageChartView view, TypedArray attrs) {
@@ -289,6 +294,9 @@ public abstract class BaseModeRenderer {
         mBackgroundOffset = attrs.getDimensionPixelSize(
                 R.styleable.PercentageChartView_pcv_backgroundOffset,
                 0);
+
+        //TEXT FORMATTER
+        defaultTextFormatter = progress -> (int)progress + "%";
     }
 
     //############################################################################################## BEHAVIOR
@@ -321,6 +329,11 @@ public abstract class BaseModeRenderer {
 
     //############################################################################################## MODIFIERS
     public abstract void setAdaptiveColorProvider(@Nullable AdaptiveColorProvider adaptiveColorProvider);
+
+    public void setTextFormatter(@Nullable ProgressTextFormatter textFormatter) {
+        this.mProvidedTextFormatter = textFormatter;
+        mView.invalidate();
+    }
 
     //PROGRESS
     public float getProgress() {
