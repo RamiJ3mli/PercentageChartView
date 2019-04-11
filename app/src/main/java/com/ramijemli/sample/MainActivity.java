@@ -37,6 +37,7 @@ import android.widget.Toast;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.ramijemli.percentagechartview.PercentageChartView;
+import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
 import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
 import com.ramijemli.percentagechartview.renderer.RingModeRenderer;
 
@@ -48,6 +49,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
@@ -242,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
     private Transition transition;
     private ObjectAnimator bgAnimator;
 
-    private PercentageChartView.AdaptiveColorProvider colorProvider;
+    private AdaptiveColorProvider colorProvider;
     private boolean isFromUser;
     private boolean isPieDisplayed;
     private boolean isDarkDisplayed;
@@ -260,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         unbinder = ButterKnife.bind(this);
-        
+
         setupLayoutAnimation();
         setupOrientation();
         setupStartAngle();
@@ -273,9 +275,9 @@ public class MainActivity extends AppCompatActivity {
         setupPgBarStyle();
         setupDrawBgBarState();
         setupColorProvider();
-        setupAdaptiveText();
-        setupAdaptiveBackground();
-        setupAdaptiveBgBar();
+//        setupAdaptiveText();
+//        setupAdaptiveBackground();
+//        setupAdaptiveBgBar();
     }
 
     @Override
@@ -645,15 +647,40 @@ public class MainActivity extends AppCompatActivity {
         colorFour = Color.parseColor("#00E676");
 
         //COLOR PROVIDER
-        colorProvider = value -> {
-            if (value <= 25)
-                return colorOne;
-            else if (value <= 50)
-                return colorTwo;
-            else if (value <= 75)
-                return colorThree;
-            else
-                return colorFour;
+        colorProvider = new AdaptiveColorProvider() {
+            @Override
+            public int provideProgressColor(float progress) {
+                if (progress <= 25)
+                    return colorOne;
+                else if (progress <= 50)
+                    return colorTwo;
+                else if (progress <= 75)
+                    return colorThree;
+                else
+                    return colorFour;
+            }
+
+            @Override
+            public int provideBackgroundColor(float progress) {
+                if (progress <= 25)
+                    return colorFour;
+                else
+                    return colorOne;
+            }
+
+            @Override
+            public int provideTextColor(float progress) {
+                return ColorUtils.blendARGB(provideProgressColor(progress),
+                        Color.WHITE,
+                        .9f);
+            }
+
+            @Override
+            public int provideBackgroundBarColor(float progress) {
+                return ColorUtils.blendARGB(provideProgressColor(progress),
+                        Color.BLACK,
+                        .5f);
+            }
         };
 
         mUseProvider.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -665,150 +692,150 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupAdaptiveText() {
-        mAdaptText.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (!mUseProvider.isChecked()) {
-                mAdaptText.setChecked(false);
-                Toast.makeText(this, "Please enable color provider first!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (isPieDisplayed) {
-                pieChart.setAdaptiveTextEnabled(isChecked);
-            } else {
-                ringChart.setAdaptiveTextEnabled(isChecked);
-            }
-        });
-
-        mTextRatioSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mTextRatioValue.setText(progress + "%");
-                mAdaptText.setChecked(true);
-                if (isPieDisplayed) {
-                    pieChart.setAdaptiveText(progress,
-                            mTextModeValue.getCheckedRadioButtonId() == R.id.text_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
-                } else {
-                    ringChart.setAdaptiveText(progress,
-                            mTextModeValue.getCheckedRadioButtonId() == R.id.text_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        mTextModeValue.setOnCheckedChangeListener((group, checkedId) -> {
-            mAdaptText.setChecked(true);
-            if (isPieDisplayed) {
-                pieChart.setAdaptiveText(mTextRatioSeekbar.getProgress(),
-                        mTextModeValue.getCheckedRadioButtonId() == R.id.text_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
-            } else {
-                ringChart.setAdaptiveText(mTextRatioSeekbar.getProgress(),
-                        mTextModeValue.getCheckedRadioButtonId() == R.id.text_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
-            }
-        });
-    }
-
-    private void setupAdaptiveBackground() {
-        mAdaptBackground.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (!mUseProvider.isChecked()) {
-                mAdaptBackground.setChecked(false);
-                Toast.makeText(this, "Please enable color provider first!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (isPieDisplayed) {
-                pieChart.setAdaptiveBackgroundEnabled(isChecked);
-            } else {
-                ringChart.setAdaptiveBackgroundEnabled(isChecked);
-            }
-        });
-
-        mBgRatioSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mBgRatioValue.setText(progress + "%");
-                mAdaptBackground.setChecked(true);
-                if (isPieDisplayed) {
-                    pieChart.setAdaptiveBackground(progress,
-                            mBgModeValue.getCheckedRadioButtonId() == R.id.bg_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
-                } else {
-                    ringChart.setAdaptiveBackground(progress,
-                            mBgModeValue.getCheckedRadioButtonId() == R.id.bg_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        mBgModeValue.setOnCheckedChangeListener((group, checkedId) -> {
-            mAdaptBackground.setChecked(true);
-            if (isPieDisplayed) {
-                pieChart.setAdaptiveBackground(mBgRatioSeekbar.getProgress(),
-                        mBgModeValue.getCheckedRadioButtonId() == R.id.bg_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
-            } else {
-                ringChart.setAdaptiveBackground(mBgRatioSeekbar.getProgress(),
-                        mBgModeValue.getCheckedRadioButtonId() == R.id.bg_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
-            }
-        });
-    }
-
-    private void setupAdaptiveBgBar() {
-        mAdaptBgBar.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (!mUseProvider.isChecked() && isChecked) {
-                mAdaptBgBar.setChecked(false);
-                Toast.makeText(this, "Please enable color provider first!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!isPieDisplayed) {
-                ringChart.setAdaptiveBgBarEnabled(isChecked);
-            } else {
-                Toast.makeText(this, "Applicable only to ring chart!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mBgBarRatioSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mBgBarRatioValue.setText(progress + "%");
-                mAdaptBgBar.setChecked(true);
-                if (!isPieDisplayed) {
-                    ringChart.setAdaptiveBackgroundBar(progress,
-                            mBgBarModeValue.getCheckedRadioButtonId() == R.id.bg_bar_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
-                } else {
-                    Toast.makeText(MainActivity.this, "Applicable only to ring chart!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        mBgBarModeValue.setOnCheckedChangeListener((group, checkedId) -> {
-            mAdaptBgBar.setChecked(true);
-            if (!isPieDisplayed) {
-                ringChart.setAdaptiveBackgroundBar(mBgBarRatioSeekbar.getProgress(),
-                        mBgBarModeValue.getCheckedRadioButtonId() == R.id.bg_bar_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
-            } else {
-                Toast.makeText(this, "Applicable only to ring chart!", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
+//    private void setupAdaptiveText() {
+//        mAdaptText.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//            if (!mUseProvider.isChecked()) {
+//                mAdaptText.setChecked(false);
+//                Toast.makeText(this, "Please enable color provider first!", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//            if (isPieDisplayed) {
+//                pieChart.setAdaptiveTextEnabled(isChecked);
+//            } else {
+//                ringChart.setAdaptiveTextEnabled(isChecked);
+//            }
+//        });
+//
+//        mTextRatioSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//                mTextRatioValue.setText(progress + "%");
+//                mAdaptText.setChecked(true);
+//                if (isPieDisplayed) {
+//                    pieChart.setAdaptiveText(progress,
+//                            mTextModeValue.getCheckedRadioButtonId() == R.id.text_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
+//                } else {
+//                    ringChart.setAdaptiveText(progress,
+//                            mTextModeValue.getCheckedRadioButtonId() == R.id.text_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
+//                }
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//            }
+//        });
+//
+//        mTextModeValue.setOnCheckedChangeListener((group, checkedId) -> {
+//            mAdaptText.setChecked(true);
+//            if (isPieDisplayed) {
+//                pieChart.setAdaptiveText(mTextRatioSeekbar.getProgress(),
+//                        mTextModeValue.getCheckedRadioButtonId() == R.id.text_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
+//            } else {
+//                ringChart.setAdaptiveText(mTextRatioSeekbar.getProgress(),
+//                        mTextModeValue.getCheckedRadioButtonId() == R.id.text_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
+//            }
+//        });
+//    }
+//
+//    private void setupAdaptiveBackground() {
+//        mAdaptBackground.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//            if (!mUseProvider.isChecked()) {
+//                mAdaptBackground.setChecked(false);
+//                Toast.makeText(this, "Please enable color provider first!", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//            if (isPieDisplayed) {
+//                pieChart.setAdaptiveBackgroundEnabled(isChecked);
+//            } else {
+//                ringChart.setAdaptiveBackgroundEnabled(isChecked);
+//            }
+//        });
+//
+//        mBgRatioSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//                mBgRatioValue.setText(progress + "%");
+//                mAdaptBackground.setChecked(true);
+//                if (isPieDisplayed) {
+//                    pieChart.setAdaptiveBackground(progress,
+//                            mBgModeValue.getCheckedRadioButtonId() == R.id.bg_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
+//                } else {
+//                    ringChart.setAdaptiveBackground(progress,
+//                            mBgModeValue.getCheckedRadioButtonId() == R.id.bg_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
+//                }
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//            }
+//        });
+//
+//        mBgModeValue.setOnCheckedChangeListener((group, checkedId) -> {
+//            mAdaptBackground.setChecked(true);
+//            if (isPieDisplayed) {
+//                pieChart.setAdaptiveBackground(mBgRatioSeekbar.getProgress(),
+//                        mBgModeValue.getCheckedRadioButtonId() == R.id.bg_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
+//            } else {
+//                ringChart.setAdaptiveBackground(mBgRatioSeekbar.getProgress(),
+//                        mBgModeValue.getCheckedRadioButtonId() == R.id.bg_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
+//            }
+//        });
+//    }
+//
+//    private void setupAdaptiveBgBar() {
+//        mAdaptBgBar.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//            if (!mUseProvider.isChecked() && isChecked) {
+//                mAdaptBgBar.setChecked(false);
+//                Toast.makeText(this, "Please enable color provider first!", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//            if (!isPieDisplayed) {
+//                ringChart.setAdaptiveBgBarEnabled(isChecked);
+//            } else {
+//                Toast.makeText(this, "Applicable only to ring chart!", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//
+//        mBgBarRatioSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//                mBgBarRatioValue.setText(progress + "%");
+//                mAdaptBgBar.setChecked(true);
+//                if (!isPieDisplayed) {
+//                    ringChart.setAdaptiveBackgroundBar(progress,
+//                            mBgBarModeValue.getCheckedRadioButtonId() == R.id.bg_bar_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
+//                } else {
+//                    Toast.makeText(MainActivity.this, "Applicable only to ring chart!", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//            }
+//        });
+//
+//        mBgBarModeValue.setOnCheckedChangeListener((group, checkedId) -> {
+//            mAdaptBgBar.setChecked(true);
+//            if (!isPieDisplayed) {
+//                ringChart.setAdaptiveBackgroundBar(mBgBarRatioSeekbar.getProgress(),
+//                        mBgBarModeValue.getCheckedRadioButtonId() == R.id.bg_bar_darker ? BaseModeRenderer.DARKER_MODE : BaseModeRenderer.LIGHTER_MODE);
+//            } else {
+//                Toast.makeText(this, "Applicable only to ring chart!", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//    }
 
     //VALUE TWEAKERS
     private void tweakAnimDuration(int amount) {
@@ -1126,9 +1153,9 @@ public class MainActivity extends AppCompatActivity {
                     getResources().getDisplayMetrics()));
         }
 
-        setupAdaptiveText();
-        setupAdaptiveBackground();
-        setupAdaptiveBgBar();
+//        setupAdaptiveText();
+//        setupAdaptiveBackground();
+//        setupAdaptiveBgBar();
     }
 
     //ACTIONS

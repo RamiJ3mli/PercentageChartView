@@ -30,6 +30,8 @@ import com.ramijemli.percentagechartview.annotation.ChartMode;
 import com.ramijemli.percentagechartview.annotation.ProgressBarStyle;
 import com.ramijemli.percentagechartview.annotation.ProgressOrientation;
 import com.ramijemli.percentagechartview.annotation.TextStyle;
+import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
+import com.ramijemli.percentagechartview.callback.OnProgressChangeListener;
 import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
 import com.ramijemli.percentagechartview.renderer.PieModeRenderer;
 import com.ramijemli.percentagechartview.renderer.RingModeRenderer;
@@ -46,6 +48,7 @@ import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_R
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_CLOCKWISE;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_COUNTERCLOCKWISE;
 
+@SuppressWarnings("unused")
 public class PercentageChartView extends View implements IPercentageChartView {
 
     private BaseModeRenderer renderer;
@@ -99,7 +102,6 @@ public class PercentageChartView extends View implements IPercentageChartView {
 
             } finally {
                 attrs.recycle();
-                attrs = null;
             }
 
         } else {
@@ -315,11 +317,11 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param interpolator TimeInterpolator instance.
      * @throws NullPointerException if the given TimeInterpolator instance is null.
      */
+    @SuppressWarnings("ConstantConditions")
     public void setAnimationInterpolator(@NonNull TimeInterpolator interpolator) {
         if (interpolator == null) {
             throw new NullPointerException("Animation interpolator cannot be null");
         }
-
         renderer.setAnimationInterpolator(interpolator);
     }
 
@@ -381,6 +383,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param typeface the text font as a Typeface instance
      * @throws NullPointerException if the given typeface is null.
      */
+    @SuppressWarnings("ConstantConditions")
     public void setTypeface(@NonNull Typeface typeface) {
         if (typeface == null) {
             throw new NullPointerException("Text TypeFace cannot be null");
@@ -604,183 +607,6 @@ public class PercentageChartView extends View implements IPercentageChartView {
         invalidate();
     }
 
-    /**
-     * Gets whether adaptive text has been enabled.
-     *
-     * @return whether adaptive text has been enabled
-     */
-    public boolean isAdaptiveTextEnabled() {
-        return renderer.isAdaptiveTextEnabled();
-    }
-
-    /**
-     * Sets whether adaptive text should be enabled.
-     *
-     * @param enable True if adaptive text should be enabled, false otherwise.
-     */
-    public void setAdaptiveTextEnabled(boolean enable) {
-        renderer.setAdaptiveTextEnabled(enable);
-        invalidate();
-    }
-
-    /**
-     * Gets adaptive text ratio.
-     *
-     * @return Adaptive text ratio.
-     */
-    @FloatRange(from = -1f, to = 1f)
-    public float getAdaptiveTextRatio() {
-        return renderer.getAdaptiveTextRatio();
-    }
-
-    /**
-     * Gets adaptive text mode.
-     *
-     * @return Adaptive text mode.
-     */
-    public int getAdaptiveTextMode() {
-        return renderer.getAdaptiveTextMode();
-    }
-
-    /**
-     * Sets adaptive text's ratio and mode.
-     *
-     * @param ratio        A float ratio value be between 0 and 1.
-     * @param adaptiveMode An adaptiveMode constant.
-     * @throws IllegalArgumentException If the given adaptive text ratio is not a float value between 0 and 1, or,
-     *                                  if the given adaptive text mode is not a valid AdaptiveMode constant.
-     */
-    public void setAdaptiveText(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
-        if (ratio < 0 || ratio > 1f) {
-            throw new IllegalArgumentException("Adaptive text ratio must be a float value between 0 and 1.");
-        }
-        if (adaptiveMode != BaseModeRenderer.DARKER_MODE && adaptiveMode != BaseModeRenderer.LIGHTER_MODE) {
-            throw new IllegalArgumentException("Adaptive text mode must be a valid AdaptiveMode constant.");
-        }
-        renderer.setAdaptiveText(ratio, adaptiveMode);
-        invalidate();
-    }
-
-    /**
-     * Gets whether adaptive background has been enabled.
-     *
-     * @return whether adaptive background has been enabled
-     */
-    public boolean isAdaptiveBackgroundEnabled() {
-        return renderer.isAdaptiveBackgroundEnabled();
-    }
-
-    /**
-     * Sets whether adaptive background should be enabled.
-     *
-     * @param enable True if adaptive background should be enabled, false otherwise.
-     */
-    public void setAdaptiveBackgroundEnabled(boolean enable) {
-        renderer.setAdaptiveBgEnabled(enable);
-        invalidate();
-    }
-
-    /**
-     * Gets adaptive background ratio.
-     *
-     * @return Adaptive background ratio.
-     */
-    @FloatRange(from = -1f, to = 1f)
-    public float getAdaptiveBackgroundRatio() {
-        return renderer.getAdaptiveBackgroundRatio();
-    }
-
-    /**
-     * Gets adaptive background mode.
-     *
-     * @return Adaptive background mode.
-     */
-    @AdaptiveMode
-    public int getAdaptiveBackgroundMode() {
-        return renderer.getAdaptiveBackgroundMode();
-    }
-
-    /**
-     * Sets adaptive background's ratio and mode.
-     *
-     * @param ratio        A float ratio value be between 0 and 1.
-     * @param adaptiveMode An adaptiveMode constant.
-     * @throws IllegalArgumentException If the given adaptive background ratio is not a float value between 0 and 1, or,
-     *                                  if the given adaptive background mode is not a valid AdaptiveMode constant.
-     */
-    public void setAdaptiveBackground(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
-        if (ratio < 0 || ratio > 1f) {
-            throw new IllegalArgumentException("Adaptive background ratio must be a float value between 0 and 1.");
-        }
-        if (adaptiveMode != BaseModeRenderer.DARKER_MODE && adaptiveMode != BaseModeRenderer.LIGHTER_MODE) {
-            throw new IllegalArgumentException("Adaptive background mode must be a valid AdaptiveMode constant.");
-        }
-        renderer.setAdaptiveBackground(ratio, adaptiveMode);
-        invalidate();
-    }
-
-    /**
-     * Gets whether adaptive background bar has been enabled.
-     *
-     * @return whether adaptive background bar has been enabled
-     */
-    public boolean isAdaptiveBackgroundBarEnabled() {
-        if (renderer instanceof PieModeRenderer) return false;
-        return ((RingModeRenderer) renderer).isAdaptiveBackgroundBarEnabled();
-    }
-
-    /**
-     * Sets whether adaptive background bar should be enabled.
-     *
-     * @param enable True if adaptive background bar should be enabled, false otherwise.
-     */
-    public void setAdaptiveBgBarEnabled(boolean enable) {
-        if (renderer instanceof PieModeRenderer) return;
-        ((RingModeRenderer) renderer).setAdaptiveBgBarEnabled(enable);
-        invalidate();
-    }
-
-    /**
-     * Gets adaptive background bar ratio.
-     *
-     * @return Adaptive background bar ratio.
-     */
-    @FloatRange(from = -1f, to = 1f)
-    public float getAdaptiveBackgroundBarRatio() {
-        if (renderer instanceof PieModeRenderer) return -1f;
-        return ((RingModeRenderer) renderer).getAdaptiveBackgroundBarRatio();
-    }
-
-    /**
-     * Gets adaptive background bar mode.
-     *
-     * @return Adaptive background bar mode.
-     */
-    public int getAdaptiveBackgroundBarMode() {
-        if (renderer instanceof PieModeRenderer) return -1;
-        return ((RingModeRenderer) renderer).getAdaptiveBackgroundBarMode();
-    }
-
-    /**
-     * Sets adaptive background bar's ratio and mode. Works only if chart mode is set to ring.
-     *
-     * @param ratio        A float ratio value be between 0 and 1.
-     * @param adaptiveMode An adaptiveMode constant.
-     * @throws IllegalArgumentException If the given adaptive background bar ratio is not a float value between 0 and 1, or,
-     *                                  if the given adaptive background bar mode is not a valid AdaptiveMode constant.
-     */
-    public void setAdaptiveBackgroundBar(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
-        if (renderer instanceof PieModeRenderer) return;
-        if (ratio < 0 || ratio > 1f) {
-            throw new IllegalArgumentException("Adaptive background bar ratio must be a float value between 0 and 1.");
-        }
-        if (adaptiveMode != BaseModeRenderer.DARKER_MODE && adaptiveMode != BaseModeRenderer.LIGHTER_MODE) {
-            throw new IllegalArgumentException("Adaptive background bar mode must be a valid AdaptiveMode constant.");
-        }
-        ((RingModeRenderer) renderer).setAdaptiveBackgroundBar(ratio, adaptiveMode);
-        invalidate();
-    }
-
     //############################################################################################## UPDATE PIPELINE AS A FLUENT API
 
     /**
@@ -861,6 +687,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param interpolator TimeInterpolator instance.
      * @throws NullPointerException if the given TimeInterpolator instance is null.
      */
+    @SuppressWarnings("ConstantConditions")
     public PercentageChartView animationInterpolator(@NonNull TimeInterpolator interpolator) {
         if (interpolator == null) {
             throw new NullPointerException("Animation interpolator cannot be null");
@@ -900,6 +727,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param typeface the text font as a Typeface instance
      * @throws NullPointerException if the given typeface is null.
      */
+    @SuppressWarnings("ConstantConditions")
     public PercentageChartView typeface(@NonNull Typeface typeface) {
         if (typeface == null) {
             throw new NullPointerException("Text TypeFace cannot be null");
@@ -1019,102 +847,15 @@ public class PercentageChartView extends View implements IPercentageChartView {
     }
 
     /**
-     * Sets whether adaptive text should be enabled.
+     * Apply all the requested changes.
      *
-     * @param enable True if adaptive text should be enabled, false otherwise.
      */
-    public PercentageChartView adaptiveTextEnabled(boolean enable) {
-        renderer.setAdaptiveTextEnabled(enable);
-        return this;
-    }
-
-    /**
-     * Sets adaptive text's ratio and mode.
-     *
-     * @param ratio        A float ratio value be between 0 and 1.
-     * @param adaptiveMode An adaptiveMode constant.
-     * @throws IllegalArgumentException If the given adaptive text ratio is not a float value between 0 and 1, or,
-     *                                  if the given adaptive text mode is not a valid AdaptiveMode constant.
-     */
-    public PercentageChartView adaptiveText(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
-        if (ratio < 0 || ratio > 1f) {
-            throw new IllegalArgumentException("Adaptive text ratio must be a float value between 0 and 1.");
-        }
-        if (adaptiveMode != BaseModeRenderer.DARKER_MODE && adaptiveMode != BaseModeRenderer.LIGHTER_MODE) {
-            throw new IllegalArgumentException("Adaptive text mode must be a valid AdaptiveMode constant.");
-        }
-        renderer.setAdaptiveText(ratio, adaptiveMode);
-        return this;
-    }
-
-    /**
-     * Sets whether adaptive background should be enabled.
-     *
-     * @param enable True if adaptive background should be enabled, false otherwise.
-     */
-    public PercentageChartView adaptiveBackgroundEnabled(boolean enable) {
-        renderer.setAdaptiveBgEnabled(enable);
-        return this;
-    }
-
-    /**
-     * Sets adaptive background's ratio and mode.
-     *
-     * @param ratio        A float ratio value be between 0 and 1.
-     * @param adaptiveMode An adaptiveMode constant.
-     * @throws IllegalArgumentException If the given adaptive background ratio is not a float value between 0 and 1, or,
-     *                                  if the given adaptive background mode is not a valid AdaptiveMode constant.
-     */
-    public PercentageChartView adaptiveBackground(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
-        if (ratio < 0 || ratio > 1f) {
-            throw new IllegalArgumentException("Adaptive background ratio must be a float value between 0 and 1.");
-        }
-        if (adaptiveMode != BaseModeRenderer.DARKER_MODE && adaptiveMode != BaseModeRenderer.LIGHTER_MODE) {
-            throw new IllegalArgumentException("Adaptive background mode must be a valid AdaptiveMode constant.");
-        }
-        renderer.setAdaptiveBackground(ratio, adaptiveMode);
-        return this;
-    }
-
-    /**
-     * Sets whether adaptive background bar should be enabled.
-     *
-     * @param enable True if adaptive background bar should be enabled, false otherwise.
-     */
-    public PercentageChartView adaptiveBgBarEnabled(boolean enable) {
-        if (renderer instanceof PieModeRenderer)
-            throw new IllegalStateException("Adaptive background bar can be enabled/disabled only if chart mode is set to ring.");
-        ((RingModeRenderer) renderer).setAdaptiveBgBarEnabled(enable);
-        return this;
-    }
-
-    /**
-     * Sets adaptive background bar's ratio and mode. Works only if chart mode is set to ring.
-     *
-     * @param ratio        A float ratio value be between 0 and 1.
-     * @param adaptiveMode An adaptiveMode constant.
-     * @throws IllegalArgumentException If the given adaptive background bar ratio is not a float value between 0 and 1, or,
-     *                                  if the given adaptive background bar mode is not a valid AdaptiveMode constant.
-     */
-    public PercentageChartView adaptiveBackgroundBar(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
-        if (renderer instanceof PieModeRenderer)
-            throw new IllegalStateException("Adaptive background bar can be updated only if chart mode is set to ring.");
-        if (ratio < 0 || ratio > 1f) {
-            throw new IllegalArgumentException("Adaptive background bar ratio must be a float value between 0 and 1.");
-        }
-        if (adaptiveMode != BaseModeRenderer.DARKER_MODE && adaptiveMode != BaseModeRenderer.LIGHTER_MODE) {
-            throw new IllegalArgumentException("Adaptive background bar mode must be a valid AdaptiveMode constant.");
-        }
-        ((RingModeRenderer) renderer).setAdaptiveBackgroundBar(ratio, adaptiveMode);
-        return this;
-    }
-
     public void apply() {
         invalidate();
     }
 
     //##############################################################################################   ADAPTIVE COLOR PROVIDER
-    public void setAdaptiveColorProvider(@Nullable PercentageChartView.AdaptiveColorProvider adaptiveColorProvider) {
+    public void setAdaptiveColorProvider(@Nullable AdaptiveColorProvider adaptiveColorProvider) {
         this.renderer.setAdaptiveColorProvider(adaptiveColorProvider);
     }
 
@@ -1123,11 +864,4 @@ public class PercentageChartView extends View implements IPercentageChartView {
         this.onProgressChangeListener = onProgressChangeListener;
     }
 
-    public interface AdaptiveColorProvider {
-        int getColor(float value);
-    }
-
-    public interface OnProgressChangeListener {
-        void onProgressChanged(float progress);
-    }
 }

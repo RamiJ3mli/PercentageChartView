@@ -38,9 +38,9 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 
 import com.ramijemli.percentagechartview.IPercentageChartView;
-import com.ramijemli.percentagechartview.PercentageChartView;
 import com.ramijemli.percentagechartview.R;
 import com.ramijemli.percentagechartview.annotation.ProgressOrientation;
+import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
@@ -91,10 +91,7 @@ public abstract class BaseModeRenderer {
     int mBackgroundColor;
     int mBackgroundOffset;
 
-    int mAdaptiveBackgroundMode;
-    float mAdaptiveBackgroundRatio;
-    int mAdaptiveBackgroundColor;
-    boolean mAdaptBackground;
+    int mProvidedBackgroundColor;
 
     // PROGRESS
     Paint mProgressPaint;
@@ -115,15 +112,12 @@ public abstract class BaseModeRenderer {
     int textHeight;
     String textValue;
 
-    int mAdaptiveTextColor;
-    int mAdaptiveTextMode;
-    float mAdaptiveTextRatio;
-    boolean mAdaptText;
+    int mProvidedTextColor;
 
     // COMMON
     RectF mBackgroundBounds;
     RectF mCircleBounds;
-    ValueAnimator mColorAnimator;
+    ValueAnimator mProgressColorAnimator, mBackgroundColorAnimator, mTextColorAnimator, mBgBarColorAnimator;
     ValueAnimator mProgressAnimator;
     Interpolator mAnimInterpolator;
     int mAnimDuration;
@@ -131,12 +125,12 @@ public abstract class BaseModeRenderer {
     float mStartAngle;
     float mSweepAngle;
 
-    int mAdaptiveColor;
+    int mProvidedProgressColor;
 
     @ProgressOrientation
     int orientation;
     @Nullable
-    PercentageChartView.AdaptiveColorProvider mAdaptiveColorProvider;
+    AdaptiveColorProvider mAdaptiveColorProvider;
 
     IPercentageChartView mView;
 
@@ -184,14 +178,6 @@ public abstract class BaseModeRenderer {
         mTextShadowRadius = 0;
         mTextShadowDistX = 0;
         mTextShadowDistY = 0;
-
-        //ADAPTIVE BACKGROUND COLOR
-        mAdaptBackground = false;
-        mAdaptiveBackgroundRatio = mAdaptiveBackgroundMode = -1;
-
-        //ADAPTIVE TEXT COLOR
-        mAdaptText = false;
-        mAdaptiveTextRatio = mAdaptiveTextMode = -1;
 
         //BACKGROUND OFFSET
         mBackgroundOffset = 0;
@@ -299,17 +285,6 @@ public abstract class BaseModeRenderer {
             mTextShadowDistY = attrs.getFloat(R.styleable.PercentageChartView_pcv_textShadowDistY, 0);
         }
 
-        //ADAPTIVE BACKGROUND COLOR
-        mAdaptBackground = attrs.getBoolean(R.styleable.PercentageChartView_pcv_adaptiveBackground, false);
-        mAdaptiveBackgroundRatio = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveBackgroundRatio, -1);
-        mAdaptiveBackgroundMode = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveBackgroundMode, -1);
-
-
-        //ADAPTIVE TEXT COLOR
-        mAdaptText = attrs.getBoolean(R.styleable.PercentageChartView_pcv_adaptiveText, false);
-        mAdaptiveTextRatio = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveTextRatio, -1);
-        mAdaptiveTextMode = attrs.getInt(R.styleable.PercentageChartView_pcv_adaptiveTextMode, -1);
-
         //BACKGROUND OFFSET
         mBackgroundOffset = attrs.getDimensionPixelSize(
                 R.styleable.PercentageChartView_pcv_backgroundOffset,
@@ -345,7 +320,7 @@ public abstract class BaseModeRenderer {
     }
 
     //############################################################################################## MODIFIERS
-    public abstract void setAdaptiveColorProvider(@Nullable PercentageChartView.AdaptiveColorProvider adaptiveColorProvider);
+    public abstract void setAdaptiveColorProvider(@Nullable AdaptiveColorProvider adaptiveColorProvider);
 
     //PROGRESS
     public float getProgress() {
@@ -360,7 +335,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setDrawBackgroundEnabled(boolean drawBackground) {
-        if(this.mDrawBackground == drawBackground) return;
+        if (this.mDrawBackground == drawBackground) return;
         this.mDrawBackground = drawBackground;
     }
 
@@ -377,11 +352,12 @@ public abstract class BaseModeRenderer {
     //BACKGROUND COLOR
     public int getBackgroundColor() {
         if (!mDrawBackground) return -1;
-        return (!mAdaptBackground) ? mBackgroundColor : mAdaptiveBackgroundColor;
+        return mBackgroundColor;
     }
 
     public void setBackgroundColor(int backgroundColor) {
-        if ((mAdaptiveColorProvider != null && mAdaptBackground) || this.mBackgroundColor == backgroundColor ) return;
+        if ((mAdaptiveColorProvider != null && mAdaptiveColorProvider.provideBackgroundColor(mProgress) != -1) || this.mBackgroundColor == backgroundColor)
+            return;
         this.mBackgroundColor = backgroundColor;
         if (!mDrawBackground) return;
         mBackgroundPaint.setColor(mBackgroundColor);
@@ -389,49 +365,17 @@ public abstract class BaseModeRenderer {
 
     //PROGRESS COLOR
     public int getProgressColor() {
-        return (mAdaptiveColorProvider != null) ? mAdaptiveColor : mProgressColor;
+        return mProgressColor;
     }
 
     public void setProgressColor(int progressColor) {
-        if (mAdaptiveColorProvider != null || this.mProgressColor == progressColor) return;
+        if ((mAdaptiveColorProvider != null && mAdaptiveColorProvider.provideProgressColor(mProgress) != -1) || this.mProgressColor == progressColor)
+            return;
 
         this.mProgressColor = progressColor;
         mProgressPaint.setColor(progressColor);
     }
 
-    //ADAPTIVE BACKGROUND
-    public boolean isAdaptiveBackgroundEnabled() {
-        return mAdaptBackground;
-    }
-
-    public float getAdaptiveBackgroundRatio() {
-        return mAdaptiveBackgroundRatio;
-    }
-
-    public int getAdaptiveBackgroundMode() {
-        return mAdaptiveBackgroundMode;
-    }
-
-    public abstract void setAdaptiveBgEnabled(boolean enable);
-
-    public abstract void setAdaptiveBackground(float ratio, int adaptiveMode);
-
-    //ADAPTIVE TEXT
-    public boolean isAdaptiveTextEnabled() {
-        return mAdaptText;
-    }
-
-    public float getAdaptiveTextRatio() {
-        return mAdaptiveTextRatio;
-    }
-
-    public int getAdaptiveTextMode() {
-        return mAdaptiveTextMode;
-    }
-
-    public abstract void setAdaptiveTextEnabled(boolean enable);
-
-    public abstract void setAdaptiveText(float ratio, int adaptiveMode);
 
     //ANIMATION DURATION
     public int getAnimationDuration() {
@@ -439,11 +383,21 @@ public abstract class BaseModeRenderer {
     }
 
     public void setAnimationDuration(int duration) {
-        if(this.mAnimDuration ==  duration) return;
+        if (this.mAnimDuration == duration) return;
         mAnimDuration = duration;
         mProgressAnimator.setDuration(mAnimDuration);
-        if (mColorAnimator != null)
-            mColorAnimator.setDuration(mAnimDuration);
+        if (mProgressColorAnimator != null) {
+            mProgressColorAnimator.setDuration(mAnimDuration);
+        }
+        if (mBackgroundColorAnimator != null) {
+            mBackgroundColorAnimator.setDuration(mAnimDuration);
+        }
+        if (mTextColorAnimator != null) {
+            mTextColorAnimator.setDuration(mAnimDuration);
+        }
+        if (mBgBarColorAnimator != null) {
+            mBgBarColorAnimator.setDuration(mAnimDuration);
+        }
     }
 
     //ANIMATION INTERPOLATOR
@@ -457,11 +411,11 @@ public abstract class BaseModeRenderer {
 
     //TEXT COLOR
     public int getTextColor() {
-        return (!mAdaptText) ? mTextColor : mAdaptiveTextColor;
+        return mTextColor;
     }
 
     public void setTextColor(@ColorInt int textColor) {
-        if ((mAdaptiveColorProvider != null && mAdaptText) || this.mTextColor ==  textColor)
+        if ((mAdaptiveColorProvider != null && mAdaptiveColorProvider.provideTextColor(mProgress) != -1) || this.mTextColor == textColor)
             return;
         this.mTextColor = textColor;
         mTextPaint.setColor(textColor);
@@ -473,7 +427,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setTextSize(float textSize) {
-        if(this.mTextSize ==  textSize) return;
+        if (this.mTextSize == textSize) return;
         this.mTextSize = textSize;
         mTextPaint.setTextSize(textSize);
         updateText();
@@ -485,7 +439,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setTypeface(Typeface typeface) {
-        if(this.mTypeface != null && this.mTypeface.equals(typeface) ) return;
+        if (this.mTypeface != null && this.mTypeface.equals(typeface)) return;
         this.mTypeface = (mTextStyle > 0) ?
                 Typeface.create(typeface, mTextStyle) :
                 typeface;
@@ -499,7 +453,7 @@ public abstract class BaseModeRenderer {
     }
 
     public void setTextStyle(int mTextStyle) {
-        if(this.mTextStyle ==  mTextStyle) return;
+        if (this.mTextStyle == mTextStyle) return;
         this.mTextStyle = mTextStyle;
         mTypeface = (mTypeface == null) ? Typeface.defaultFromStyle(mTextStyle) : Typeface.create(mTypeface, mTextStyle);
 
@@ -525,10 +479,10 @@ public abstract class BaseModeRenderer {
     }
 
     public void setTextShadow(int shadowColor, float shadowRadius, float shadowDistX, float shadowDistY) {
-        if(this.mTextShadowColor ==  shadowColor
-                && this.mTextShadowRadius ==  shadowRadius
-                && this.mTextShadowDistX ==  shadowDistX
-                && this.mTextShadowDistY ==  shadowDistY) return;
+        if (this.mTextShadowColor == shadowColor
+                && this.mTextShadowRadius == shadowRadius
+                && this.mTextShadowDistX == shadowDistX
+                && this.mTextShadowDistY == shadowDistY) return;
         this.mTextShadowColor = shadowColor;
         this.mTextShadowRadius = shadowRadius;
         this.mTextShadowDistX = shadowDistX;
@@ -536,46 +490,5 @@ public abstract class BaseModeRenderer {
 
         mTextPaint.setShadowLayer(mTextShadowRadius, mTextShadowDistX, mTextShadowDistY, mTextShadowColor);
         updateText();
-    }
-
-    //COPY RENDERER
-    public void mirror(BaseModeRenderer renderer) {
-        renderer.mDrawBackground = mDrawBackground;
-        renderer.mBackgroundPaint = mBackgroundPaint;
-        renderer.mBackgroundColor = mBackgroundColor;
-        renderer.mBackgroundOffset = mBackgroundOffset;
-        renderer.mAdaptiveBackgroundMode = mAdaptiveBackgroundMode;
-        renderer.mAdaptiveBackgroundRatio = mAdaptiveBackgroundRatio;
-        renderer.mAdaptiveBackgroundColor = mAdaptiveBackgroundColor;
-        renderer.mAdaptBackground = mAdaptBackground;
-        renderer.mProgressPaint = mProgressPaint;
-        renderer.mProgressColor = mProgressColor;
-        renderer.mTextBounds = mTextBounds;
-        renderer.mTextPaint = mTextPaint;
-        renderer.mTextSize = mTextSize;
-        renderer.mTextStyle = mTextStyle;
-        renderer.mTextColor = mTextColor;
-        renderer.mTextProgress = mTextProgress;
-        renderer.mTypeface = mTypeface;
-        renderer.mTextShadowColor = mTextShadowColor;
-        renderer.mTextShadowRadius = mTextShadowRadius;
-        renderer.mTextShadowDistY = mTextShadowDistY;
-        renderer.mTextShadowDistX = mTextShadowDistX;
-        renderer.mAdaptiveTextColor = mAdaptiveTextColor;
-        renderer.mAdaptiveTextMode = mAdaptiveTextMode;
-        renderer.mAdaptiveTextRatio = mAdaptiveTextRatio;
-        renderer.mAdaptText = mAdaptText;
-        renderer.mBackgroundBounds = mBackgroundBounds;
-        renderer.mCircleBounds = mCircleBounds;
-        renderer.mColorAnimator = mColorAnimator;
-        renderer.mProgressAnimator = mProgressAnimator;
-        renderer.mAnimInterpolator = mAnimInterpolator;
-        renderer.mAnimDuration = mAnimDuration;
-        renderer.mProgress = mProgress;
-        renderer.mStartAngle = mStartAngle;
-        renderer.mSweepAngle = mSweepAngle;
-        renderer.mAdaptiveColor = mAdaptiveColor;
-        renderer.orientation = orientation;
-        renderer.mAdaptiveColorProvider = mAdaptiveColorProvider;
     }
 }
