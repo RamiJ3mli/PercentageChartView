@@ -6,6 +6,7 @@
         <attr name="pcv_mode" format="enum">
             <enum name="ring" value="0" />
             <enum name="pie" value="1" />
+            <enum name="fill" value="2" />
         </attr>
 
         <attr name="pcv_orientation" format="enum">

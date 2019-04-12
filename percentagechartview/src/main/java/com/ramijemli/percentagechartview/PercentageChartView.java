@@ -33,6 +33,9 @@ import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
 import com.ramijemli.percentagechartview.callback.OnProgressChangeListener;
 import com.ramijemli.percentagechartview.callback.ProgressTextFormatter;
 import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
+import com.ramijemli.percentagechartview.renderer.FillModeRenderer;
+import com.ramijemli.percentagechartview.renderer.OffsetEnabledMode;
+import com.ramijemli.percentagechartview.renderer.OrientationBasedMode;
 import com.ramijemli.percentagechartview.renderer.PieModeRenderer;
 import com.ramijemli.percentagechartview.renderer.RingModeRenderer;
 
@@ -43,6 +46,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_FILL;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_PIE;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_RING;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_CLOCKWISE;
@@ -95,7 +99,12 @@ public class PercentageChartView extends View implements IPercentageChartView {
                     case MODE_RING:
                         renderer = new RingModeRenderer(this, attrs);
                         break;
+                    case MODE_FILL:
+                        renderer = new FillModeRenderer(this, attrs);
+                        break;
+
                     default:
+                    case MODE_PIE:
                         renderer = new PieModeRenderer(this, attrs);
                         break;
                 }
@@ -154,7 +163,9 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     @ProgressOrientation
     public int getOrientation() {
-        return renderer.getOrientation();
+        if (!(renderer instanceof OrientationBasedMode))
+            return BaseModeRenderer.INVALID_ORIENTATION;
+        return ((OrientationBasedMode) renderer).getOrientation();
     }
 
     /**
@@ -166,8 +177,11 @@ public class PercentageChartView extends View implements IPercentageChartView {
     public void setOrientation(@ProgressOrientation int orientation) {
         if (orientation != ORIENTATION_CLOCKWISE && orientation != ORIENTATION_COUNTERCLOCKWISE) {
             throw new IllegalArgumentException("Orientation must be a ProgressOrientation constant.");
+        } else if (!(renderer instanceof OrientationBasedMode)) {
+            throw new IllegalArgumentException("Orientation is not supported by the used percentage chart mode.");
         }
-        this.renderer.setOrientation(orientation);
+
+        ((OrientationBasedMode) renderer).setOrientation(orientation);
         invalidate();
     }
 
@@ -472,8 +486,8 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @return the offset of the circular background.-1 if chart mode is not set to pie.
      */
     public float getBackgroundOffset() {
-        if (renderer instanceof RingModeRenderer) return -1;
-        return ((PieModeRenderer) renderer).getBackgroundOffset();
+        if (!(renderer instanceof OffsetEnabledMode)) return -1;
+        return ((OffsetEnabledMode) renderer).getBackgroundOffset();
     }
 
     /**
@@ -483,12 +497,16 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @throws IllegalArgumentException if the given offset is a negative value.
      */
     public void setBackgroundOffset(@IntRange(from = 0) int offset) {
-        if (renderer instanceof RingModeRenderer) return;
         if (offset < 0) {
             throw new IllegalArgumentException("Background offset must be a positive value.");
         }
-        ((PieModeRenderer) renderer).setBackgroundOffset(offset);
-        invalidate();
+
+        try {
+            ((OffsetEnabledMode) renderer).setBackgroundOffset(offset);
+            invalidate();
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background offset is not supported by the used percentage chart mode.");
+        }
     }
 
     /**
@@ -497,7 +515,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @return whether drawing the background bar has been enabled
      */
     public boolean isDrawBackgroundBarEnabled() {
-        if (renderer instanceof PieModeRenderer) return false;
+        if (!(renderer instanceof RingModeRenderer)) return false;
         return ((RingModeRenderer) renderer).isDrawBackgroundBarEnabled();
     }
 
@@ -507,9 +525,12 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param enabled True if background bar have to be drawn, false otherwise.
      */
     public void setDrawBackgroundBarEnabled(boolean enabled) {
-        if (renderer instanceof PieModeRenderer) return;
-        ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
-        invalidate();
+        try {
+            ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
+            invalidate();
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background bar's drawing state is not support by the used percentage chart mode.");
+        }
     }
 
     /**
@@ -518,7 +539,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @return the background bar color. -1 if chart mode is not set to ring.
      */
     public int getBackgroundBarColor() {
-        if (renderer instanceof PieModeRenderer) return -1;
+        if (!(renderer instanceof RingModeRenderer)) return -1;
         return ((RingModeRenderer) renderer).getBackgroundBarColor();
     }
 
@@ -528,8 +549,12 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param color the background bar color
      */
     public void setBackgroundBarColor(@ColorInt int color) {
-        ((RingModeRenderer) renderer).setBackgroundBarColor(color);
-        invalidate();
+        try {
+            ((RingModeRenderer) renderer).setBackgroundBarColor(color);
+            invalidate();
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background bar color is not support by the used percentage chart mode.");
+        }
     }
 
     /**
@@ -538,7 +563,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @return the background bar thickness in pixels. -1 if chart mode is not set to ring.
      */
     public float getBackgroundBarThickness() {
-        if (renderer instanceof PieModeRenderer) return -1;
+        if (!(renderer instanceof RingModeRenderer)) return -1;
         return ((RingModeRenderer) renderer).getBackgroundBarThickness();
     }
 
@@ -549,12 +574,16 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @throws IllegalArgumentException if the given value is negative.
      */
     public void setBackgroundBarThickness(@FloatRange(from = 0) float thickness) {
-        if (renderer instanceof PieModeRenderer) return;
         if (thickness < 0) {
             throw new IllegalArgumentException("Background bar thickness must be a positive value.");
         }
-        ((RingModeRenderer) renderer).setBackgroundBarThickness(thickness);
-        invalidate();
+
+        try {
+            ((RingModeRenderer) renderer).setBackgroundBarThickness(thickness);
+            invalidate();
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background bar thickness is not support by the used percentage chart mode.");
+        }
     }
 
     /**
@@ -563,7 +592,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @return the progress bar thickness in pixels. -1 if chart mode is not set to ring.
      */
     public float getProgressBarThickness() {
-        if (renderer instanceof PieModeRenderer) return -1;
+        if (!(renderer instanceof RingModeRenderer)) return -1;
         return ((RingModeRenderer) renderer).getProgressBarThickness();
     }
 
@@ -574,12 +603,16 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @throws IllegalArgumentException if the given value is negative.
      */
     public void setProgressBarThickness(@FloatRange(from = 0) float thickness) {
-        if (renderer instanceof PieModeRenderer) return;
         if (thickness < 0) {
             throw new IllegalArgumentException("Progress bar thickness must be a positive value.");
         }
-        ((RingModeRenderer) renderer).setProgressBarThickness(thickness);
-        invalidate();
+
+        try {
+            ((RingModeRenderer) renderer).setProgressBarThickness(thickness);
+            invalidate();
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Progress bar thickness is not support by the used percentage chart mode.");
+        }
     }
 
     /**
@@ -588,7 +621,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @return the progress bar stroke style. -1 if chart mode is not set to ring.
      */
     public int getProgressBarStyle() {
-        if (renderer instanceof PieModeRenderer) return -1;
+        if (!(renderer instanceof RingModeRenderer)) return -1;
         return ((RingModeRenderer) renderer).getProgressBarStyle();
     }
 
@@ -599,12 +632,16 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @throws IllegalArgumentException if the given progress bar style is not a valid ProgressBarStyle constant.
      */
     public void setProgressBarStyle(@ProgressBarStyle int style) {
-        if (renderer instanceof PieModeRenderer) return;
         if (style < 0 || style > 1) {
             throw new IllegalArgumentException("Text style must be a valid TextStyle constant.");
         }
-        ((RingModeRenderer) renderer).setProgressBarStyle(style);
-        invalidate();
+
+        try {
+            ((RingModeRenderer) renderer).setProgressBarStyle(style);
+            invalidate();
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Progress bar style is not support by the used percentage chart mode.");
+        }
     }
 
     //############################################################################################## UPDATE PIPELINE AS A FLUENT API
@@ -619,7 +656,12 @@ public class PercentageChartView extends View implements IPercentageChartView {
         if (orientation != ORIENTATION_CLOCKWISE && orientation != ORIENTATION_COUNTERCLOCKWISE) {
             throw new IllegalArgumentException("Orientation must be a ProgressOrientation constant.");
         }
-        this.renderer.setOrientation(orientation);
+
+        try {
+            ((OrientationBasedMode) renderer).setOrientation(orientation);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Orientation is not support by the used percentage chart mode.");
+        }
         return this;
     }
 
@@ -770,12 +812,15 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @throws IllegalArgumentException if the given offset is a negative value.
      */
     public PercentageChartView backgroundOffset(@IntRange(from = 0) int offset) {
-        if (renderer instanceof RingModeRenderer)
-            throw new IllegalStateException("Background offset can be altered only if chart mode is set to pie.");
         if (offset < 0) {
             throw new IllegalArgumentException("Background offset must be a positive value.");
         }
-        ((PieModeRenderer) renderer).setBackgroundOffset(offset);
+
+        try {
+            ((OffsetEnabledMode) renderer).setBackgroundOffset(offset);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background offset is not support by the used percentage chart mode.");
+        }
         return this;
     }
 
@@ -785,9 +830,11 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param enabled True if background bar have to be drawn, false otherwise.
      */
     public PercentageChartView drawBackgroundBarEnabled(boolean enabled) {
-        if (renderer instanceof PieModeRenderer)
-            throw new IllegalStateException("Background bar's drawing state can be altered only if chart mode is set to ring.");
-        ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
+        try {
+            ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background bar's drawing state is not support by the used percentage chart mode.");
+        }
         return this;
     }
 
@@ -797,7 +844,11 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param color the background bar color
      */
     public PercentageChartView backgroundBarColor(@ColorInt int color) {
-        ((RingModeRenderer) renderer).setBackgroundBarColor(color);
+        try {
+            ((RingModeRenderer) renderer).setBackgroundBarColor(color);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background bar color is not support by the used percentage chart mode.");
+        }
         return this;
     }
 
@@ -808,12 +859,15 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @throws IllegalArgumentException if the given value is negative.
      */
     public PercentageChartView backgroundBarThickness(@FloatRange(from = 0) float thickness) {
-        if (renderer instanceof PieModeRenderer)
-            throw new IllegalStateException("Background bar's thickness can be altered only if chart mode is set to ring.");
         if (thickness < 0) {
             throw new IllegalArgumentException("Background bar thickness must be a positive value.");
         }
-        ((RingModeRenderer) renderer).setBackgroundBarThickness(thickness);
+
+        try {
+            ((RingModeRenderer) renderer).setBackgroundBarThickness(thickness);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background bar thickness is not support by the used percentage chart mode.");
+        }
         return this;
     }
 
@@ -824,12 +878,15 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @throws IllegalArgumentException if the given value is negative.
      */
     public PercentageChartView progressBarThickness(@FloatRange(from = 0) float thickness) {
-        if (renderer instanceof PieModeRenderer)
-            throw new IllegalStateException("Progress bar's thickness can be altered only if chart mode is set to ring.");
         if (thickness < 0) {
             throw new IllegalArgumentException("Progress bar thickness must be a positive value.");
         }
-        ((RingModeRenderer) renderer).setProgressBarThickness(thickness);
+
+        try {
+            ((RingModeRenderer) renderer).setProgressBarThickness(thickness);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Progress bar thickness is not support by the used percentage chart mode.");
+        }
         return this;
     }
 
@@ -840,9 +897,15 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @throws IllegalArgumentException if the given progress bar style is not a valid ProgressBarStyle constant.
      */
     public PercentageChartView progressBarStyle(@ProgressBarStyle int style) {
-        if (renderer instanceof PieModeRenderer)
-            throw new IllegalStateException("Progress bar style can be altered only if chart mode is set to ring.");
-        ((RingModeRenderer) renderer).setProgressBarStyle(style);
+        if (style < 0 || style > 1) {
+            throw new IllegalArgumentException("Text style must be a valid TextStyle constant.");
+        }
+
+        try {
+            ((RingModeRenderer) renderer).setProgressBarStyle(style);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Progress bar style is not support by the used percentage chart mode.");
+        }
         return this;
     }
 

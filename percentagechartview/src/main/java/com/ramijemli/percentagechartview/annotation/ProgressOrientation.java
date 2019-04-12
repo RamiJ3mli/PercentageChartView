@@ -21,10 +21,11 @@ import java.lang.annotation.RetentionPolicy;
 
 import androidx.annotation.IntDef;
 
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.INVALID_ORIENTATION;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_CLOCKWISE;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_COUNTERCLOCKWISE;
 
 @Retention(RetentionPolicy.SOURCE)
-@IntDef({ORIENTATION_CLOCKWISE, ORIENTATION_COUNTERCLOCKWISE})
+@IntDef({INVALID_ORIENTATION, ORIENTATION_CLOCKWISE, ORIENTATION_COUNTERCLOCKWISE})
 public @interface ProgressOrientation {
 }

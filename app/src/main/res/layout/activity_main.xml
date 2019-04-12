@@ -24,7 +24,7 @@
         app:layout_constraintEnd_toEndOf="@+id/spotlight"
         app:layout_constraintStart_toStartOf="@+id/spotlight"
         app:layout_constraintTop_toTopOf="@+id/spotlight"
-        app:pcv_mode="pie"
+        app:pcv_mode="fill"
         app:pcv_progress="10"
         app:pcv_startAngle="90"
         app:pcv_textSize="50sp" />

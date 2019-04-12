@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package com.ramijemli.percentagechartview;
+package com.ramijemli.percentagechartview.renderer;
 
-import android.content.Context;
+public interface OrientationBasedMode {
 
-public interface IPercentageChartView {
+    void setOrientation(int orientation);
 
-    Context getViewContext();
-
-    void invalidate();
-
-    int getWidth();
-
-    int getHeight();
-
-    void onProgressUpdated(float progress);
+    int getOrientation();
 
 }

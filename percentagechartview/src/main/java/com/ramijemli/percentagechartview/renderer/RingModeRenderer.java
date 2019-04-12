@@ -32,7 +32,7 @@ import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
 
 import androidx.annotation.Nullable;
 
-public class RingModeRenderer extends BaseModeRenderer {
+public class RingModeRenderer extends BaseModeRenderer implements OrientationBasedMode {
 
 
     // BACKGROUND BAR
@@ -107,10 +107,8 @@ public class RingModeRenderer extends BaseModeRenderer {
         mCircleBounds = new RectF();
         mBackgroundBounds = new RectF();
         mTextBounds = new Rect();
-        mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
-                -(this.mProgress / DEFAULT_MAX * 360) :
-                this.mProgress / DEFAULT_MAX * 360;
         mProvidedProgressColor = mProvidedBackgroundColor = mProvidedTextColor = mProvidedBgBarColor = -1;
+        updateDrawingAngles();
 
         //BACKGROUND
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -158,10 +156,7 @@ public class RingModeRenderer extends BaseModeRenderer {
                 mTextProgress = 100;
             else mTextProgress = 0;
 
-            mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
-                    -(mProgress / DEFAULT_MAX * 360) :
-                    mProgress / DEFAULT_MAX * 360;
-
+            updateDrawingAngles();
             updateText();
 
             mView.onProgressUpdated(mProgress);
@@ -294,10 +289,7 @@ public class RingModeRenderer extends BaseModeRenderer {
             this.mProgress = progress;
             this.mTextProgress = (int) progress;
 
-            mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
-                    -(this.mProgress / DEFAULT_MAX * 360) :
-                    this.mProgress / DEFAULT_MAX * 360;
-
+            updateDrawingAngles();
             updateText();
 
             mView.onProgressUpdated(mProgress);
@@ -447,19 +439,17 @@ public class RingModeRenderer extends BaseModeRenderer {
         }
     }
 
-    @Override
-    public void setOrientation(int orientation) {
-        if (this.orientation == orientation) return;
-        this.orientation = orientation;
-        this.mSweepAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ?
-                -(mProgress / DEFAULT_MAX * 360) :
-                mProgress / DEFAULT_MAX * 360;
-    }
+    private void updateDrawingAngles() {
+        switch (orientation) {
+            case ORIENTATION_COUNTERCLOCKWISE:
+                mSweepAngle = -(mProgress / DEFAULT_MAX * 360);
+                break;
 
-    @Override
-    public void setStartAngle(float startAngle) {
-        if (this.mStartAngle == startAngle) return;
-        this.mStartAngle = startAngle;
+            default:
+            case ORIENTATION_CLOCKWISE:
+                mSweepAngle = mProgress / DEFAULT_MAX * 360;
+                break;
+        }
     }
 
     @Override
@@ -470,6 +460,22 @@ public class RingModeRenderer extends BaseModeRenderer {
 
         mTextPaint.getTextBounds(textValue, 0, textValue.length(), mTextBounds);
         textHeight = mTextBounds.height();
+    }
+
+    public int getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(int orientation) {
+        if (this.orientation == orientation) return;
+        this.orientation = orientation;
+        updateDrawingAngles();
+    }
+
+    @Override
+    public void setStartAngle(float startAngle) {
+        if (this.mStartAngle == startAngle) return;
+        this.mStartAngle = startAngle;
     }
 
     // DRAW BACKGROUND BAR STATE

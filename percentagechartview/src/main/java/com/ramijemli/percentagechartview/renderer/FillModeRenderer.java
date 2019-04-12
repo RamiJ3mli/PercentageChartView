@@ -30,17 +30,18 @@ import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
 
 import androidx.annotation.Nullable;
 
-public class PieModeRenderer extends BaseModeRenderer implements OrientationBasedMode, OffsetEnabledMode{
+public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledMode {
 
-    private float mBgStartAngle;
+    private float mDirectionAngle;
     private float mBgSweepAngle;
+    private float mRadius;
 
-    public PieModeRenderer(IPercentageChartView view) {
+    public FillModeRenderer(IPercentageChartView view) {
         super(view);
         setup();
     }
 
-    public PieModeRenderer(IPercentageChartView view, TypedArray attrs) {
+    public FillModeRenderer(IPercentageChartView view, TypedArray attrs) {
         super(view, attrs);
         setup();
     }
@@ -50,7 +51,6 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         mBackgroundBounds = new RectF();
         mTextBounds = new Rect();
         mProvidedProgressColor = mProvidedBackgroundColor = mProvidedTextColor = -1;
-        updateDrawingAngles();
 
         //BACKGROUND
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -104,24 +104,25 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
     public void mesure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
         int centerX = w / 2;
         int centerY = h / 2;
-        float radius = (float) Math.min(w, h) / 2;
+        mRadius = (float) Math.min(w, h) / 2;
 
-        mCircleBounds.left = centerX - radius;
-        mCircleBounds.top = centerY - radius;
-        mCircleBounds.right = centerX + radius;
-        mCircleBounds.bottom = centerY + radius;
+        mCircleBounds.left = centerX - mRadius;
+        mCircleBounds.top = centerY - mRadius;
+        mCircleBounds.right = centerX + mRadius;
+        mCircleBounds.bottom = centerY + mRadius;
         mesureBackgroundBounds();
+        updateDrawingAngles();
     }
 
     @Override
     public void draw(Canvas canvas) {
-        //FOREGROUND
-        canvas.drawArc(mCircleBounds, mStartAngle, mSweepAngle, true, mProgressPaint);
-
         //BACKGROUND
         if (mDrawBackground) {
-            canvas.drawArc(mBackgroundBounds, mBgStartAngle, mBgSweepAngle, true, mBackgroundPaint);
+            canvas.drawArc(mBackgroundBounds, mStartAngle, mBgSweepAngle, false, mBackgroundPaint);
         }
+
+        //FOREGROUND
+        canvas.drawArc(mCircleBounds, mStartAngle, mSweepAngle, false, mProgressPaint);
 
         //TEXT
         canvas.drawText(textValue, mCircleBounds.centerX(), mCircleBounds.centerY() + (textHeight / 2f), mTextPaint);
@@ -325,20 +326,20 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
     }
 
     private void updateDrawingAngles() {
-        switch (orientation) {
-            case ORIENTATION_COUNTERCLOCKWISE:
-                mSweepAngle = -(mProgress / DEFAULT_MAX * 360);
-                mBgStartAngle = mStartAngle;
-                mBgSweepAngle = 360 + mSweepAngle;
-                break;
+        float height = mRadius - mProgress * (mRadius * 2) / DEFAULT_MAX;
+        double radiusPow = Math.pow(mRadius, 2);
+        double heightPow = Math.pow(height, 2);
 
-            default:
-            case ORIENTATION_CLOCKWISE:
-                mSweepAngle = mProgress / DEFAULT_MAX * 360;
-                mBgStartAngle = mStartAngle + mSweepAngle;
-                mBgSweepAngle = 360 - mSweepAngle;
-                break;
-        }
+        mSweepAngle = (height == 0) ? 180 : (float) Math.toDegrees(Math.acos((heightPow + radiusPow - Math.pow(Math.sqrt(radiusPow - heightPow), 2)) / (2 * height * mRadius))) * 2;
+        mStartAngle = mDirectionAngle - (mSweepAngle / 2);
+        mBgSweepAngle = (mBackgroundOffset > 0) ? 360 : mSweepAngle - 360;
+    }
+
+    @Override
+    public void setStartAngle(float angle) {
+        if (this.mDirectionAngle == angle) return;
+        this.mDirectionAngle = angle;
+        updateDrawingAngles();
     }
 
     @Override
@@ -351,24 +352,6 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         textHeight = mTextBounds.height();
     }
 
-    public int getOrientation() {
-        return orientation;
-    }
-
-    public void setOrientation(int orientation) {
-        if (this.orientation == orientation) return;
-        this.orientation = orientation;
-        updateDrawingAngles();
-    }
-
-    @Override
-    public void setStartAngle(float startAngle) {
-        if (this.mStartAngle == startAngle) return;
-        this.mStartAngle = startAngle;
-        mBgStartAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ? mStartAngle : mStartAngle + mSweepAngle;
-        mBgSweepAngle = 360 - ((orientation == ORIENTATION_COUNTERCLOCKWISE) ? -(mSweepAngle) : mSweepAngle);
-    }
-
     //BACKGROUND OFFSET
     public float getBackgroundOffset() {
         return mBackgroundOffset;
@@ -379,5 +362,6 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
             return;
         this.mBackgroundOffset = backgroundOffset;
         mesureBackgroundBounds();
+        updateDrawingAngles();
     }
 }

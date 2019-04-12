@@ -110,23 +110,23 @@ chart.setOnProgressChangeListener(new PercentageChartView.OnProgressChangeListen
 });
 ``` 
 
-## To do
-- [x] ~~Initial release~~  
-- [x] ~~Progress based adaptive color support~~ 
-- [x] ~~Text style support~~ 
-- [x] ~~Filled background support for ring mode~~  
-- [x] ~~Text typeface support~~  
-- [x] ~~Progress change listener~~  
-- [x] ~~Progress based adaptive color support for text, background and background bar~~
-- [x] ~~Draw orientation support~~
-- [x] ~~Text shadow/glow support~~
-- [ ] Demo app optimization using a RecyclerView  
-- [ ] Background bar and progress bar offset support  
-- [ ] Text formatter support  
-- [ ] Gradient colors support  
-- [ ] Builder pattern based update pipeline  
-- [ ] New mode/appearance
-- [ ] Segmented style support for ring mode  
+## TO DO
+-   [x] ~~Initial release~~  
+-   [x] ~~Progress based adaptive color support~~ 
+-   [x] ~~Text style support~~ 
+-   [x] ~~Filled background support for ring mode~~  
+-   [x] ~~Text typeface support~~  
+-   [x] ~~Progress change listener~~  
+-   [x] ~~Progress based adaptive color support for text, background and background bar~~
+-   [x] ~~Draw orientation support~~
+-   [x] ~~Text shadow/glow support~~
+-   [ ] Demo app optimization using a RecyclerView  
+-   [ ] Background bar and progress bar offset support  
+-   [ ] Text formatter support  
+-   [ ] Gradient colors support  
+-   [ ] Builder pattern based update pipeline  
+-   [ ] New mode/appearance
+-   [ ] Segmented style support for ring mode  
 
 ## CONTRIBUTION
 All bugs, feature requests, feedback, etc. are welcome. Please, feel free to [create an issue](https://github.com/RamiJ3mli/PercentageChartView/issues).  

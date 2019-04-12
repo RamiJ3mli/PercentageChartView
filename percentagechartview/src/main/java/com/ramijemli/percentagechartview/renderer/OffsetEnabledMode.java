@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package com.ramijemli.percentagechartview;
+package com.ramijemli.percentagechartview.renderer;
 
-import android.content.Context;
+public interface OffsetEnabledMode {
 
-public interface IPercentageChartView {
+    float getBackgroundOffset();
 
-    Context getViewContext();
-
-    void invalidate();
-
-    int getWidth();
-
-    int getHeight();
-
-    void onProgressUpdated(float progress);
+    void setBackgroundOffset(int backgroundOffset);
 
 }

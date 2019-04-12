@@ -55,17 +55,15 @@ public abstract class BaseModeRenderer {
     // CHART MODE
     public static final int MODE_RING = 0;
     public static final int MODE_PIE = 1;
+    public static final int MODE_FILL = 2;
 
     // ORIENTATION
+    public static final int INVALID_ORIENTATION = -1;
     public static final int ORIENTATION_CLOCKWISE = 0;
     public static final int ORIENTATION_COUNTERCLOCKWISE = 1;
 
     // TEXT
-    private static float DEFAULT_TEXT_SP_SIZE = 12;
-
-    //ADAPTIVE MODES
-    public static final int DARKER_MODE = 0;
-    public static final int LIGHTER_MODE = 1;
+    private static final float DEFAULT_TEXT_SP_SIZE = 12;
 
     //ANIMATIONS
     private static final int DEFAULT_ANIMATION_INTERPOLATOR = 0;
@@ -201,7 +199,7 @@ public abstract class BaseModeRenderer {
         }
 
         //BACKGROUND DRAW STATE
-        mDrawBackground = attrs.getBoolean(R.styleable.PercentageChartView_pcv_drawBackground, this instanceof PieModeRenderer);
+        mDrawBackground = attrs.getBoolean(R.styleable.PercentageChartView_pcv_drawBackground, (this instanceof PieModeRenderer || this instanceof FillModeRenderer));
 
         //BACKGROUND COLOR
         mBackgroundColor = attrs.getColor(R.styleable.PercentageChartView_pcv_backgroundColor, Color.BLACK);
@@ -308,11 +306,9 @@ public abstract class BaseModeRenderer {
 
     abstract void updateText();
 
-    public abstract void setOrientation(int orientation);
-
     public abstract void setStartAngle(float startAngle);
 
-    int getThemeAccentColor() {
+    private int getThemeAccentColor() {
         int colorAttr;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             colorAttr = android.R.attr.colorAccent;
@@ -355,11 +351,6 @@ public abstract class BaseModeRenderer {
     //START ANGLE
     public float getStartAngle() {
         return mStartAngle;
-    }
-
-    //ORIENTATION
-    public int getOrientation() {
-        return orientation;
     }
 
     //BACKGROUND COLOR
