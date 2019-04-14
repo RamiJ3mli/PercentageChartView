@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tab_text"
+    android:layout_width="wrap_content"
+    android:layout_height="48dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:paddingLeft="8dp"
+    android:fontFamily="sans-serif-condensed-medium"
+    android:paddingRight="8dp"
+    android:gravity="center"
+    android:textAllCaps="true"
+    android:textColor="@color/all_tab_tint_s"
+    android:textSize="12sp" />

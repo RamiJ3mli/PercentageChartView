@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/card_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/all_ripple_white"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/space"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/anchor"
+        android:layout_width="4dp"
+        android:layout_height="20dp"
+        android:background="@drawable/home_bg_anchor"
+        android:elevation="8dp"
+        android:outlineProvider="none"
+        app:layout_constraintBottom_toBottomOf="@+id/title"
+        app:layout_constraintStart_toStartOf="@+id/card_bg"
+        app:layout_constraintTop_toTopOf="@+id/title" />
+
+    <TextView
+        android:id="@+id/title"
+        tools:text="PIE MODE PLAYGROUND"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:layout_marginEnd="16dp"
+        android:elevation="8dp"
+        android:fontFamily="sans-serif-condensed-medium"
+        android:gravity="start"
+        android:includeFontPadding="false"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/card_bg"
+        app:layout_constraintStart_toStartOf="@+id/card_bg"
+        app:layout_constraintTop_toTopOf="@+id/card_bg" />
+
+    <TextView
+        android:id="@+id/subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:elevation="8dp"
+        android:fontFamily="sans-serif-light"
+        android:gravity="start"
+        android:includeFontPadding="false"
+        tools:texttext="Inspect pie mode with all its related attributes"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/card_bg"
+        app:layout_constraintStart_toStartOf="@+id/card_bg"
+        app:layout_constraintTop_toBottomOf="@+id/title" />
+
+    <Space
+        android:id="@+id/space"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/subtitle" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

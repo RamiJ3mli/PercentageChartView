@@ -1,5 +1,37 @@
 <resources>
     <string name="app_name">Percentage Chart View</string>
+
+    <string name="title">PERCENTAGE CHART VIEW</string>
+    <string name="subtitle">v0.3.0 library showcase app</string>
+
+    <array name="home_colors">
+        <item>@color/colorAccent</item>
+        <item>@color/colorAccent</item>
+        <item>@color/colorAccent</item>
+        <item>@color/colorCyan</item>
+        <item>@color/colorYellow</item>
+        <item>@color/colorBlue</item>
+    </array>
+
+    <array name="home_titles">
+        <item>PIE MODE PLAYGROUND</item>
+        <item>RING MODE PLAYGROUND</item>
+        <item>FILL MODE PLAYGROUND</item>
+        <item>ADAPTIVE COLOR PROVIDER SHOWCASE</item>
+        <item>GRADIENT COLORS SHOWCASE</item>
+        <item>TEXT FORMATTER SHOWCASE</item>
+    </array>
+
+    <array name="home_subtitles">
+        <item>Explore pie mode with all its related attributes</item>
+        <item>Explore ring mode with all its related attributes</item>
+        <item>Explore fill mode with all its related attributes</item>
+        <item>See the adaptive color provider in action</item>
+        <item>Check the progress gradient colors in action</item>
+        <item>Check the text formatter in action</item>
+        <item>Check how SpringAnimation differs from the regular animations</item>
+    </array>
+
     <string name="orientation_label">ORIENTATION</string>
     <string name="orientation_clockwise">Clockwise</string>
     <string name="orientation_counter_clockwise">Counter clockwise</string>
@@ -70,4 +102,12 @@
     <string name="github_lbl">GitHub URL</string>
     <string name="github_url">https://github.com/RamiJ3mli/PercentageChartView</string>
     <string name="developed_by_lbl">Developed by Rami Jemli</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="gradient_label">GRADIENT TYPE</string>
+    <string name="gradient_linear">Linear</string>
+    <string name="gradient_radial">Radial</string>
+    <string name="gradient_sweep">Sweep</string>
+    <string name="gradient_angle_label">LINEAR GRADIENT ANGLE</string>
 </resources>

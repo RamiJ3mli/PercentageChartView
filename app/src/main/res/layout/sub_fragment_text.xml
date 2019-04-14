@@ -1,0 +1,398 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/all_card_bg"
+        android:elevation="8dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:outlineProvider="none"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="16dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!--########################################## TEXT COLOR-->
+            <TextView
+                android:id="@+id/text_color_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/text_color_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/text_color"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@android:color/white"
+                android:drawableTop="@drawable/all_ico_paint"
+                android:paddingTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_color_label" />
+
+            <TextView
+                android:id="@+id/text_color_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/default_text_color"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@+id/text_color"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!--########################################## TEXT SIZE-->
+            <TextView
+                android:id="@+id/text_size_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/text_size_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_color_default" />
+
+            <ImageButton
+                android:id="@+id/increment_text_size"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_increment"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_size_label" />
+
+            <TextView
+                android:id="@+id/text_size_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:text="50 sp"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/decrement_text_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/decrement_text_size" />
+
+            <ImageButton
+                android:id="@+id/decrement_text_size"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_decrement"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_size_label" />
+
+            <TextView
+                android:id="@+id/text_size_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/default_text_size"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@+id/decrement_text_size"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!--########################################## TEXT FONT-->
+            <TextView
+                android:id="@+id/font_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/text_font_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_size_default" />
+
+            <Spinner
+                android:id="@+id/font_value"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:spinnerMode="dialog"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/font_label" />
+
+            <!--########################################## TEXT STYLE-->
+            <TextView
+                android:id="@+id/text_style_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/text_font_style_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/font_value" />
+
+            <Spinner
+                android:id="@+id/text_style_value"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:spinnerMode="dialog"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_style_label" />
+
+            <!--########################################## TEXT SHADOW-->
+            <TextView
+                android:id="@+id/text_shadow_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/text_shadow_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_style_value" />
+
+            <CheckBox
+                android:id="@+id/use_shadow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:includeFontPadding="false"
+                android:text="@string/text_shadow_use_shadow_value"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_shadow_label" />
+
+            <!--########################################## TEXT SHADOW COLOR-->
+            <TextView
+                android:id="@+id/shadow_color_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="sans-serif-condensed-light"
+                android:text="@string/text_shadow_color_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/shadow_color"
+                app:layout_constraintEnd_toStartOf="@+id/shadow_color"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/shadow_color" />
+
+            <Button
+                android:id="@+id/shadow_color"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@android:color/white"
+                android:drawableTop="@drawable/all_ico_paint"
+                android:paddingTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/shadow_color_label"
+                app:layout_constraintTop_toBottomOf="@+id/use_shadow" />
+
+            <!--########################################## TEXT SHADOW RADIUS-->
+            <TextView
+                android:id="@+id/shadow_radius_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="sans-serif-condensed-light"
+                android:text="@string/text_shadow_radius_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/decrement_shadow"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/decrement_shadow" />
+
+            <TextView
+                android:id="@+id/radius_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="sans-serif-light"
+                android:text="2.0"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/decrement_shadow"
+                app:layout_constraintEnd_toStartOf="@+id/decrement_shadow"
+                app:layout_constraintTop_toTopOf="@+id/decrement_shadow" />
+
+            <ImageButton
+                android:id="@+id/decrement_shadow"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_decrement"
+                app:layout_constraintEnd_toStartOf="@+id/increment_shadow"
+                app:layout_constraintTop_toBottomOf="@+id/shadow_color" />
+
+            <ImageButton
+                android:id="@+id/increment_shadow"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_increment"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/shadow_color" />
+
+            <!--########################################## TEXT SHADOW DISTANCE X-->
+            <TextView
+                android:id="@+id/shadow_distx_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="sans-serif-condensed-light"
+                android:text="@string/text_shadow_distance_x_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/decrement_distx"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/decrement_distx" />
+
+            <TextView
+                android:id="@+id/distx_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="sans-serif-light"
+                android:text="2.0"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/decrement_distx"
+                app:layout_constraintEnd_toStartOf="@+id/decrement_distx"
+                app:layout_constraintTop_toTopOf="@+id/decrement_distx" />
+
+            <ImageButton
+                android:id="@+id/decrement_distx"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_decrement"
+                app:layout_constraintEnd_toStartOf="@+id/increment_distx"
+                app:layout_constraintTop_toBottomOf="@+id/increment_shadow" />
+
+            <ImageButton
+                android:id="@+id/increment_distx"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_increment"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/increment_shadow" />
+
+            <!--########################################## TEXT SHADOW DISTANCE Y-->
+            <TextView
+                android:id="@+id/shadow_disty_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="sans-serif-condensed-light"
+                android:text="@string/text_shadow_distance_y_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/decrement_disty"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/decrement_disty" />
+
+            <TextView
+                android:id="@+id/disty_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="sans-serif-light"
+                android:text="2.0"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/decrement_disty"
+                app:layout_constraintEnd_toStartOf="@+id/decrement_disty"
+                app:layout_constraintTop_toTopOf="@+id/decrement_disty" />
+
+            <ImageButton
+                android:id="@+id/decrement_disty"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_decrement"
+                app:layout_constraintEnd_toStartOf="@+id/increment_disty"
+                app:layout_constraintTop_toBottomOf="@+id/increment_distx" />
+
+            <ImageButton
+                android:id="@+id/increment_disty"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_increment"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/increment_distx" />
+
+            <Space
+                android:id="@+id/space"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/decrement_disty" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</FrameLayout>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    android:transitionGroup="false">
+
+    <com.ramijemli.percentagechartview.PercentageChartView
+        android:id="@+id/chart"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="24dp"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:pcv_backgroundBarThickness="30dp"
+        app:pcv_mode="ring"
+        app:pcv_progress="50"
+        app:pcv_progressBarThickness="30dp"
+        app:pcv_startAngle="90"
+        app:pcv_textSize="50sp" />
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/view_pager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="24dp"
+        android:transitionGroup="true"
+        app:layout_constraintBottom_toTopOf="@+id/tabs"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chart" />
+
+    <com.ogaclejapan.smarttablayout.SmartTabLayout
+        android:id="@+id/tabs"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:stl_clickable="true"
+        app:stl_customTabTextLayoutId="@layout/custom_tab"
+        app:stl_customTabTextViewId="@id/tab_text"
+        app:stl_defaultTabBackground="?attr/selectableItemBackground"
+        app:stl_dividerThickness="0dp"
+        app:stl_indicatorAlwaysInCenter="true"
+        app:stl_indicatorColor="@color/colorAccent"
+        app:stl_indicatorCornerRadius="3dp"
+        app:stl_indicatorGravity="top"
+        app:stl_indicatorInFront="true"
+        app:stl_indicatorInterpolation="linear"
+        app:stl_indicatorThickness="6dp"
+        app:stl_indicatorWidth="6dp"
+        app:stl_indicatorWithoutPadding="true"
+        app:stl_overlineThickness="0dp"
+        app:stl_underlineThickness="0dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
