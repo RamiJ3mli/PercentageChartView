@@ -21,14 +21,20 @@ import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.SweepGradient;
 import android.util.TypedValue;
 
 import com.ramijemli.percentagechartview.IPercentageChartView;
 import com.ramijemli.percentagechartview.R;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
+import com.ramijemli.percentagechartview.callback.ProgressTextFormatter;
 
 import androidx.annotation.Nullable;
 
@@ -41,7 +47,6 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
     private boolean mDrawBackgroundBar;
     private float mBackgroundBarThickness;
     private int mBackgroundBarColor;
-
     private int mProvidedBgBarColor;
 
     //PROGRESS BAR
@@ -50,6 +55,9 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
     public static final int CAP_SQUARE = 1;
     private Paint.Cap mProgressBarStyle;
     private float mProgressBarThickness;
+
+    //TO PUSH PROGRESS BAR OUT OF SWEEP GRADIENT'S WAY
+    private float tweekAngle;
 
 
     public RingModeRenderer(IPercentageChartView view) {
@@ -108,6 +116,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         mBackgroundBounds = new RectF();
         mTextBounds = new Rect();
         mProvidedProgressColor = mProvidedBackgroundColor = mProvidedTextColor = mProvidedBgBarColor = -1;
+        tweekAngle = 0;
         updateDrawingAngles();
 
         //BACKGROUND
@@ -165,7 +174,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
     }
 
     @Override
-    public void mesure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
+    public void measure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
         int diameter = Math.min(w, h);
         float maxOffset = Math.max(mProgressBarThickness, mBackgroundBarThickness);
 
@@ -183,8 +192,8 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         mBackgroundBounds.top = centerY - backgroundRadius;
         mBackgroundBounds.right = centerX + backgroundRadius;
         mBackgroundBounds.bottom = centerY + backgroundRadius;
+        setupGradientColors(mCircleBounds);
     }
-
 
     @Override
     public void draw(Canvas canvas) {
@@ -196,7 +205,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         //BACKGROUND BAR
         if (mDrawBackgroundBar) {
             if (mBackgroundBarThickness <= mProgressBarThickness) {
-                canvas.drawArc(mCircleBounds, mStartAngle + mSweepAngle, 360 - mSweepAngle, false, mBackgroundBarPaint);
+                canvas.drawArc(mCircleBounds, mStartAngle + tweekAngle, -(360 - mSweepAngle + tweekAngle), false, mBackgroundBarPaint);
             } else {
                 canvas.drawArc(mCircleBounds, 0, 360, false, mBackgroundBarPaint);
             }
@@ -204,7 +213,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
 
         //FOREGROUND
         if (mProgress != 0) {
-            canvas.drawArc(mCircleBounds, mStartAngle, mSweepAngle, false, mProgressPaint);
+            canvas.drawArc(mCircleBounds, mStartAngle + tweekAngle, mSweepAngle + tweekAngle, false, mProgressPaint);
         }
 
         //TEXT
@@ -252,6 +261,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         mCircleBounds = mBackgroundBounds = null;
         mTextBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
+        gradient = null;
 
 
         mAdaptiveColorProvider = null;
@@ -279,16 +289,23 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
     }
 
     @Override
+    public void setTextFormatter(@Nullable ProgressTextFormatter textFormatter) {
+        this.mProvidedTextFormatter = textFormatter;
+        updateText();
+        mView.invalidate();
+    }
+
+    @Override
     public void setProgress(float progress, boolean animate) {
         if (this.mProgress == progress) return;
 
         cancelAnimations();
 
         if (!animate) {
-            updateProvidedColors(progress);
             this.mProgress = progress;
             this.mTextProgress = (int) progress;
 
+            updateProvidedColors(progress);
             updateDrawingAngles();
             updateText();
 
@@ -298,6 +315,36 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         }
 
         updateAnimations(progress);
+    }
+
+    private void setupGradientColors(RectF bounds) {
+        if (mGradientType == -1) return;
+
+        double ab = Math.pow(bounds.bottom - bounds.centerY(), 2);
+        tweekAngle = (float) Math.toDegrees(Math.acos((2 * ab - Math.pow(mProgressBarThickness / 2, 2)) / (2 * ab)));
+
+        switch (mGradientType) {
+            default:
+            case GRADIENT_LINEAR:
+                gradient = new LinearGradient(bounds.centerX(), bounds.top, bounds.centerX(), bounds.bottom, mGradientColors, mGradientDistributions, Shader.TileMode.CLAMP);
+                updateGradientAngle(mStartAngle);
+                break;
+
+            case GRADIENT_RADIAL:
+                gradient = new RadialGradient(bounds.centerX(), bounds.centerY(), bounds.bottom - bounds.centerY(), mGradientColors, mGradientDistributions, Shader.TileMode.MIRROR);
+                break;
+
+            case GRADIENT_SWEEP:
+                gradient = new SweepGradient(bounds.centerX(), bounds.centerY(), mGradientColors, mGradientDistributions);
+
+                if (!mView.isInEditMode()) {
+                    // THIS BREAKS SWEEP GRADIENT'S PREVIEW MODE
+                    updateGradientAngle(mStartAngle);
+                }
+                break;
+        }
+
+        mProgressPaint.setShader(gradient);
     }
 
     private void setupColorAnimations() {
@@ -369,7 +416,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
 
         int providedProgressColor = mAdaptiveColorProvider.provideProgressColor(progress);
 
-        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor) {
+        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor && mGradientType == -1) {
             int startColor = mProvidedProgressColor != -1 ? mProvidedProgressColor : mProgressColor;
             mProgressColorAnimator.setIntValues(startColor, providedProgressColor);
             mProgressColorAnimator.start();
@@ -409,7 +456,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
 
         int providedProgressColor = mAdaptiveColorProvider.provideProgressColor(progress);
 
-        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor) {
+        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor && mGradientType == -1) {
             mProvidedProgressColor = providedProgressColor;
             mProgressPaint.setColor(mProvidedProgressColor);
         }
@@ -452,6 +499,13 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         }
     }
 
+    private void updateGradientAngle(float angle) {
+        if (mGradientType == -1 || mGradientType == GRADIENT_RADIAL) return;
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle, mCircleBounds.centerX(), mCircleBounds.centerY());
+        gradient.setLocalMatrix(matrix);
+    }
+
     @Override
     void updateText() {
         textValue = (mProvidedTextFormatter != null) ?
@@ -476,6 +530,21 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
     public void setStartAngle(float startAngle) {
         if (this.mStartAngle == startAngle) return;
         this.mStartAngle = startAngle;
+        if (mGradientType == GRADIENT_SWEEP) {
+            updateGradientAngle(startAngle);
+        }
+    }
+
+    @Override
+    public void setGradientColors(int type, int[] colors, float[] positions, float angle) {
+        mGradientType = type;
+        mGradientColors = colors;
+        mGradientDistributions = positions;
+        setupGradientColors(mCircleBounds);
+        if (mGradientType == GRADIENT_LINEAR && mGradientAngle != angle) {
+            mGradientAngle = angle;
+            updateGradientAngle(mGradientAngle);
+        }
     }
 
     // DRAW BACKGROUND BAR STATE
@@ -510,7 +579,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         if (this.mBackgroundBarThickness == backgroundBarThickness) return;
         this.mBackgroundBarThickness = backgroundBarThickness;
         mBackgroundBarPaint.setStrokeWidth(backgroundBarThickness);
-        mesure(mView.getWidth(), mView.getHeight(), 0, 0, 0, 0);
+        measure(mView.getWidth(), mView.getHeight(), 0, 0, 0, 0);
     }
 
     //PROGRESS BAR THICKNESS
@@ -522,7 +591,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         if (this.mProgressBarThickness == progressBarThickness) return;
         this.mProgressBarThickness = progressBarThickness;
         mProgressPaint.setStrokeWidth(progressBarThickness);
-        mesure(mView.getWidth(), mView.getHeight(), 0, 0, 0, 0);
+        measure(mView.getWidth(), mView.getHeight(), 0, 0, 0, 0);
     }
 
     //PROGRESS BAR STYLE

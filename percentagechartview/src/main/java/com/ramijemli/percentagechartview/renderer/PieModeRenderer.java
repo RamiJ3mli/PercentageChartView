@@ -21,16 +21,22 @@ import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.SweepGradient;
 
 import com.ramijemli.percentagechartview.IPercentageChartView;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
+import com.ramijemli.percentagechartview.callback.ProgressTextFormatter;
 
 import androidx.annotation.Nullable;
 
-public class PieModeRenderer extends BaseModeRenderer implements OrientationBasedMode, OffsetEnabledMode{
+public class PieModeRenderer extends BaseModeRenderer implements OrientationBasedMode, OffsetEnabledMode {
 
     private float mBgStartAngle;
     private float mBgSweepAngle;
@@ -101,20 +107,28 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
     }
 
     @Override
-    public void mesure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
-        int centerX = w / 2;
-        int centerY = h / 2;
-        float radius = (float) Math.min(w, h) / 2;
+    public void measure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
+        float centerX = w * 0.5f;
+        float centerY = h * 0.5f;
+        float radius = Math.min(w, h) * 0.5f;
 
         mCircleBounds.left = centerX - radius;
         mCircleBounds.top = centerY - radius;
         mCircleBounds.right = centerX + radius;
         mCircleBounds.bottom = centerY + radius;
-        mesureBackgroundBounds();
+        measureBackgroundBounds();
+        setupGradientColors(mCircleBounds);
     }
 
     @Override
     public void draw(Canvas canvas) {
+
+        if (mGradientType == GRADIENT_SWEEP && mView.isInEditMode()) {
+            // TO GET THE RIGHT DRAWING START ANGLE FOR SWEEP GRADIENT'S COLORS IN PREVIEW MODE
+            canvas.save();
+            canvas.rotate(mStartAngle, mCircleBounds.centerX(), mCircleBounds.centerY());
+        }
+
         //FOREGROUND
         canvas.drawArc(mCircleBounds, mStartAngle, mSweepAngle, true, mProgressPaint);
 
@@ -123,8 +137,14 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
             canvas.drawArc(mBackgroundBounds, mBgStartAngle, mBgSweepAngle, true, mBackgroundPaint);
         }
 
+        if (mGradientType == GRADIENT_SWEEP && mView.isInEditMode()) {
+            // TO GET THE RIGHT DRAWING START ANGLE FOR SWEEP GRADIENT'S COLORS IN PREVIEW MODE
+            canvas.restore();
+        }
+
         //TEXT
         canvas.drawText(textValue, mCircleBounds.centerX(), mCircleBounds.centerY() + (textHeight / 2f), mTextPaint);
+
     }
 
     @Override
@@ -161,13 +181,13 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         mCircleBounds = null;
         mTextBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
+        gradient = null;
 
-        if (mAdaptiveColorProvider != null) {
-            mAdaptiveColorProvider = null;
-        }
+        mAdaptiveColorProvider = null;
+        defaultTextFormatter = mProvidedTextFormatter = null;
     }
 
-    private void mesureBackgroundBounds() {
+    private void measureBackgroundBounds() {
         mBackgroundBounds.left = mCircleBounds.left + mBackgroundOffset;
         mBackgroundBounds.top = mCircleBounds.top + mBackgroundOffset;
         mBackgroundBounds.right = mCircleBounds.right - mBackgroundOffset;
@@ -178,7 +198,7 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
     public void setAdaptiveColorProvider(@Nullable AdaptiveColorProvider adaptiveColorProvider) {
         if (adaptiveColorProvider == null) {
             mProgressColorAnimator = mBackgroundColorAnimator = mTextColorAnimator = null;
-            this.mAdaptiveColorProvider = null;
+            mAdaptiveColorProvider = null;
             mTextPaint.setColor(mTextColor);
             mBackgroundPaint.setColor(mBackgroundColor);
             mProgressPaint.setColor(mProgressColor);
@@ -194,16 +214,23 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
     }
 
     @Override
+    public void setTextFormatter(@Nullable ProgressTextFormatter textFormatter) {
+        this.mProvidedTextFormatter = textFormatter;
+        updateText();
+        mView.invalidate();
+    }
+
+    @Override
     public void setProgress(float progress, boolean animate) {
         if (this.mProgress == progress) return;
 
         cancelAnimations();
 
         if (!animate) {
-            updateProvidedColors(progress);
             this.mProgress = progress;
             this.mTextProgress = (int) progress;
 
+            updateProvidedColors(progress);
             updateDrawingAngles();
             updateText();
 
@@ -213,6 +240,33 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         }
 
         updateAnimations(progress);
+    }
+
+    private void setupGradientColors(RectF bounds) {
+        if (mGradientType == -1) return;
+
+        switch (mGradientType) {
+            default:
+            case GRADIENT_LINEAR:
+                gradient = new LinearGradient(bounds.centerX(), bounds.top, bounds.centerX(), bounds.bottom, mGradientColors, mGradientDistributions, Shader.TileMode.CLAMP);
+                updateGradientAngle(mGradientAngle);
+                break;
+
+            case GRADIENT_RADIAL:
+                gradient = new RadialGradient(bounds.centerX(), bounds.centerY(), bounds.bottom - bounds.centerY(), mGradientColors, mGradientDistributions, Shader.TileMode.MIRROR);
+                break;
+
+            case GRADIENT_SWEEP:
+                gradient = new SweepGradient(bounds.centerX(), bounds.centerY(), mGradientColors, mGradientDistributions);
+
+                if (!mView.isInEditMode()) {
+                    // THIS BREAKS SWEEP GRADIENT'S PREVIEW MODE
+                    updateGradientAngle(mStartAngle);
+                }
+                break;
+        }
+
+        mProgressPaint.setShader(gradient);
     }
 
     private void setupColorAnimations() {
@@ -271,7 +325,7 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
 
         int providedProgressColor = mAdaptiveColorProvider.provideProgressColor(progress);
 
-        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor) {
+        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor && mGradientType == -1) {
             int startColor = mProvidedProgressColor != -1 ? mProvidedProgressColor : mProgressColor;
             mProgressColorAnimator.setIntValues(startColor, providedProgressColor);
             mProgressColorAnimator.start();
@@ -302,7 +356,7 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
 
         int providedProgressColor = mAdaptiveColorProvider.provideProgressColor(progress);
 
-        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor) {
+        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor && mGradientType == -1) {
             mProvidedProgressColor = providedProgressColor;
             mProgressPaint.setColor(mProvidedProgressColor);
         }
@@ -341,6 +395,13 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         }
     }
 
+    private void updateGradientAngle(float angle) {
+        if (mGradientType == -1 || mGradientType == GRADIENT_RADIAL) return;
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle, mCircleBounds.centerX(), mCircleBounds.centerY());
+        gradient.setLocalMatrix(matrix);
+    }
+
     @Override
     void updateText() {
         textValue = (mProvidedTextFormatter != null) ?
@@ -365,8 +426,22 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
     public void setStartAngle(float startAngle) {
         if (this.mStartAngle == startAngle) return;
         this.mStartAngle = startAngle;
-        mBgStartAngle = (orientation == ORIENTATION_COUNTERCLOCKWISE) ? mStartAngle : mStartAngle + mSweepAngle;
-        mBgSweepAngle = 360 - ((orientation == ORIENTATION_COUNTERCLOCKWISE) ? -(mSweepAngle) : mSweepAngle);
+        updateDrawingAngles();
+        if (mGradientType == GRADIENT_SWEEP) {
+            updateGradientAngle(startAngle);
+        }
+    }
+
+    @Override
+    public void setGradientColors(int type, int[] colors, float[] positions, float angle) {
+        mGradientType = type;
+        mGradientColors = colors;
+        mGradientDistributions = positions;
+        setupGradientColors(mCircleBounds);
+        if (mGradientType == GRADIENT_LINEAR && mGradientAngle != angle) {
+            mGradientAngle = angle;
+            updateGradientAngle(mGradientAngle);
+        }
     }
 
     //BACKGROUND OFFSET
@@ -378,6 +453,6 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         if (!mDrawBackground || this.mBackgroundOffset == backgroundOffset)
             return;
         this.mBackgroundOffset = backgroundOffset;
-        mesureBackgroundBounds();
+        measureBackgroundBounds();
     }
 }

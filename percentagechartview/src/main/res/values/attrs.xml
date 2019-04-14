@@ -22,19 +22,14 @@
         <attr name="pcv_progress" format="float" />
         <attr name="pcv_progressColor" format="color" />
 
-        <attr name="pcv_adaptiveBackground" format="boolean" />
-        <attr name="pcv_adaptiveBackgroundRatio" format="integer" />
-        <attr name="pcv_adaptiveBackgroundMode"  format="enum">
-            <enum name="darker" value="0" />
-            <enum name="lighter" value="1" />
+        <attr name="pcv_gradientType" format="enum">
+            <enum name="linear" value="0" />
+            <enum name="radial" value="1" />
+            <enum name="sweep" value="2" />
         </attr>
-
-        <attr name="pcv_adaptiveText" format="boolean" />
-        <attr name="pcv_adaptiveTextRatio" format="integer" />
-        <attr name="pcv_adaptiveTextMode"  format="enum">
-            <enum name="darker" value="0" />
-            <enum name="lighter" value="1" />
-        </attr>
+        <attr name="pcv_gradientColors" format="string" />
+        <attr name="pcv_gradientDistributions" format="string" />
+        <attr name="pcv_gradientAngle" format="integer" />
 
         <attr name="pcv_animDuration" format="integer" />
         <attr name="pcv_animInterpolator" format="enum">
@@ -64,7 +59,7 @@
         <attr name="pcv_textShadowDistX" format="float" />
         <attr name="pcv_textShadowColor" format="color" />
 
-        <!--PIE MODE ATTRIBUTES-->
+        <!--PIE AND FILL MODES ATTRIBUTES-->
         <attr name="pcv_backgroundOffset" format="dimension" />
 
         <!--RING MODE ATTRIBUTES-->
@@ -76,13 +71,6 @@
         <attr name="pcv_progressBarStyle" format="enum">
             <enum name="round" value="0" />
             <enum name="square" value="1" />
-        </attr>
-
-        <attr name="pcv_adaptiveBackgroundBar" format="boolean" />
-        <attr name="pcv_adaptiveBackgroundBarRatio" format="integer" />
-        <attr name="pcv_adaptiveBackgroundBarMode"  format="enum">
-            <enum name="darker" value="0" />
-            <enum name="lighter" value="1" />
         </attr>
 
     </declare-styleable>

@@ -26,6 +26,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.ramijemli.percentagechartview.annotation.ChartMode;
+import com.ramijemli.percentagechartview.annotation.GradientTypes;
 import com.ramijemli.percentagechartview.annotation.ProgressBarStyle;
 import com.ramijemli.percentagechartview.annotation.ProgressOrientation;
 import com.ramijemli.percentagechartview.annotation.TextStyle;
@@ -46,13 +47,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.GRADIENT_LINEAR;
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.GRADIENT_SWEEP;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_FILL;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_PIE;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_RING;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_CLOCKWISE;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_COUNTERCLOCKWISE;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public class PercentageChartView extends View implements IPercentageChartView {
 
     private BaseModeRenderer renderer;
@@ -114,15 +117,17 @@ public class PercentageChartView extends View implements IPercentageChartView {
             }
 
         } else {
+            mode = MODE_PIE;
             renderer = new PieModeRenderer(this);
         }
     }
 
     //##############################################################################################   BEHAVIOR
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        renderer.mesure(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec), getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+        renderer.measure(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec), getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
     }
 
     @Override
@@ -157,6 +162,16 @@ public class PercentageChartView extends View implements IPercentageChartView {
     //##############################################################################################   STYLE MODIFIERS
 
     /**
+     * Gets the percentage chart view mode.
+     *
+     * @return the percentage chart view mode
+     */
+    @ChartMode
+    public int getMode() {
+        return mode;
+    }
+
+    /**
      * Gets the current drawing orientation.
      *
      * @return the current drawing orientation
@@ -172,16 +187,9 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the circular drawing direction. Default orientation is ORIENTATION_CLOCKWISE.
      *
      * @param orientation non-negative orientation constant.
-     * @throws IllegalArgumentException if the given orientation is not a non-negative ProgressOrientation constant.
      */
     public void setOrientation(@ProgressOrientation int orientation) {
-        if (orientation != ORIENTATION_CLOCKWISE && orientation != ORIENTATION_COUNTERCLOCKWISE) {
-            throw new IllegalArgumentException("Orientation must be a ProgressOrientation constant.");
-        } else if (!(renderer instanceof OrientationBasedMode)) {
-            throw new IllegalArgumentException("Orientation is not supported by the used percentage chart mode.");
-        }
-
-        ((OrientationBasedMode) renderer).setOrientation(orientation);
+        orientation(orientation);
         invalidate();
     }
 
@@ -199,13 +207,9 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the current circular drawing's start angle in degrees. Default start angle is0.
      *
      * @param startAngle A positive start angle value that is less or equal to 360.
-     * @throws IllegalArgumentException if the given start angle is not positive, or, less or equal to 360.
      */
     public void setStartAngle(@FloatRange(from = 0f, to = 360f) float startAngle) {
-        if (startAngle < 0 || startAngle > 360) {
-            throw new IllegalArgumentException("Start angle value must be positive and less or equal to 360.");
-        }
-        this.renderer.setStartAngle(startAngle);
+        startAngle(startAngle);
         invalidate();
     }
 
@@ -224,7 +228,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param enabled True if background have to be drawn, false otherwise.
      */
     public void setDrawBackgroundEnabled(boolean enabled) {
-        this.renderer.setDrawBackgroundEnabled(enabled);
+        drawBackgroundEnabled(enabled);
         invalidate();
     }
 
@@ -244,7 +248,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param color the color of the circular background
      */
     public void setBackgroundColor(@ColorInt int color) {
-        this.renderer.setBackgroundColor(color);
+        backgroundColor(color);
         invalidate();
     }
 
@@ -289,7 +293,38 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param color the color of the progress/progress bar
      */
     public void setProgressColor(@ColorInt int color) {
-        this.renderer.setProgressColor(color);
+        progressColor(color);
+        invalidate();
+    }
+
+
+    /**
+     * Gets progress gradient type.
+     *
+     * @return Gets progress gradient type.
+     */
+    @GradientTypes
+    public int getGradientType() {
+        return renderer.getGradientType();
+    }
+
+
+    /**
+     * Sets progress gradient colors.
+     *
+     * @param type      The gradient type which is a GradientTypes constant
+     * @param colors    The colors to be distributed.
+     *                  There must be at least 2 colors in the array.
+     * @param positions May be NULL. The relative position of
+     *                  each corresponding color in the colors array, beginning
+     *                  with 0 and ending with 1.0. If the values are not
+     *                  monotonic, the drawing may produce unexpected results.
+     *                  If positions is NULL, then the colors are automatically
+     *                  spaced evenly.
+     * @param angle     Defines the direction for linear gradient type.
+     */
+    public void setGradientColors(@GradientTypes int type, int[] colors, float[] positions, @FloatRange(from = 0f, to = 360f) float angle) {
+        gradientColors(type, colors, positions, angle);
         invalidate();
     }
 
@@ -307,13 +342,9 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the duration of the progress change's animation.
      *
      * @param duration non-negative duration value.
-     * @throws IllegalArgumentException if the given duration is less than 50.
      */
     public void setAnimationDuration(@IntRange(from = 50) int duration) {
-        if (duration < 50) {
-            throw new IllegalArgumentException("Duration must be equal or greater than 50.");
-        }
-        renderer.setAnimationDuration(duration);
+        animationDuration(duration);
     }
 
     /**
@@ -329,14 +360,10 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the interpolator of the progress change's animation.
      *
      * @param interpolator TimeInterpolator instance.
-     * @throws IllegalArgumentException if the given TimeInterpolator instance is null.
      */
     @SuppressWarnings("ConstantConditions")
     public void setAnimationInterpolator(@NonNull TimeInterpolator interpolator) {
-        if (interpolator == null) {
-            throw new IllegalArgumentException("Animation interpolator cannot be null");
-        }
-        renderer.setAnimationInterpolator(interpolator);
+        animationInterpolator(interpolator);
     }
 
     /**
@@ -355,7 +382,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param color the text color
      */
     public void setTextColor(@ColorInt int color) {
-        renderer.setTextColor(color);
+        textColor(color);
         invalidate();
     }
 
@@ -372,13 +399,9 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the text size.
      *
      * @param size the text size
-     * @throws IllegalArgumentException if the given text size is zero or a negative value.
      */
     public void setTextSize(float size) {
-        if (size <= 0) {
-            throw new IllegalArgumentException("Text size must be a nonzero positive value.");
-        }
-        renderer.setTextSize(size);
+        textSize(size);
         invalidate();
     }
 
@@ -395,14 +418,10 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the text font.
      *
      * @param typeface the text font as a Typeface instance
-     * @throws IllegalArgumentException if the given typeface is null.
      */
     @SuppressWarnings("ConstantConditions")
     public void setTypeface(@NonNull Typeface typeface) {
-        if (typeface == null) {
-            throw new IllegalArgumentException("Text TypeFace cannot be null");
-        }
-        renderer.setTypeface(typeface);
+        typeface(typeface);
         invalidate();
     }
 
@@ -420,13 +439,9 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the text style.
      *
      * @param style the text style.
-     * @throws IllegalArgumentException if the given text style is not a valid TextStyle constant.
      */
     public void setTextStyle(@TextStyle int style) {
-        if (style < 0 || style > 3) {
-            throw new IllegalArgumentException("Text style must be a valid TextStyle constant.");
-        }
-        renderer.setTextStyle(style);
+        textStyle(style);
         invalidate();
     }
 
@@ -476,7 +491,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param shadowDistY  text shadow x-axis distance.
      */
     public void setTextShadow(@ColorInt int shadowColor, @FloatRange(from = 0) float shadowRadius, @FloatRange(from = 0) float shadowDistX, @FloatRange(from = 0) float shadowDistY) {
-        renderer.setTextShadow(shadowColor, shadowRadius, shadowDistX, shadowDistY);
+        textShadow(shadowColor, shadowRadius, shadowDistX, shadowDistY);
         invalidate();
     }
 
@@ -494,19 +509,10 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the offset of the circular background. Works only if chart mode is set to pie.
      *
      * @param offset A positive offset value.
-     * @throws IllegalArgumentException if the given offset is a negative value.
      */
     public void setBackgroundOffset(@IntRange(from = 0) int offset) {
-        if (offset < 0) {
-            throw new IllegalArgumentException("Background offset must be a positive value.");
-        }
-
-        try {
-            ((OffsetEnabledMode) renderer).setBackgroundOffset(offset);
-            invalidate();
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("Background offset is not supported by the used percentage chart mode.");
-        }
+        backgroundOffset(offset);
+        invalidate();
     }
 
     /**
@@ -525,12 +531,8 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param enabled True if background bar have to be drawn, false otherwise.
      */
     public void setDrawBackgroundBarEnabled(boolean enabled) {
-        try {
-            ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
-            invalidate();
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("Background bar's drawing state is not support by the used percentage chart mode.");
-        }
+        drawBackgroundBarEnabled(enabled);
+        invalidate();
     }
 
     /**
@@ -549,12 +551,8 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * @param color the background bar color
      */
     public void setBackgroundBarColor(@ColorInt int color) {
-        try {
-            ((RingModeRenderer) renderer).setBackgroundBarColor(color);
-            invalidate();
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("Background bar color is not support by the used percentage chart mode.");
-        }
+        backgroundBarColor(color);
+        invalidate();
     }
 
     /**
@@ -571,19 +569,10 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the background bar thickness in pixels. Works only if chart mode is set to ring.
      *
      * @param thickness non-negative thickness value in pixels.
-     * @throws IllegalArgumentException if the given value is negative.
      */
     public void setBackgroundBarThickness(@FloatRange(from = 0) float thickness) {
-        if (thickness < 0) {
-            throw new IllegalArgumentException("Background bar thickness must be a positive value.");
-        }
-
-        try {
-            ((RingModeRenderer) renderer).setBackgroundBarThickness(thickness);
-            invalidate();
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("Background bar thickness is not support by the used percentage chart mode.");
-        }
+        backgroundBarThickness(thickness);
+        invalidate();
     }
 
     /**
@@ -600,19 +589,10 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the progress bar thickness in pixels. Works only if chart mode is set to ring.
      *
      * @param thickness non-negative thickness value in pixels.
-     * @throws IllegalArgumentException if the given value is negative.
      */
     public void setProgressBarThickness(@FloatRange(from = 0) float thickness) {
-        if (thickness < 0) {
-            throw new IllegalArgumentException("Progress bar thickness must be a positive value.");
-        }
-
-        try {
-            ((RingModeRenderer) renderer).setProgressBarThickness(thickness);
-            invalidate();
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("Progress bar thickness is not support by the used percentage chart mode.");
-        }
+        progressBarThickness(thickness);
+        invalidate();
     }
 
     /**
@@ -629,19 +609,10 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the progress bar stroke style. Works only if chart mode is set to ring.
      *
      * @param style Progress bar stroke style as a ProgressStyle constant.
-     * @throws IllegalArgumentException if the given progress bar style is not a valid ProgressBarStyle constant.
      */
     public void setProgressBarStyle(@ProgressBarStyle int style) {
-        if (style < 0 || style > 1) {
-            throw new IllegalArgumentException("Text style must be a valid TextStyle constant.");
-        }
-
-        try {
-            ((RingModeRenderer) renderer).setProgressBarStyle(style);
-            invalidate();
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("Progress bar style is not support by the used percentage chart mode.");
-        }
+        progressBarStyle(style);
+        invalidate();
     }
 
     //############################################################################################## UPDATE PIPELINE AS A FLUENT API
@@ -650,7 +621,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the circular drawing direction. Default orientation is ORIENTATION_CLOCKWISE.
      *
      * @param orientation non-negative orientation constant.
-     * @throws IllegalArgumentException if the given orientation is not a non-negative ProgressOrientation constant.
+     * @throws IllegalArgumentException if the given orientation is not a ProgressOrientation constant or not supported by the current used chart mode.
      */
     public PercentageChartView orientation(@ProgressOrientation int orientation) {
         if (orientation != ORIENTATION_CLOCKWISE && orientation != ORIENTATION_COUNTERCLOCKWISE) {
@@ -706,6 +677,32 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public PercentageChartView progressColor(@ColorInt int color) {
         this.renderer.setProgressColor(color);
+        return this;
+    }
+
+    /**
+     * Sets progress gradient colors.
+     *
+     * @param type      The gradient type which is a GradientTypes constant
+     * @param colors    The colors to be distributed.
+     *                  There must be at least 2 colors in the array.
+     * @param positions May be NULL. The relative position of
+     *                  each corresponding color in the colors array, beginning
+     *                  with 0 and ending with 1.0. If the values are not
+     *                  monotonic, the drawing may produce unexpected results.
+     *                  If positions is NULL, then the colors are automatically
+     *                  spaced evenly.
+     * @param angle     Defines the direction for linear gradient type.
+     * @throws IllegalArgumentException If type is not a GradientTypes constant and if colors array is null
+     */
+    public PercentageChartView gradientColors(@GradientTypes int type, int[] colors, float[] positions, @FloatRange(from = 0f, to = 360f) float angle) {
+        if (type < GRADIENT_LINEAR || type > GRADIENT_SWEEP) {
+            throw new IllegalArgumentException("Invalid value for progress gradient type.");
+        } else if (colors == null) {
+            throw new IllegalArgumentException("Gradient colors int array cannot be null.");
+        }
+
+        this.renderer.setGradientColors(type, colors, positions, angle);
         return this;
     }
 
@@ -809,7 +806,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the offset of the circular background. Works only if chart mode is set to pie.
      *
      * @param offset A positive offset value.
-     * @throws IllegalArgumentException if the given offset is a negative value.
+     * @throws IllegalArgumentException if the given offset is a negative value, or, not supported by the current used chart mode.
      */
     public PercentageChartView backgroundOffset(@IntRange(from = 0) int offset) {
         if (offset < 0) {
@@ -828,6 +825,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets whether background bar should be drawn.
      *
      * @param enabled True if background bar have to be drawn, false otherwise.
+     * @throws IllegalArgumentException if background bar's drawing state is not supported by the current used chart mode.
      */
     public PercentageChartView drawBackgroundBarEnabled(boolean enabled) {
         try {
@@ -842,6 +840,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the background bar color.
      *
      * @param color the background bar color
+     * @throws IllegalArgumentException if background bar color is not supported by the current used chart mode.
      */
     public PercentageChartView backgroundBarColor(@ColorInt int color) {
         try {
@@ -856,7 +855,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the background bar thickness in pixels. Works only if chart mode is set to ring.
      *
      * @param thickness non-negative thickness value in pixels.
-     * @throws IllegalArgumentException if the given value is negative.
+     * @throws IllegalArgumentException if the given value is negative, or, background bar thickness is not supported by the current used chart mode.
      */
     public PercentageChartView backgroundBarThickness(@FloatRange(from = 0) float thickness) {
         if (thickness < 0) {
@@ -875,7 +874,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the progress bar thickness in pixels. Works only if chart mode is set to ring.
      *
      * @param thickness non-negative thickness value in pixels.
-     * @throws IllegalArgumentException if the given value is negative.
+     * @throws IllegalArgumentException if the given value is negative, or, progress bar thickness is not supported by the current used chart mode.
      */
     public PercentageChartView progressBarThickness(@FloatRange(from = 0) float thickness) {
         if (thickness < 0) {
@@ -894,11 +893,11 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Sets the progress bar stroke style. Works only if chart mode is set to ring.
      *
      * @param style Progress bar stroke style as a ProgressStyle constant.
-     * @throws IllegalArgumentException if the given progress bar style is not a valid ProgressBarStyle constant.
+     * @throws IllegalArgumentException if the given progress bar style is not a valid ProgressBarStyle constant, or, not supported by the current used chart mode.
      */
     public PercentageChartView progressBarStyle(@ProgressBarStyle int style) {
         if (style < 0 || style > 1) {
-            throw new IllegalArgumentException("Text style must be a valid TextStyle constant.");
+            throw new IllegalArgumentException("Progress bar style must be a valid TextStyle constant.");
         }
 
         try {

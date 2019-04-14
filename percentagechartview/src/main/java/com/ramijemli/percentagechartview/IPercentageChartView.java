@@ -24,6 +24,8 @@ public interface IPercentageChartView {
 
     void invalidate();
 
+    boolean isInEditMode();
+
     int getWidth();
 
     int getHeight();

@@ -21,12 +21,17 @@ import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
 
 import com.ramijemli.percentagechartview.IPercentageChartView;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
+import com.ramijemli.percentagechartview.callback.ProgressTextFormatter;
 
 import androidx.annotation.Nullable;
 
@@ -51,6 +56,7 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
         mBackgroundBounds = new RectF();
         mTextBounds = new Rect();
         mProvidedProgressColor = mProvidedBackgroundColor = mProvidedTextColor = -1;
+        this.mDirectionAngle = mStartAngle;
 
         //BACKGROUND
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -101,7 +107,7 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
     }
 
     @Override
-    public void mesure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
+    public void measure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
         int centerX = w / 2;
         int centerY = h / 2;
         mRadius = (float) Math.min(w, h) / 2;
@@ -110,8 +116,9 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
         mCircleBounds.top = centerY - mRadius;
         mCircleBounds.right = centerX + mRadius;
         mCircleBounds.bottom = centerY + mRadius;
-        mesureBackgroundBounds();
+        measureBackgroundBounds();
         updateDrawingAngles();
+        setupGradientColors(mCircleBounds);
     }
 
     @Override
@@ -163,12 +170,11 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
         mTextBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
 
-        if (mAdaptiveColorProvider != null) {
-            mAdaptiveColorProvider = null;
-        }
+        mAdaptiveColorProvider = null;
+        defaultTextFormatter = mProvidedTextFormatter = null;
     }
 
-    private void mesureBackgroundBounds() {
+    private void measureBackgroundBounds() {
         mBackgroundBounds.left = mCircleBounds.left + mBackgroundOffset;
         mBackgroundBounds.top = mCircleBounds.top + mBackgroundOffset;
         mBackgroundBounds.right = mCircleBounds.right - mBackgroundOffset;
@@ -195,16 +201,23 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
     }
 
     @Override
+    public void setTextFormatter(@Nullable ProgressTextFormatter textFormatter) {
+        this.mProvidedTextFormatter = textFormatter;
+        updateText();
+        mView.invalidate();
+    }
+
+    @Override
     public void setProgress(float progress, boolean animate) {
         if (this.mProgress == progress) return;
 
         cancelAnimations();
 
         if (!animate) {
-            updateProvidedColors(progress);
             this.mProgress = progress;
             this.mTextProgress = (int) progress;
 
+            updateProvidedColors(progress);
             updateDrawingAngles();
             updateText();
 
@@ -214,6 +227,24 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
         }
 
         updateAnimations(progress);
+    }
+
+    private void setupGradientColors(RectF bounds) {
+        if (mGradientType == -1 || mGradientType == GRADIENT_SWEEP) return;
+
+        switch (mGradientType) {
+            default:
+            case GRADIENT_LINEAR:
+                gradient = new LinearGradient(bounds.centerX(), bounds.top, bounds.centerX(), bounds.bottom, mGradientColors, mGradientDistributions, Shader.TileMode.CLAMP);
+                updateGradientAngle(mGradientAngle);
+                break;
+
+            case GRADIENT_RADIAL:
+                gradient = new RadialGradient(bounds.centerX(), bounds.centerY(), bounds.bottom - bounds.centerY(), mGradientColors, mGradientDistributions, Shader.TileMode.MIRROR);
+                break;
+        }
+
+        mProgressPaint.setShader(gradient);
     }
 
     private void setupColorAnimations() {
@@ -272,7 +303,7 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
 
         int providedProgressColor = mAdaptiveColorProvider.provideProgressColor(progress);
 
-        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor) {
+        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor && mGradientType == -1) {
             int startColor = mProvidedProgressColor != -1 ? mProvidedProgressColor : mProgressColor;
             mProgressColorAnimator.setIntValues(startColor, providedProgressColor);
             mProgressColorAnimator.start();
@@ -303,7 +334,7 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
 
         int providedProgressColor = mAdaptiveColorProvider.provideProgressColor(progress);
 
-        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor) {
+        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor && mGradientType == -1) {
             mProvidedProgressColor = providedProgressColor;
             mProgressPaint.setColor(mProvidedProgressColor);
         }
@@ -335,11 +366,11 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
         mBgSweepAngle = (mBackgroundOffset > 0) ? 360 : mSweepAngle - 360;
     }
 
-    @Override
-    public void setStartAngle(float angle) {
-        if (this.mDirectionAngle == angle) return;
-        this.mDirectionAngle = angle;
-        updateDrawingAngles();
+    private void updateGradientAngle(float angle) {
+        if (mGradientType == -1 || mGradientType == GRADIENT_RADIAL) return;
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle, mCircleBounds.centerX(), mCircleBounds.centerY());
+        gradient.setLocalMatrix(matrix);
     }
 
     @Override
@@ -352,6 +383,25 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
         textHeight = mTextBounds.height();
     }
 
+    @Override
+    public void setStartAngle(float angle) {
+        if (this.mDirectionAngle == angle) return;
+        this.mDirectionAngle = angle;
+        updateDrawingAngles();
+    }
+
+    @Override
+    public void setGradientColors(int type, int[] colors, float[] positions, float angle) {
+        mGradientType = type;
+        mGradientColors = colors;
+        mGradientDistributions = positions;
+        setupGradientColors(mCircleBounds);
+        if (mGradientType == GRADIENT_LINEAR && mGradientAngle != angle) {
+            mGradientAngle = angle;
+            updateGradientAngle(mGradientAngle);
+        }
+    }
+
     //BACKGROUND OFFSET
     public float getBackgroundOffset() {
         return mBackgroundOffset;
@@ -361,7 +411,7 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
         if (!mDrawBackground || this.mBackgroundOffset == backgroundOffset)
             return;
         this.mBackgroundOffset = backgroundOffset;
-        mesureBackgroundBounds();
+        measureBackgroundBounds();
         updateDrawingAngles();
     }
 }

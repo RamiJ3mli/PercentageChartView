@@ -24,9 +24,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.util.TypedValue;
+import android.view.InflateException;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
@@ -62,6 +64,12 @@ public abstract class BaseModeRenderer {
     public static final int ORIENTATION_CLOCKWISE = 0;
     public static final int ORIENTATION_COUNTERCLOCKWISE = 1;
 
+    // CHART MODE
+    public static final int INVALID_GRADIENT = -1;
+    public static final int GRADIENT_LINEAR = 0;
+    public static final int GRADIENT_RADIAL = 1;
+    public static final int GRADIENT_SWEEP = 2;
+
     // TEXT
     private static final float DEFAULT_TEXT_SP_SIZE = 12;
 
@@ -83,6 +91,7 @@ public abstract class BaseModeRenderer {
     private static final int DEFAULT_ANIMATION_DURATION = 400;
     static final float DEFAULT_MAX = 100;
 
+
     //##############################################################################################
     // BACKGROUND
     boolean mDrawBackground;
@@ -95,6 +104,12 @@ public abstract class BaseModeRenderer {
     // PROGRESS
     Paint mProgressPaint;
     int mProgressColor;
+
+    int[] mGradientColors;
+    float[] mGradientDistributions;
+    int mGradientType;
+    float mGradientAngle;
+    Shader gradient;
 
     // TEXT
     Rect mTextBounds;
@@ -156,6 +171,10 @@ public abstract class BaseModeRenderer {
         //PROGRESS COLOR
         mProgressColor = Color.RED;
 
+        //GRADIENT COLORS
+        mGradientType = -1;
+        mGradientAngle = (int) mStartAngle;
+
         //PROGRESS ANIMATION DURATION
         mAnimDuration = DEFAULT_ANIMATION_DURATION;
 
@@ -183,7 +202,7 @@ public abstract class BaseModeRenderer {
         mBackgroundOffset = 0;
 
         //TEXT FORMATTER
-        defaultTextFormatter = progress -> (int)progress + "%";
+        defaultTextFormatter = progress -> (int) progress + "%";
     }
 
     BaseModeRenderer(IPercentageChartView view, TypedArray attrs) {
@@ -216,6 +235,9 @@ public abstract class BaseModeRenderer {
         //PROGRESS COLOR
         mProgressColor = attrs.getColor(R.styleable.PercentageChartView_pcv_progressColor, getThemeAccentColor());
 
+        //GRADIENT COLORS
+        initGradientColors(attrs);
+
         //PROGRESS ANIMATION DURATION
         mAnimDuration = attrs.getInt(R.styleable.PercentageChartView_pcv_animDuration, DEFAULT_ANIMATION_DURATION);
 
@@ -223,8 +245,10 @@ public abstract class BaseModeRenderer {
         int interpolator = attrs.getInt(R.styleable.PercentageChartView_pcv_animInterpolator, DEFAULT_ANIMATION_INTERPOLATOR);
         switch (interpolator) {
             default:
+            case LINEAR:
                 mAnimInterpolator = new LinearInterpolator();
                 break;
+
             case ACCELERATE:
                 mAnimInterpolator = new AccelerateInterpolator();
                 break;
@@ -294,11 +318,48 @@ public abstract class BaseModeRenderer {
                 0);
 
         //TEXT FORMATTER
-        defaultTextFormatter = progress -> (int)progress + "%";
+        defaultTextFormatter = progress -> (int) progress + "%";
+    }
+
+    private void initGradientColors(TypedArray attrs) {
+        //PROGRESS GRADIENT TYPE
+        mGradientType = attrs.getInt(R.styleable.PercentageChartView_pcv_gradientType, -1);
+        if (mGradientType == -1) return;
+
+        //ANGLE FOR LINEAR GRADIENT
+        mGradientAngle = attrs.getInt(R.styleable.PercentageChartView_pcv_gradientAngle, (int)mStartAngle);
+
+        //PROGRESS GRADIENT COLORS
+        String gradientColors = attrs.getString(R.styleable.PercentageChartView_pcv_gradientColors);
+        if (gradientColors != null) {
+            String[] colors = gradientColors.split(",");
+            mGradientColors = new int[colors.length];
+            try {
+                for (int i = 0; i < colors.length; i++) {
+                    mGradientColors[i] = Color.parseColor(colors[i].trim());
+                }
+            } catch (Exception e) {
+                throw new InflateException("pcv_gradientColors attribute contains invalid hex color values.");
+            }
+        }
+
+        //PROGRESS GRADIENT COLORS'S DISTRIBUTIONS
+        String gradientDist = attrs.getString(R.styleable.PercentageChartView_pcv_gradientDistributions);
+        if (gradientDist != null) {
+            String[] distributions = gradientDist.split(",");
+            mGradientDistributions = new float[distributions.length];
+            try {
+                for (int i = 0; i < distributions.length; i++) {
+                    mGradientDistributions[i] = Float.parseFloat(distributions[i].trim());
+                }
+            } catch (Exception e) {
+                throw new InflateException("pcv_gradientDistributions attribute contains invalid values.");
+            }
+        }
     }
 
     //############################################################################################## BEHAVIOR
-    public abstract void mesure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom);
+    public abstract void measure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom);
 
     public abstract void draw(Canvas canvas);
 
@@ -306,7 +367,6 @@ public abstract class BaseModeRenderer {
 
     abstract void updateText();
 
-    public abstract void setStartAngle(float startAngle);
 
     private int getThemeAccentColor() {
         int colorAttr;
@@ -326,10 +386,7 @@ public abstract class BaseModeRenderer {
     //############################################################################################## MODIFIERS
     public abstract void setAdaptiveColorProvider(@Nullable AdaptiveColorProvider adaptiveColorProvider);
 
-    public void setTextFormatter(@Nullable ProgressTextFormatter textFormatter) {
-        this.mProvidedTextFormatter = textFormatter;
-        mView.invalidate();
-    }
+    public abstract void setTextFormatter(@Nullable ProgressTextFormatter textFormatter);
 
     //PROGRESS
     public float getProgress() {
@@ -352,6 +409,8 @@ public abstract class BaseModeRenderer {
     public float getStartAngle() {
         return mStartAngle;
     }
+
+    public abstract void setStartAngle(float startAngle);
 
     //BACKGROUND COLOR
     public int getBackgroundColor() {
@@ -380,6 +439,12 @@ public abstract class BaseModeRenderer {
         mProgressPaint.setColor(progressColor);
     }
 
+    //GRADIENT COLORS
+    public int getGradientType() {
+        return mGradientType;
+    }
+
+    public abstract void setGradientColors(int type, int[] colors, float[] positions, float angle);
 
     //ANIMATION DURATION
     public int getAnimationDuration() {
