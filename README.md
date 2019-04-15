@@ -1,4 +1,5 @@
 # Percentage Chart View
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/60780fd194a94722a901e3ac3e3def5c)](https://app.codacy.com/app/RamiJ3mli/PercentageChartView?utm_source=github.com&utm_medium=referral&utm_content=RamiJ3mli/PercentageChartView&utm_campaign=Badge_Grade_Dashboard)
 [![Platform](https://img.shields.io/badge/platform-android-green.svg)](http://developer.android.com/index.html)
 [![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=16)
 [ ![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.2.0) ](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.2.0/link)
