@@ -1,0 +1,235 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/all_card_bg"
+        android:elevation="8dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:outlineProvider="none"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="16dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!--########################################## ORIENTATION-->
+            <TextView
+                android:id="@+id/orientation_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/orientation_label"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <RadioGroup
+                android:id="@+id/orientation_value"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/orientation_label">
+
+                <RadioButton
+                    android:id="@+id/clockwise"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/orientation_clockwise"
+                    android:textSize="12sp" />
+
+                <RadioButton
+                    android:id="@+id/counter_clockwise"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/orientation_counter_clockwise"
+                    android:textSize="12sp" />
+
+            </RadioGroup>
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/orientation_visibility"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="orientation_label, orientation_value"/>
+
+            <!--########################################## START ANGLE-->
+            <TextView
+                android:id="@+id/start_angle_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                app:layout_goneMarginTop="24dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/start_angle_label"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/orientation_value" />
+
+            <SeekBar
+                android:id="@+id/start_angle_value"
+                android:layout_width="0dp"
+                android:layout_height="17dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:max="360"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:progress="90"
+                app:layout_constraintEnd_toStartOf="@+id/start_angle_value_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/start_angle_label" />
+
+            <TextView
+                android:id="@+id/start_angle_value_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="sans-serif-light"
+                android:includeFontPadding="false"
+                android:text="90"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/start_angle_value"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/start_angle_value" />
+
+            <!--########################################## ANIM DURATION-->
+            <TextView
+                android:id="@+id/duration_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/anim_duration_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/start_angle_value_label" />
+
+            <ImageButton
+                android:id="@+id/increment_duration"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_increment"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/duration_label" />
+
+            <TextView
+                android:id="@+id/duration_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:text="400 ms"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/decrement_duration"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/decrement_duration" />
+
+            <ImageButton
+                android:id="@+id/decrement_duration"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_decrement"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/duration_label" />
+
+            <TextView
+                android:id="@+id/duration_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/default_duration"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/decrement_duration" />
+
+            <!--########################################## INTERPOLATOR-->
+            <TextView
+                android:id="@+id/interpolator_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/anim_interpolator_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/duration_default" />
+
+            <Spinner
+                android:id="@+id/interpolator_value"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:spinnerMode="dialog"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/interpolator_label" />
+
+            <TextView
+                android:id="@+id/interpolator_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/default_interpolator"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/interpolator_value" />
+
+            <Space
+                android:id="@+id/space"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/interpolator_default" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</FrameLayout>

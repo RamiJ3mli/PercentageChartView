@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coordinator_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:elevation="0dp"
+        android:fitsSystemWindows="true"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            app:layout_scrollFlags="scroll">
+
+            <com.ramijemli.percentagechartview.PercentageChartView
+                android:id="@+id/chart"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="56dp"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="-0.3"
+                app:pcv_mode="ring"
+                app:pcv_progress="50"
+                app:pcv_progressBarThickness="16dp"
+                app:pcv_progressColor="@color/colorAccent"
+                app:pcv_startAngle="45"
+                app:pcv_textSize="20sp"
+                app:pcv_typeface="interstellar.ttf" />
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="240dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:text="@string/title"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="-0.2" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="272dp"
+                android:fontFamily="sans-serif-light"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:paddingBottom="40dp"
+                android:text="@string/subtitle"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="-0.1" />
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="56dp" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:paddingBottom="56dp"
+        android:clipToPadding="false"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

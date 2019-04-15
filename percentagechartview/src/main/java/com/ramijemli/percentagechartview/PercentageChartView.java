@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Rami Jemli
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.ramijemli.percentagechartview;
 
 import android.animation.TimeInterpolator;
@@ -9,12 +25,18 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.ramijemli.percentagechartview.annotation.AdaptiveMode;
 import com.ramijemli.percentagechartview.annotation.ChartMode;
+import com.ramijemli.percentagechartview.annotation.GradientTypes;
 import com.ramijemli.percentagechartview.annotation.ProgressBarStyle;
 import com.ramijemli.percentagechartview.annotation.ProgressOrientation;
 import com.ramijemli.percentagechartview.annotation.TextStyle;
+import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
+import com.ramijemli.percentagechartview.callback.OnProgressChangeListener;
+import com.ramijemli.percentagechartview.callback.ProgressTextFormatter;
 import com.ramijemli.percentagechartview.renderer.BaseModeRenderer;
+import com.ramijemli.percentagechartview.renderer.FillModeRenderer;
+import com.ramijemli.percentagechartview.renderer.OffsetEnabledMode;
+import com.ramijemli.percentagechartview.renderer.OrientationBasedMode;
 import com.ramijemli.percentagechartview.renderer.PieModeRenderer;
 import com.ramijemli.percentagechartview.renderer.RingModeRenderer;
 
@@ -25,9 +47,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.GRADIENT_LINEAR;
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.GRADIENT_SWEEP;
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_FILL;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_PIE;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_RING;
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_CLOCKWISE;
+import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_COUNTERCLOCKWISE;
 
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public class PercentageChartView extends View implements IPercentageChartView {
 
     private BaseModeRenderer renderer;
@@ -74,6 +102,11 @@ public class PercentageChartView extends View implements IPercentageChartView {
                     case MODE_RING:
                         renderer = new RingModeRenderer(this, attrs);
                         break;
+                    case MODE_FILL:
+                        renderer = new FillModeRenderer(this, attrs);
+                        break;
+
+                    default:
                     case MODE_PIE:
                         renderer = new PieModeRenderer(this, attrs);
                         break;
@@ -81,18 +114,20 @@ public class PercentageChartView extends View implements IPercentageChartView {
 
             } finally {
                 attrs.recycle();
-                attrs = null;
             }
 
         } else {
+            mode = MODE_PIE;
             renderer = new PieModeRenderer(this);
         }
     }
 
+    //##############################################################################################   BEHAVIOR
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        renderer.mesure(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec), getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+        renderer.measure(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec), getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
     }
 
     @Override
@@ -125,299 +160,769 @@ public class PercentageChartView extends View implements IPercentageChartView {
     }
 
     //##############################################################################################   STYLE MODIFIERS
-    //PROGRESS
-    @FloatRange(from = -1f, to = 100f)
-    public float getProgress() {
-        return renderer.getProgress();
+
+    /**
+     * Gets the percentage chart view mode.
+     *
+     * @return the percentage chart view mode
+     */
+    @ChartMode
+    public int getMode() {
+        return mode;
     }
 
     /**
-     * Sets a new progress value. Passing true in animate will result in an animated progress update.
+     * Gets the current drawing orientation.
      *
-     * @param progress New progress float value to set.
-     * @param animate  Animation boolean value to set whether to animate progress change or not.
+     * @return the current drawing orientation
      */
-    public void setProgress(@FloatRange(from = 0f, to = 100f) float progress, boolean animate) {
-        if (progress < 0) progress = 0;
-        if (progress > 100) progress = 100;
-        renderer.setProgress(progress, animate);
-    }
-
-    //ORIENTATION
     @ProgressOrientation
     public int getOrientation() {
-        return renderer.getOrientation();
+        if (!(renderer instanceof OrientationBasedMode))
+            return BaseModeRenderer.INVALID_ORIENTATION;
+        return ((OrientationBasedMode) renderer).getOrientation();
     }
 
+    /**
+     * Sets the circular drawing direction. Default orientation is ORIENTATION_CLOCKWISE.
+     *
+     * @param orientation non-negative orientation constant.
+     */
     public void setOrientation(@ProgressOrientation int orientation) {
-        this.renderer.setOrientation(orientation);
+        orientation(orientation);
+        invalidate();
     }
 
-    //DRAW BACKGROUND STATE
-    public boolean isDrawBackgroundEnabled() {
-        return renderer.isDrawBackgroundEnabled();
-    }
-
-    public void setDrawBackgroundEnabled(boolean enabled) {
-        this.renderer.setDrawBackgroundEnabled(enabled);
-    }
-
-    //START ANGLE
+    /**
+     * Gets the current circular drawing's start angle.
+     *
+     * @return the current circular drawing's start angle
+     */
     @FloatRange(from = 0f, to = 360f)
     public float getStartAngle() {
         return renderer.getStartAngle();
     }
 
+    /**
+     * Sets the current circular drawing's start angle in degrees. Default start angle is0.
+     *
+     * @param startAngle A positive start angle value that is less or equal to 360.
+     */
     public void setStartAngle(@FloatRange(from = 0f, to = 360f) float startAngle) {
-        if (startAngle < 0) startAngle = 0;
-        if (startAngle > 360) startAngle = 360;
-        this.renderer.setStartAngle(startAngle);
+        startAngle(startAngle);
+        invalidate();
     }
 
-    //BACKGROUND COLOR
+    /**
+     * Gets whether drawing background has been enabled.
+     *
+     * @return whether drawing background has been enabled
+     */
+    public boolean isDrawBackgroundEnabled() {
+        return renderer.isDrawBackgroundEnabled();
+    }
+
+    /**
+     * Sets whether background should be drawn.
+     *
+     * @param enabled True if background have to be drawn, false otherwise.
+     */
+    public void setDrawBackgroundEnabled(boolean enabled) {
+        drawBackgroundEnabled(enabled);
+        invalidate();
+    }
+
+    /**
+     * Gets the circular background color for this view.
+     *
+     * @return the color of the circular background
+     */
     @ColorInt
     public int getBackgroundColor() {
         return renderer.getBackgroundColor();
     }
 
-    public void setBackgroundColor(@ColorInt int backgroundColor) {
-        this.renderer.setBackgroundColor(backgroundColor);
+    /**
+     * Sets the circular background color for this view.
+     *
+     * @param color the color of the circular background
+     */
+    public void setBackgroundColor(@ColorInt int color) {
+        backgroundColor(color);
+        invalidate();
     }
 
-    //BACKGROUND OFFSET
-    public float getBackgroundOffset() {
-        return renderer.getBackgroundOffset();
+    /**
+     * Gets the current progress.
+     *
+     * @return the current progress
+     */
+    @FloatRange(from = 0f, to = 100f)
+    public float getProgress() {
+        return renderer.getProgress();
     }
 
-    public void setBackgroundOffset(int backgroundOffset) {
-        this.renderer.setBackgroundOffset(backgroundOffset);
+    /**
+     * Sets a new progress value. Passing true in animate will cause an animated progress update.
+     *
+     * @param progress New progress float value to set.
+     * @param animate  Animation boolean value to set whether to animate progress change or not.
+     * @throws IllegalArgumentException if the given progress is negative, or, less or equal to 100.
+     */
+    public void setProgress(@FloatRange(from = 0f, to = 100f) float progress, boolean animate) {
+        if (progress < 0 || progress > 100) {
+            throw new IllegalArgumentException("Progress value must be positive and less or equal to 100.");
+        }
+
+        renderer.setProgress(progress, animate);
     }
 
-    //PROGRESS COLOR
+    /**
+     * Gets the progress/progress bar color for this view.
+     *
+     * @return the progress/progress bar color.
+     */
     @ColorInt
     public int getProgressColor() {
         return renderer.getProgressColor();
     }
 
-    public void setProgressColor(@ColorInt int progressColor) {
-        this.renderer.setProgressColor(progressColor);
+    /**
+     * Sets the progress/progress bar color for this view.
+     *
+     * @param color the color of the progress/progress bar
+     */
+    public void setProgressColor(@ColorInt int color) {
+        progressColor(color);
+        invalidate();
     }
 
-    //ADAPTIVE BACKGROUND
-    public boolean isAdaptiveBackgroundEnabled() {
-        return renderer.isAdaptiveBackgroundEnabled();
+
+    /**
+     * Gets progress gradient type.
+     *
+     * @return Gets progress gradient type.
+     */
+    @GradientTypes
+    public int getGradientType() {
+        return renderer.getGradientType();
     }
 
-    @FloatRange(from = -1f, to = 1f)
-    public float getAdaptiveBackgroundRatio() {
-        return renderer.getAdaptiveBackgroundRatio();
+
+    /**
+     * Sets progress gradient colors.
+     *
+     * @param type      The gradient type which is a GradientTypes constant
+     * @param colors    The colors to be distributed.
+     *                  There must be at least 2 colors in the array.
+     * @param positions May be NULL. The relative position of
+     *                  each corresponding color in the colors array, beginning
+     *                  with 0 and ending with 1.0. If the values are not
+     *                  monotonic, the drawing may produce unexpected results.
+     *                  If positions is NULL, then the colors are automatically
+     *                  spaced evenly.
+     * @param angle     Defines the direction for linear gradient type.
+     */
+    public void setGradientColors(@GradientTypes int type, int[] colors, float[] positions, @FloatRange(from = 0f, to = 360f) float angle) {
+        gradientColors(type, colors, positions, angle);
+        invalidate();
     }
 
-    @AdaptiveMode
-    public int getAdaptiveBackgroundMode() {
-        return renderer.getAdaptiveBackgroundMode();
-    }
-
-    public void setAdaptiveBgEnabled(boolean enable) {
-        renderer.setAdaptiveBgEnabled(enable);
-    }
-
-    public void setAdaptiveBackground(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
-        renderer.setAdaptiveBackground(ratio, adaptiveMode);
-    }
-
-    //ADAPTIVE BACKGROUND BAR
-    public boolean isAdaptiveBackgroundBarEnabled() {
-        if (renderer instanceof PieModeRenderer) return false;
-        return ((RingModeRenderer) renderer).isAdaptiveBackgroundBarEnabled();
-    }
-
-    @FloatRange(from = -1f, to = 1f)
-    public float getAdaptiveBackgroundBarRatio() {
-        if (renderer instanceof PieModeRenderer) return -1f;
-        return ((RingModeRenderer) renderer).getAdaptiveBackgroundBarRatio();
-    }
-
-    public int getAdaptiveBackgroundBarMode() {
-        if (renderer instanceof PieModeRenderer) return -1;
-        return ((RingModeRenderer) renderer).getAdaptiveBackgroundBarMode();
-    }
-
-    public void setAdaptiveBgBarEnabled(boolean enable) {
-        if (renderer instanceof PieModeRenderer) return;
-        ((RingModeRenderer) renderer).setAdaptiveBgBarEnabled(enable);
-    }
-
-    public void setAdaptiveBackgroundBar(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
-        if (renderer instanceof PieModeRenderer) return;
-        ((RingModeRenderer) renderer).setAdaptiveBackgroundBar(ratio, adaptiveMode);
-    }
-
-    //ADAPTIVE TEXT
-    public boolean isAdaptiveTextEnabled() {
-        return renderer.isAdaptiveTextEnabled();
-    }
-
-    @FloatRange(from = -1f, to = 1f)
-    public float getAdaptiveTextRatio() {
-        return renderer.getAdaptiveTextRatio();
-    }
-
-    public int getAdaptiveTextMode() {
-        return renderer.getAdaptiveTextMode();
-    }
-
-    public void setAdaptiveTextEnabled(boolean enable) {
-        renderer.setAdaptiveTextEnabled(enable);
-    }
-
-    public void setAdaptiveText(@FloatRange(from = 0f, to = 1f) float ratio, @AdaptiveMode int adaptiveMode) {
-        renderer.setAdaptiveText(ratio, adaptiveMode);
-    }
-
-    //ANIMATION DURATION
+    /**
+     * Gets the duration of the progress change's animation.
+     *
+     * @return the duration of the progress change's animation
+     */
     @IntRange(from = 0)
     public int getAnimationDuration() {
         return renderer.getAnimationDuration();
     }
 
+    /**
+     * Sets the duration of the progress change's animation.
+     *
+     * @param duration non-negative duration value.
+     */
     public void setAnimationDuration(@IntRange(from = 50) int duration) {
-        renderer.setAnimationDuration(duration);
+        animationDuration(duration);
     }
 
-    //ANIMATION INTERPOLATOR
+    /**
+     * Gets the interpolator of the progress change's animation.
+     *
+     * @return the interpolator of the progress change's animation
+     */
     public TimeInterpolator getAnimationInterpolator() {
         return renderer.getAnimationInterpolator();
     }
 
+    /**
+     * Sets the interpolator of the progress change's animation.
+     *
+     * @param interpolator TimeInterpolator instance.
+     */
+    @SuppressWarnings("ConstantConditions")
     public void setAnimationInterpolator(@NonNull TimeInterpolator interpolator) {
-        if (interpolator == null) {
-            throw new NullPointerException("Animation interpolator cannot be null");
-        }
-
-        renderer.setAnimationInterpolator(interpolator);
+        animationInterpolator(interpolator);
     }
 
-    //TEXT COLOR
+    /**
+     * Gets the text color.
+     *
+     * @return the text color
+     */
     @ColorInt
     public int getTextColor() {
         return renderer.getTextColor();
     }
 
-    public void setTextColor(@ColorInt int textColor) {
-        renderer.setTextColor(textColor);
+    /**
+     * Sets the text color for this view.
+     *
+     * @param color the text color
+     */
+    public void setTextColor(@ColorInt int color) {
+        textColor(color);
+        invalidate();
     }
 
-    //TEXT SIZE
+    /**
+     * Gets the text size.
+     *
+     * @return the text size
+     */
     public float getTextSize() {
         return renderer.getTextSize();
     }
 
-    public void setTextSize(float textSize) {
-        renderer.setTextSize(textSize);
+    /**
+     * Sets the text size.
+     *
+     * @param size the text size
+     */
+    public void setTextSize(float size) {
+        textSize(size);
+        invalidate();
     }
 
-    //TEXT TYPEFACE
+    /**
+     * Gets the text font.
+     *
+     * @return the text typeface
+     */
     public Typeface getTypeface() {
         return renderer.getTypeface();
     }
 
+    /**
+     * Sets the text font.
+     *
+     * @param typeface the text font as a Typeface instance
+     */
+    @SuppressWarnings("ConstantConditions")
     public void setTypeface(@NonNull Typeface typeface) {
-        if (typeface == null) {
-            throw new NullPointerException("Text TypeFace cannot be null");
-        }
-        renderer.setTypeface(typeface);
+        typeface(typeface);
+        invalidate();
     }
 
-    //TEXT STYLE
+    /**
+     * Gets the text style.
+     *
+     * @return the text style
+     */
     @TextStyle
     public int getTextStyle() {
         return renderer.getTextStyle();
     }
 
-    public void setTextStyle(@TextStyle int textStyle) {
-        renderer.setTextStyle(textStyle);
+    /**
+     * Sets the text style.
+     *
+     * @param style the text style.
+     */
+    public void setTextStyle(@TextStyle int style) {
+        textStyle(style);
+        invalidate();
     }
 
-    //TEXT SHADOW
+    /**
+     * Gets the text shadow color.
+     *
+     * @return the text shadow color
+     */
     @ColorInt
     public int getTextShadowColor() {
         return renderer.getTextShadowColor();
     }
 
+    /**
+     * Gets the text shadow radius.
+     *
+     * @return the text shadow radius
+     */
     public float getTextShadowRadius() {
         return renderer.getTextShadowRadius();
     }
 
+    /**
+     * Gets the text shadow y-axis distance.
+     *
+     * @return the text shadow y-axis distance
+     */
     public float getTextShadowDistY() {
         return renderer.getTextShadowDistY();
     }
 
+    /**
+     * Gets the text shadow x-axis distance.
+     *
+     * @return the text shadow x-axis distance
+     */
     public float getTextShadowDistX() {
         return renderer.getTextShadowDistX();
     }
 
+    /**
+     * Sets the text shadow. Passing zeros will remove the shadow.
+     *
+     * @param shadowColor  text shadow color value.
+     * @param shadowRadius text shadow radius.
+     * @param shadowDistX  text shadow y-axis distance.
+     * @param shadowDistY  text shadow x-axis distance.
+     */
     public void setTextShadow(@ColorInt int shadowColor, @FloatRange(from = 0) float shadowRadius, @FloatRange(from = 0) float shadowDistX, @FloatRange(from = 0) float shadowDistY) {
-        renderer.setTextShadow(shadowColor, shadowRadius, shadowDistX, shadowDistY);
+        textShadow(shadowColor, shadowRadius, shadowDistX, shadowDistY);
+        invalidate();
     }
 
-    //DRAW BACKGROUND BAR STATE
+    /**
+     * Gets the offset of the circular background.
+     *
+     * @return the offset of the circular background.-1 if chart mode is not set to pie.
+     */
+    public float getBackgroundOffset() {
+        if (!(renderer instanceof OffsetEnabledMode)) return -1;
+        return ((OffsetEnabledMode) renderer).getBackgroundOffset();
+    }
+
+    /**
+     * Sets the offset of the circular background. Works only if chart mode is set to pie.
+     *
+     * @param offset A positive offset value.
+     */
+    public void setBackgroundOffset(@IntRange(from = 0) int offset) {
+        backgroundOffset(offset);
+        invalidate();
+    }
+
+    /**
+     * Gets whether drawing the background bar has been enabled.
+     *
+     * @return whether drawing the background bar has been enabled
+     */
     public boolean isDrawBackgroundBarEnabled() {
-        if (renderer instanceof PieModeRenderer) return false;
+        if (!(renderer instanceof RingModeRenderer)) return false;
         return ((RingModeRenderer) renderer).isDrawBackgroundBarEnabled();
     }
 
+    /**
+     * Sets whether background bar should be drawn.
+     *
+     * @param enabled True if background bar have to be drawn, false otherwise.
+     */
     public void setDrawBackgroundBarEnabled(boolean enabled) {
-        if (renderer instanceof PieModeRenderer) return;
-        ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
+        drawBackgroundBarEnabled(enabled);
+        invalidate();
     }
 
-    //BACKGROUND BAR COLOR
+    /**
+     * Gets the background bar color.
+     *
+     * @return the background bar color. -1 if chart mode is not set to ring.
+     */
     public int getBackgroundBarColor() {
-        if (renderer instanceof PieModeRenderer) return -1;
+        if (!(renderer instanceof RingModeRenderer)) return -1;
         return ((RingModeRenderer) renderer).getBackgroundBarColor();
     }
 
-    public void setBackgroundBarColor(@ColorInt int backgroundBarColor) {
-        ((RingModeRenderer) renderer).setBackgroundBarColor(backgroundBarColor);
+    /**
+     * Sets the background bar color.
+     *
+     * @param color the background bar color
+     */
+    public void setBackgroundBarColor(@ColorInt int color) {
+        backgroundBarColor(color);
+        invalidate();
     }
 
-    //BACKGROUND BAR THICKNESS
+    /**
+     * Gets the background bar thickness in pixels.
+     *
+     * @return the background bar thickness in pixels. -1 if chart mode is not set to ring.
+     */
     public float getBackgroundBarThickness() {
-        if (renderer instanceof PieModeRenderer) return -1;
+        if (!(renderer instanceof RingModeRenderer)) return -1;
         return ((RingModeRenderer) renderer).getBackgroundBarThickness();
     }
 
-    public void setBackgroundBarThickness(@FloatRange(from = 0) float backgroundBarThickness) {
-        if (renderer instanceof PieModeRenderer) return;
-        ((RingModeRenderer) renderer).setBackgroundBarThickness(backgroundBarThickness);
+    /**
+     * Sets the background bar thickness in pixels. Works only if chart mode is set to ring.
+     *
+     * @param thickness non-negative thickness value in pixels.
+     */
+    public void setBackgroundBarThickness(@FloatRange(from = 0) float thickness) {
+        backgroundBarThickness(thickness);
+        invalidate();
     }
 
-    //PROGRESS BAR THICKNESS
+    /**
+     * Gets the progress bar thickness in pixels.
+     *
+     * @return the progress bar thickness in pixels. -1 if chart mode is not set to ring.
+     */
     public float getProgressBarThickness() {
-        if (renderer instanceof PieModeRenderer) return -1;
+        if (!(renderer instanceof RingModeRenderer)) return -1;
         return ((RingModeRenderer) renderer).getProgressBarThickness();
     }
 
-    public void setProgressBarThickness(@FloatRange(from = 0) float progressBarThickness) {
-        if (renderer instanceof PieModeRenderer) return;
-        ((RingModeRenderer) renderer).setProgressBarThickness(progressBarThickness);
+    /**
+     * Sets the progress bar thickness in pixels. Works only if chart mode is set to ring.
+     *
+     * @param thickness non-negative thickness value in pixels.
+     */
+    public void setProgressBarThickness(@FloatRange(from = 0) float thickness) {
+        progressBarThickness(thickness);
+        invalidate();
     }
 
-    //PROGRESS BAR STYLE
+    /**
+     * Gets the progress bar stroke style.
+     *
+     * @return the progress bar stroke style. -1 if chart mode is not set to ring.
+     */
     public int getProgressBarStyle() {
-        if (renderer instanceof PieModeRenderer) return -1;
+        if (!(renderer instanceof RingModeRenderer)) return -1;
         return ((RingModeRenderer) renderer).getProgressBarStyle();
     }
 
-    public void setProgressBarStyle(@ProgressBarStyle int progressBarStyle) {
-        if (renderer instanceof PieModeRenderer) return;
-        ((RingModeRenderer) renderer).setProgressBarStyle(progressBarStyle);
+    /**
+     * Sets the progress bar stroke style. Works only if chart mode is set to ring.
+     *
+     * @param style Progress bar stroke style as a ProgressStyle constant.
+     */
+    public void setProgressBarStyle(@ProgressBarStyle int style) {
+        progressBarStyle(style);
+        invalidate();
+    }
+
+    //############################################################################################## UPDATE PIPELINE AS A FLUENT API
+
+    /**
+     * Sets the circular drawing direction. Default orientation is ORIENTATION_CLOCKWISE.
+     *
+     * @param orientation non-negative orientation constant.
+     * @throws IllegalArgumentException if the given orientation is not a ProgressOrientation constant or not supported by the current used chart mode.
+     */
+    public PercentageChartView orientation(@ProgressOrientation int orientation) {
+        if (orientation != ORIENTATION_CLOCKWISE && orientation != ORIENTATION_COUNTERCLOCKWISE) {
+            throw new IllegalArgumentException("Orientation must be a ProgressOrientation constant.");
+        }
+
+        try {
+            ((OrientationBasedMode) renderer).setOrientation(orientation);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Orientation is not support by the used percentage chart mode.");
+        }
+        return this;
+    }
+
+    /**
+     * Sets the current circular drawing's start angle in degrees. Default start angle is0.
+     *
+     * @param startAngle A positive start angle value that is less or equal to 360.
+     * @throws IllegalArgumentException if the given start angle is not positive, or, less or equal to 360.
+     */
+    public PercentageChartView startAngle(@FloatRange(from = 0f, to = 360f) float startAngle) {
+        if (startAngle < 0 || startAngle > 360) {
+            throw new IllegalArgumentException("Start angle value must be positive and less or equal to 360.");
+        }
+        this.renderer.setStartAngle(startAngle);
+        return this;
+    }
+
+    /**
+     * Sets whether background should be drawn.
+     *
+     * @param enabled True if background have to be drawn, false otherwise.
+     */
+    public PercentageChartView drawBackgroundEnabled(boolean enabled) {
+        this.renderer.setDrawBackgroundEnabled(enabled);
+        return this;
+    }
+
+    /**
+     * Sets the circular background color for this view.
+     *
+     * @param color the color of the circular background
+     */
+    public PercentageChartView backgroundColor(@ColorInt int color) {
+        this.renderer.setBackgroundColor(color);
+        return this;
+    }
+
+    /**
+     * Sets the progress/progress bar color for this view.
+     *
+     * @param color the color of the progress/progress bar
+     */
+    public PercentageChartView progressColor(@ColorInt int color) {
+        this.renderer.setProgressColor(color);
+        return this;
+    }
+
+    /**
+     * Sets progress gradient colors.
+     *
+     * @param type      The gradient type which is a GradientTypes constant
+     * @param colors    The colors to be distributed.
+     *                  There must be at least 2 colors in the array.
+     * @param positions May be NULL. The relative position of
+     *                  each corresponding color in the colors array, beginning
+     *                  with 0 and ending with 1.0. If the values are not
+     *                  monotonic, the drawing may produce unexpected results.
+     *                  If positions is NULL, then the colors are automatically
+     *                  spaced evenly.
+     * @param angle     Defines the direction for linear gradient type.
+     * @throws IllegalArgumentException If type is not a GradientTypes constant and if colors array is null
+     */
+    public PercentageChartView gradientColors(@GradientTypes int type, int[] colors, float[] positions, @FloatRange(from = 0f, to = 360f) float angle) {
+        if (type < GRADIENT_LINEAR || type > GRADIENT_SWEEP) {
+            throw new IllegalArgumentException("Invalid value for progress gradient type.");
+        } else if (colors == null) {
+            throw new IllegalArgumentException("Gradient colors int array cannot be null.");
+        }
+
+        this.renderer.setGradientColors(type, colors, positions, angle);
+        return this;
+    }
+
+    /**
+     * Sets the duration of the progress change's animation.
+     *
+     * @param duration non-negative duration value.
+     * @throws IllegalArgumentException if the given duration is less than 50.
+     */
+    public PercentageChartView animationDuration(@IntRange(from = 50) int duration) {
+        if (duration < 50) {
+            throw new IllegalArgumentException("Duration must be equal or greater than 50.");
+        }
+        renderer.setAnimationDuration(duration);
+        return this;
+    }
+
+    /**
+     * Sets the interpolator of the progress change's animation.
+     *
+     * @param interpolator TimeInterpolator instance.
+     * @throws IllegalArgumentException if the given TimeInterpolator instance is null.
+     */
+    @SuppressWarnings("ConstantConditions")
+    public PercentageChartView animationInterpolator(@NonNull TimeInterpolator interpolator) {
+        if (interpolator == null) {
+            throw new IllegalArgumentException("Animation interpolator cannot be null");
+        }
+
+        renderer.setAnimationInterpolator(interpolator);
+        return this;
+    }
+
+    /**
+     * Sets the text color for this view.
+     *
+     * @param color the text color
+     */
+    public PercentageChartView textColor(@ColorInt int color) {
+        renderer.setTextColor(color);
+        return this;
+    }
+
+    /**
+     * Sets the text size.
+     *
+     * @param size the text size
+     * @throws IllegalArgumentException if the given text size is zero or a negative value.
+     */
+    public PercentageChartView textSize(float size) {
+        if (size <= 0) {
+            throw new IllegalArgumentException("Text size must be a nonzero positive value.");
+        }
+        renderer.setTextSize(size);
+        return this;
+    }
+
+    /**
+     * Sets the text font.
+     *
+     * @param typeface the text font as a Typeface instance
+     * @throws IllegalArgumentException if the given typeface is null.
+     */
+    @SuppressWarnings("ConstantConditions")
+    public PercentageChartView typeface(@NonNull Typeface typeface) {
+        if (typeface == null) {
+            throw new IllegalArgumentException("Text TypeFace cannot be null");
+        }
+        renderer.setTypeface(typeface);
+        return this;
+    }
+
+    /**
+     * Sets the text style.
+     *
+     * @param style the text style.
+     * @throws IllegalArgumentException if the given text style is not a valid TextStyle constant.
+     */
+    public PercentageChartView textStyle(@TextStyle int style) {
+        if (style < 0 || style > 3) {
+            throw new IllegalArgumentException("Text style must be a valid TextStyle constant.");
+        }
+        renderer.setTextStyle(style);
+        return this;
+    }
+
+    /**
+     * Sets the text shadow. Passing zeros will remove the shadow.
+     *
+     * @param shadowColor  text shadow color value.
+     * @param shadowRadius text shadow radius.
+     * @param shadowDistX  text shadow y-axis distance.
+     * @param shadowDistY  text shadow x-axis distance.
+     */
+    public PercentageChartView textShadow(@ColorInt int shadowColor, @FloatRange(from = 0) float shadowRadius, @FloatRange(from = 0) float shadowDistX, @FloatRange(from = 0) float shadowDistY) {
+        renderer.setTextShadow(shadowColor, shadowRadius, shadowDistX, shadowDistY);
+        return this;
+    }
+
+    /**
+     * Sets the offset of the circular background. Works only if chart mode is set to pie.
+     *
+     * @param offset A positive offset value.
+     * @throws IllegalArgumentException if the given offset is a negative value, or, not supported by the current used chart mode.
+     */
+    public PercentageChartView backgroundOffset(@IntRange(from = 0) int offset) {
+        if (offset < 0) {
+            throw new IllegalArgumentException("Background offset must be a positive value.");
+        }
+
+        try {
+            ((OffsetEnabledMode) renderer).setBackgroundOffset(offset);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background offset is not support by the used percentage chart mode.");
+        }
+        return this;
+    }
+
+    /**
+     * Sets whether background bar should be drawn.
+     *
+     * @param enabled True if background bar have to be drawn, false otherwise.
+     * @throws IllegalArgumentException if background bar's drawing state is not supported by the current used chart mode.
+     */
+    public PercentageChartView drawBackgroundBarEnabled(boolean enabled) {
+        try {
+            ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(enabled);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background bar's drawing state is not support by the used percentage chart mode.");
+        }
+        return this;
+    }
+
+    /**
+     * Sets the background bar color.
+     *
+     * @param color the background bar color
+     * @throws IllegalArgumentException if background bar color is not supported by the current used chart mode.
+     */
+    public PercentageChartView backgroundBarColor(@ColorInt int color) {
+        try {
+            ((RingModeRenderer) renderer).setBackgroundBarColor(color);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background bar color is not support by the used percentage chart mode.");
+        }
+        return this;
+    }
+
+    /**
+     * Sets the background bar thickness in pixels. Works only if chart mode is set to ring.
+     *
+     * @param thickness non-negative thickness value in pixels.
+     * @throws IllegalArgumentException if the given value is negative, or, background bar thickness is not supported by the current used chart mode.
+     */
+    public PercentageChartView backgroundBarThickness(@FloatRange(from = 0) float thickness) {
+        if (thickness < 0) {
+            throw new IllegalArgumentException("Background bar thickness must be a positive value.");
+        }
+
+        try {
+            ((RingModeRenderer) renderer).setBackgroundBarThickness(thickness);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Background bar thickness is not support by the used percentage chart mode.");
+        }
+        return this;
+    }
+
+    /**
+     * Sets the progress bar thickness in pixels. Works only if chart mode is set to ring.
+     *
+     * @param thickness non-negative thickness value in pixels.
+     * @throws IllegalArgumentException if the given value is negative, or, progress bar thickness is not supported by the current used chart mode.
+     */
+    public PercentageChartView progressBarThickness(@FloatRange(from = 0) float thickness) {
+        if (thickness < 0) {
+            throw new IllegalArgumentException("Progress bar thickness must be a positive value.");
+        }
+
+        try {
+            ((RingModeRenderer) renderer).setProgressBarThickness(thickness);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Progress bar thickness is not support by the used percentage chart mode.");
+        }
+        return this;
+    }
+
+    /**
+     * Sets the progress bar stroke style. Works only if chart mode is set to ring.
+     *
+     * @param style Progress bar stroke style as a ProgressStyle constant.
+     * @throws IllegalArgumentException if the given progress bar style is not a valid ProgressBarStyle constant, or, not supported by the current used chart mode.
+     */
+    public PercentageChartView progressBarStyle(@ProgressBarStyle int style) {
+        if (style < 0 || style > 1) {
+            throw new IllegalArgumentException("Progress bar style must be a valid TextStyle constant.");
+        }
+
+        try {
+            ((RingModeRenderer) renderer).setProgressBarStyle(style);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Progress bar style is not support by the used percentage chart mode.");
+        }
+        return this;
+    }
+
+    /**
+     * Apply all the requested changes.
+     */
+    public void apply() {
+        invalidate();
     }
 
     //##############################################################################################   ADAPTIVE COLOR PROVIDER
-    public void setAdaptiveColorProvider(@Nullable PercentageChartView.AdaptiveColorProvider adaptiveColorProvider) {
+    public void setAdaptiveColorProvider(@Nullable AdaptiveColorProvider adaptiveColorProvider) {
         this.renderer.setAdaptiveColorProvider(adaptiveColorProvider);
+    }
+
+    //##############################################################################################   TEXT FORMATTER
+    public void setTextFormatter(@Nullable ProgressTextFormatter textFormatter) {
+        this.renderer.setTextFormatter(textFormatter);
     }
 
     //##############################################################################################   LISTENER
@@ -425,11 +930,4 @@ public class PercentageChartView extends View implements IPercentageChartView {
         this.onProgressChangeListener = onProgressChangeListener;
     }
 
-    public interface AdaptiveColorProvider {
-        int getColor(float value);
-    }
-
-    public interface OnProgressChangeListener {
-        void onProgressChanged(float progress);
-    }
 }

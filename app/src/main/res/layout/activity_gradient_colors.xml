@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/constraint_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    android:transitionGroup="false">
+
+    <com.ramijemli.percentagechartview.PercentageChartView
+        android:id="@+id/pie_chart"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="24dp"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:pcv_mode="pie"
+        app:pcv_progress="70"
+        app:pcv_startAngle="90"
+        app:pcv_textSize="50sp"
+        app:pcv_typeface="interstellar.ttf" />
+
+    <com.ramijemli.percentagechartview.PercentageChartView
+        android:id="@+id/ring_chart"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="24dp"
+        android:visibility="gone"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:pcv_backgroundBarThickness="30dp"
+        app:pcv_mode="ring"
+        app:pcv_progress="70"
+        app:pcv_progressBarThickness="30dp"
+        app:pcv_startAngle="90"
+        app:pcv_textSize="50sp"
+        app:pcv_typeface="interstellar.ttf" />
+
+    <com.ramijemli.percentagechartview.PercentageChartView
+        android:id="@+id/fill_chart"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="24dp"
+        android:visibility="gone"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:pcv_mode="fill"
+        app:pcv_progress="70"
+        app:pcv_startAngle="90"
+        app:pcv_textSize="50sp"
+        app:pcv_typeface="interstellar.ttf" />
+
+    <Space
+        android:id="@+id/spotlight"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--########################################## MODES-->
+    <ImageView
+        android:id="@+id/pie_mode"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_horizontal|bottom"
+        android:scaleType="centerInside"
+        android:src="@drawable/all_ico_pie"
+        app:layout_constraintEnd_toStartOf="@+id/fill_mode"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spotlight" />
+
+    <ImageView
+        android:id="@+id/fill_mode"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_horizontal|bottom"
+        android:scaleType="centerInside"
+        android:src="@drawable/all_ico_fill"
+        app:layout_constraintEnd_toStartOf="@+id/ring_mode"
+        app:layout_constraintStart_toEndOf="@+id/pie_mode"
+        app:layout_constraintTop_toBottomOf="@+id/spotlight" />
+
+    <ImageView
+        android:id="@+id/ring_mode"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_horizontal|bottom"
+        android:scaleType="centerInside"
+        android:src="@drawable/all_ico_ring"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/fill_mode"
+        app:layout_constraintTop_toBottomOf="@+id/spotlight" />
+
+    <View
+        android:id="@+id/bottom_sheet"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/all_card_bg_top"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ring_mode" />
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:elevation="8dp"
+        android:outlineProvider="none"
+        android:overScrollMode="never"
+        android:paddingBottom="56dp"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/bottom_sheet">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!--########################################## ORIENTATION-->
+            <TextView
+                android:id="@+id/gradient_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/gradient_label"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <RadioGroup
+                android:id="@+id/gradient_value"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/gradient_label">
+
+                <RadioButton
+                    android:id="@+id/linear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/gradient_linear"
+                    android:textSize="12sp" />
+
+                <RadioButton
+                    android:id="@+id/radial"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/gradient_radial"
+                    android:textSize="12sp" />
+
+                <RadioButton
+                    android:id="@+id/sweep"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/gradient_sweep"
+                    android:textSize="12sp" />
+
+            </RadioGroup>
+
+            <!--########################################## GRADIENT ANGLE-->
+            <TextView
+                android:id="@+id/gradient_angle_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/gradient_angle_label"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/gradient_value" />
+
+            <SeekBar
+                android:id="@+id/gradient_angle_value"
+                android:layout_width="0dp"
+                android:layout_height="17dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:max="360"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:progress="90"
+                app:layout_constraintEnd_toStartOf="@+id/gradient_angle_value_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/gradient_angle_label" />
+
+            <TextView
+                android:id="@+id/gradient_angle_value_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="sans-serif-light"
+                android:includeFontPadding="false"
+                android:text="90"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/gradient_angle_value"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/gradient_angle_value" />
+
+            <!--########################################## GRADIENT COLORS-->
+            <TextView
+                android:id="@+id/gradient_color_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="GRADIENT COLORS"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/gradient_angle_value_label" />
+
+            <TextView
+                android:id="@+id/gradient_color_info"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="For the progress color, we can use gradient colors. Keep in mind that this has higher priority than the progress color provided by an AdaptiveColorProvider."
+                android:textColor="@android:color/black"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@+id/gradient_color_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <Button
+                android:id="@+id/color_one"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:backgroundTint="@color/colorAccent"
+                android:drawableTop="@drawable/all_ico_paint"
+                android:paddingTop="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/gradient_color_info"
+                app:layout_constraintEnd_toStartOf="@+id/color_two"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <Button
+                android:id="@+id/color_two"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#FFEA00"
+                android:drawableTop="@drawable/all_ico_paint"
+                android:paddingTop="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/gradient_color_info"
+                app:layout_constraintEnd_toStartOf="@+id/color_three"
+                app:layout_constraintStart_toEndOf="@+id/color_one" />
+
+            <Button
+                android:id="@+id/color_three"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#03A9F4"
+                android:drawableTop="@drawable/all_ico_paint"
+                android:paddingTop="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/gradient_color_info"
+                app:layout_constraintEnd_toStartOf="@+id/color_four"
+                app:layout_constraintStart_toEndOf="@+id/color_two" />
+
+            <Button
+                android:id="@+id/color_four"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#00E676"
+                android:drawableTop="@drawable/all_ico_paint"
+                android:paddingTop="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/gradient_color_info"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/color_three" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

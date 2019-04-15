@@ -1,0 +1,193 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/all_card_bg"
+        android:elevation="8dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:outlineProvider="none"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="16dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!--########################################## DRAW BACKGROUND-->
+            <TextView
+                android:id="@+id/draw_background_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/draw_background_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <CheckBox
+                android:id="@+id/draw_background"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:checked="true"
+                android:fontFamily="sans-serif-light"
+                android:includeFontPadding="false"
+                android:text="@string/draw_background_value"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/draw_background_label" />
+
+            <TextView
+                android:id="@+id/draw_background_default"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/default_draw_background"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                android:gravity="start"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/draw_background"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!--########################################## BACKGROUND COLOR-->
+            <TextView
+                android:id="@+id/background_color_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/background_color_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/draw_background_default" />
+
+            <Button
+                android:id="@+id/background_color"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@android:color/black"
+                android:drawableTop="@drawable/all_ico_paint"
+                android:paddingTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/background_color_label" />
+
+            <TextView
+                android:id="@+id/background_color_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/background_color_default"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/background_color"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!--########################################## BACKGROUND OFFSET-->
+            <TextView
+                android:id="@+id/offset_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="40dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="@string/background_offset_lbl"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/background_color_default" />
+
+            <ImageButton
+                android:id="@+id/increment_offset"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_increment"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/offset_label" />
+
+            <TextView
+                android:id="@+id/offset_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:text="0 dp"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/decrement_offset"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/decrement_offset" />
+
+            <ImageButton
+                android:id="@+id/decrement_offset"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/all_bg_btn"
+                android:src="@drawable/all_ico_decrement"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/offset_label" />
+
+            <TextView
+                android:id="@+id/offset_info"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/background_offset_info"
+                android:textColor="@color/colorAccent"
+                android:textSize="10sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/decrement_offset" />
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/offset_visibility"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="offset_label, increment_offset, offset_value, decrement_offset, offset_info"/>
+
+            <Space
+                android:id="@+id/space"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/offset_info" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</FrameLayout>
