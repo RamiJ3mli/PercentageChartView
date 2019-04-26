@@ -18,17 +18,26 @@ package com.ramijemli.percentagechartview.renderer;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
+import android.graphics.Outline;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
+import android.os.Build;
+import android.text.DynamicLayout;
+import android.text.Layout;
+import android.text.TextPaint;
+import android.view.View;
+import android.view.ViewOutlineProvider;
 
 import com.ramijemli.percentagechartview.IPercentageChartView;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
@@ -61,16 +70,13 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         //BACKGROUND
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBackgroundPaint.setColor(mBackgroundColor);
-        mBackgroundPaint.setStyle(Paint.Style.FILL);
 
         //PROGRESS
         mProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mProgressPaint.setColor(mProgressColor);
-        mProgressPaint.setStyle(Paint.Style.FILL);
 
         //TEXT
-        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setStyle(Paint.Style.FILL);
+        mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setTextSize(mTextSize);
         mTextPaint.setColor(mTextColor);
@@ -81,7 +87,6 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         if (mTextShadowColor != Color.TRANSPARENT) {
             mTextPaint.setShadowLayer(mTextShadowRadius, mTextShadowDistX, mTextShadowDistY, mTextShadowColor);
         }
-        updateText();
 
         //ANIMATIONS
         mProgressAnimator = ValueAnimator.ofFloat(0, mProgress);
@@ -104,6 +109,23 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
             mView.onProgressUpdated(mProgress);
             mView.invalidate();
         });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            mTextLayout = DynamicLayout.Builder.obtain(mTextEditor, mTextPaint, Integer.MAX_VALUE)
+                    .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                    .setLineSpacing(0, 0)
+                    .setJustificationMode(Layout.JUSTIFICATION_MODE_NONE)
+                    .setBreakStrategy(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .setIncludePad(false)
+                    .build();
+        } else {
+            mTextLayout = new DynamicLayout(mTextEditor,
+                    mTextPaint,
+                    Integer.MAX_VALUE,
+                    Layout.Alignment.ALIGN_NORMAL,
+                    0, 0,
+                    false);
+        }
     }
 
     @Override
@@ -118,6 +140,7 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         mCircleBounds.bottom = centerY + radius;
         measureBackgroundBounds();
         setupGradientColors(mCircleBounds);
+        updateText();
     }
 
     @Override
@@ -143,8 +166,14 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         }
 
         //TEXT
-        canvas.drawText(textValue, mCircleBounds.centerX(), mCircleBounds.centerY() + (textHeight / 2f), mTextPaint);
+        drawText(canvas);
+    }
 
+    private void drawText(Canvas canvas) {
+        canvas.save();
+        canvas.translate(mCircleBounds.centerX(), mCircleBounds.centerY() - (mTextLayout.getHeight() >> 1));
+        mTextLayout.draw(canvas);
+        canvas.restore();
     }
 
     @Override
@@ -404,12 +433,13 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
 
     @Override
     void updateText() {
-        textValue = (mProvidedTextFormatter != null) ?
-                mProvidedTextFormatter.provideFormattedText(mTextProgress) :
-                defaultTextFormatter.provideFormattedText(mTextProgress);
-
-        mTextPaint.getTextBounds(textValue, 0, textValue.length(), mTextBounds);
-        textHeight = mTextBounds.height();
+        if (mTextEditor != null) {
+            CharSequence text = (mProvidedTextFormatter != null) ?
+                    mProvidedTextFormatter.provideFormattedText(mTextProgress) :
+                    defaultTextFormatter.provideFormattedText(mTextProgress);
+            mTextEditor.clear();
+            mTextEditor.append(text);
+        }
     }
 
     public int getOrientation() {

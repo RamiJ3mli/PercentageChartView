@@ -27,8 +27,13 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.text.DynamicLayout;
+import android.text.Editable;
+import android.text.Layout;
+import android.text.TextPaint;
 import android.util.TypedValue;
 import android.view.InflateException;
+import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
@@ -113,7 +118,7 @@ public abstract class BaseModeRenderer {
 
     // TEXT
     Rect mTextBounds;
-    Paint mTextPaint;
+    TextPaint mTextPaint;
     int mTextColor;
     int mProvidedTextColor;
     int mTextProgress;
@@ -124,8 +129,8 @@ public abstract class BaseModeRenderer {
     float mTextShadowRadius;
     float mTextShadowDistY;
     float mTextShadowDistX;
-    int textHeight;
-    String textValue;
+    Editable mTextEditor;
+    DynamicLayout mTextLayout;
 
     // COMMON
     RectF mBackgroundBounds;
@@ -201,8 +206,7 @@ public abstract class BaseModeRenderer {
         //BACKGROUND OFFSET
         mBackgroundOffset = 0;
 
-        //TEXT FORMATTER
-        defaultTextFormatter = progress -> (int) progress + "%";
+        initText();
     }
 
     BaseModeRenderer(IPercentageChartView view, TypedArray attrs) {
@@ -317,8 +321,16 @@ public abstract class BaseModeRenderer {
                 R.styleable.PercentageChartView_pcv_backgroundOffset,
                 0);
 
+        //TET VALUE
+        initText();
+    }
+
+    private void initText(){
         //TEXT FORMATTER
         defaultTextFormatter = progress -> (int) progress + "%";
+
+        //TEXT VALUE
+        mTextEditor = Editable.Factory.getInstance().newEditable(defaultTextFormatter.provideFormattedText(mTextProgress));
     }
 
     private void initGradientColors(TypedArray attrs) {
@@ -366,7 +378,6 @@ public abstract class BaseModeRenderer {
     public abstract void destroy();
 
     abstract void updateText();
-
 
     private int getThemeAccentColor() {
         int colorAttr;

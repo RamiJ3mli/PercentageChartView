@@ -3,8 +3,15 @@ package com.ramijemli.sample.activity;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.BulletSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.transition.Explode;
 import android.view.animation.OvershootInterpolator;
+import android.widget.TextView;
 
 import com.ramijemli.percentagechartview.PercentageChartView;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
@@ -14,6 +21,9 @@ import java.util.Random;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.ColorUtils;
+
+import org.w3c.dom.Text;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -28,6 +38,8 @@ public class TextFormatterActivity extends AppCompatActivity {
     PercentageChartView mRingChart;
     @BindView(R.id.fill_chart)
     PercentageChartView mFillChart;
+    @BindView(R.id.text)
+    TextView mText;
 
     private Unbinder unbinder;
     private AdaptiveColorProvider colorProvider;
@@ -72,9 +84,17 @@ public class TextFormatterActivity extends AppCompatActivity {
             return cals + " cal";
         });
 
+        SpannableStringBuilder b =  new SpannableStringBuilder();
         mRingChart.setTextFormatter(progress -> {
             int days = (int) (progress * maxDays / 100);
-            return days + " days";
+//            b.clear();
+//            String text =;
+//            b.append(text);
+//            int start = String.valueOf(days).length();
+//            int end = b.length();
+//            b.setSpan(new RelativeSizeSpan(0.4f), 0, start, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//            mText.setText(b);
+            return  days + " days";
         });
     }
 

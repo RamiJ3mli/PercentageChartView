@@ -17,13 +17,17 @@
 package com.ramijemli.percentagechartview;
 
 import android.animation.TimeInterpolator;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 
 import com.ramijemli.percentagechartview.annotation.ChartMode;
 import com.ramijemli.percentagechartview.annotation.GradientTypes;
@@ -46,6 +50,7 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.core.view.ViewCompat;
 
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.GRADIENT_LINEAR;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.GRADIENT_SWEEP;
@@ -115,7 +120,6 @@ public class PercentageChartView extends View implements IPercentageChartView {
             } finally {
                 attrs.recycle();
             }
-
         } else {
             mode = MODE_PIE;
             renderer = new PieModeRenderer(this);
@@ -123,11 +127,13 @@ public class PercentageChartView extends View implements IPercentageChartView {
     }
 
     //##############################################################################################   BEHAVIOR
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        renderer.measure(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec), getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+        int w = MeasureSpec.getSize(widthMeasureSpec);
+        int h = MeasureSpec.getSize(heightMeasureSpec);
+        renderer.measure(w, h, getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+        setMeasuredDimension(w , h);
     }
 
     @Override

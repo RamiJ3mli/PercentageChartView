@@ -11,11 +11,11 @@
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
             android:id="@+id/root_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:clickable="true"
-            android:focusable="true"
-            android:layout_height="wrap_content">
+            android:focusable="true">
 
             <com.ramijemli.percentagechartview.PercentageChartView
                 android:id="@+id/pie_chart"
@@ -34,20 +34,30 @@
                 app:pcv_textSize="36sp"
                 app:pcv_typeface="interstellar.ttf" />
 
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="match_parent"
+                android:layout_height="600dp"
+                android:gravity="bottom"
+                android:textSize="40sp"
+
+                android:textColor="@android:color/white"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:paddingBottom="100dp" />
+
             <com.ramijemli.percentagechartview.PercentageChartView
                 android:id="@+id/ring_chart"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginStart="24dp"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:text="csdvsdvsdvdsvsdvsdvsdvsdvsdvsdvsdvsdvsdvsdvsdvsdvsdvsdvsdvsdvsdv"
                 android:layout_marginTop="40dp"
-                android:layout_marginEnd="24dp"
-                app:layout_constraintDimensionRatio="1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/pie_chart"
                 app:pcv_backgroundBarThickness="30dp"
                 app:pcv_mode="ring"
-                app:pcv_progress="70"
+                app:pcv_progress="1"
                 app:pcv_progressBarThickness="30dp"
                 app:pcv_startAngle="90"
                 app:pcv_textSize="36sp"
