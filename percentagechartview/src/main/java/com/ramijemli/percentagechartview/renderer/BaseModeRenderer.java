@@ -24,7 +24,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
@@ -106,7 +105,7 @@ public abstract class BaseModeRenderer {
     int mBackgroundColor;
     int mBackgroundOffset;
 
-    int mProvidedBackgroundColor;
+    private int mProvidedBackgroundColor;
 
     // PROGRESS
     Paint mProgressPaint;
@@ -119,11 +118,10 @@ public abstract class BaseModeRenderer {
     Shader gradient;
 
     // TEXT
-    private Rect mTextBounds;
     TextPaint mTextPaint;
     int mTextColor;
-    int mProvidedTextColor;
-    int mTextProgress;
+    private int mProvidedTextColor;
+    private int mTextProgress;
     private float mTextSize;
     private int mTextStyle;
     private Typeface mTypeface;
@@ -132,20 +130,20 @@ public abstract class BaseModeRenderer {
     private float mTextShadowDistY;
     private float mTextShadowDistX;
     private Editable mTextEditor;
-    DynamicLayout mTextLayout;
+    private DynamicLayout mTextLayout;
 
     // COMMON
     RectF mBackgroundBounds;
     RectF mCircleBounds;
     ValueAnimator mProgressColorAnimator, mBackgroundColorAnimator, mTextColorAnimator, mBgBarColorAnimator;
-    ValueAnimator mProgressAnimator;
+    private ValueAnimator mProgressAnimator;
     private Interpolator mAnimInterpolator;
     int mAnimDuration;
     float mProgress;
     float mStartAngle;
     float mSweepAngle;
 
-    int mProvidedProgressColor;
+    private int mProvidedProgressColor;
 
     @ProgressOrientation
     int orientation;
@@ -375,7 +373,6 @@ public abstract class BaseModeRenderer {
     void setup() {
         mCircleBounds = new RectF();
         mBackgroundBounds = new RectF();
-        mTextBounds = new Rect();
         mProvidedProgressColor = mProvidedBackgroundColor = mProvidedTextColor = -1;
 
         //BACKGROUND PAINT
@@ -483,7 +480,6 @@ public abstract class BaseModeRenderer {
 
         mProgressAnimator = mProgressColorAnimator = mBackgroundColorAnimator = mTextColorAnimator = null;
         mCircleBounds = mBackgroundBounds = null;
-        mTextBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
         gradient = null;
         mAdaptiveColorProvider = null;

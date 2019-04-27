@@ -16,6 +16,7 @@
 
 package com.ramijemli.percentagechartview.renderer;
 
+
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
@@ -35,6 +36,7 @@ import androidx.annotation.Nullable;
 import com.ramijemli.percentagechartview.IPercentageChartView;
 import com.ramijemli.percentagechartview.R;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
+
 
 public class RingModeRenderer extends BaseModeRenderer implements OrientationBasedMode {
 

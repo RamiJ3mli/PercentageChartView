@@ -16,18 +16,15 @@
 
 package com.ramijemli.percentagechartview;
 
+
 import android.animation.TimeInterpolator;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Outline;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewOutlineProvider;
 
 import com.ramijemli.percentagechartview.annotation.ChartMode;
 import com.ramijemli.percentagechartview.annotation.GradientTypes;
@@ -50,7 +47,6 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.core.view.ViewCompat;
 
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.GRADIENT_LINEAR;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.GRADIENT_SWEEP;
@@ -59,6 +55,7 @@ import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_P
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_RING;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_CLOCKWISE;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_COUNTERCLOCKWISE;
+
 
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public class PercentageChartView extends View implements IPercentageChartView {
