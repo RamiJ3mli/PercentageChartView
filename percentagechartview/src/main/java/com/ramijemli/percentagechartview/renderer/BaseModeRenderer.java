@@ -16,6 +16,8 @@
 
 package com.ramijemli.percentagechartview.renderer;
 
+
+import android.animation.ArgbEvaluator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
@@ -33,7 +35,6 @@ import android.text.Layout;
 import android.text.TextPaint;
 import android.util.TypedValue;
 import android.view.InflateException;
-import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
@@ -44,17 +45,18 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
+import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+
 import com.ramijemli.percentagechartview.IPercentageChartView;
 import com.ramijemli.percentagechartview.R;
 import com.ramijemli.percentagechartview.annotation.ProgressOrientation;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
 import com.ramijemli.percentagechartview.callback.ProgressTextFormatter;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Nullable;
-import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
 public abstract class BaseModeRenderer {
 
@@ -117,19 +119,19 @@ public abstract class BaseModeRenderer {
     Shader gradient;
 
     // TEXT
-    Rect mTextBounds;
+    private Rect mTextBounds;
     TextPaint mTextPaint;
     int mTextColor;
     int mProvidedTextColor;
     int mTextProgress;
-    float mTextSize;
+    private float mTextSize;
     private int mTextStyle;
-    Typeface mTypeface;
-    int mTextShadowColor;
-    float mTextShadowRadius;
-    float mTextShadowDistY;
-    float mTextShadowDistX;
-    Editable mTextEditor;
+    private Typeface mTypeface;
+    private int mTextShadowColor;
+    private float mTextShadowRadius;
+    private float mTextShadowDistY;
+    private float mTextShadowDistX;
+    private Editable mTextEditor;
     DynamicLayout mTextLayout;
 
     // COMMON
@@ -137,7 +139,7 @@ public abstract class BaseModeRenderer {
     RectF mCircleBounds;
     ValueAnimator mProgressColorAnimator, mBackgroundColorAnimator, mTextColorAnimator, mBgBarColorAnimator;
     ValueAnimator mProgressAnimator;
-    Interpolator mAnimInterpolator;
+    private Interpolator mAnimInterpolator;
     int mAnimDuration;
     float mProgress;
     float mStartAngle;
@@ -150,7 +152,7 @@ public abstract class BaseModeRenderer {
     @Nullable
     AdaptiveColorProvider mAdaptiveColorProvider;
     @Nullable
-    ProgressTextFormatter mProvidedTextFormatter, defaultTextFormatter;
+    private ProgressTextFormatter mProvidedTextFormatter, defaultTextFormatter;
 
     IPercentageChartView mView;
 
@@ -325,21 +327,13 @@ public abstract class BaseModeRenderer {
         initText();
     }
 
-    private void initText(){
-        //TEXT FORMATTER
-        defaultTextFormatter = progress -> (int) progress + "%";
-
-        //TEXT VALUE
-        mTextEditor = Editable.Factory.getInstance().newEditable(defaultTextFormatter.provideFormattedText(mTextProgress));
-    }
-
     private void initGradientColors(TypedArray attrs) {
         //PROGRESS GRADIENT TYPE
         mGradientType = attrs.getInt(R.styleable.PercentageChartView_pcv_gradientType, -1);
         if (mGradientType == -1) return;
 
         //ANGLE FOR LINEAR GRADIENT
-        mGradientAngle = attrs.getInt(R.styleable.PercentageChartView_pcv_gradientAngle, (int)mStartAngle);
+        mGradientAngle = attrs.getInt(R.styleable.PercentageChartView_pcv_gradientAngle, (int) mStartAngle);
 
         //PROGRESS GRADIENT COLORS
         String gradientColors = attrs.getString(R.styleable.PercentageChartView_pcv_gradientColors);
@@ -370,14 +364,245 @@ public abstract class BaseModeRenderer {
         }
     }
 
-    //############################################################################################## BEHAVIOR
+    private void initText() {
+        //TEXT FORMATTER
+        defaultTextFormatter = progress -> (int) progress + "%";
+
+        //TEXT VALUE
+        mTextEditor = Editable.Factory.getInstance().newEditable(defaultTextFormatter.provideFormattedText(mTextProgress));
+    }
+
+    void setup() {
+        mCircleBounds = new RectF();
+        mBackgroundBounds = new RectF();
+        mTextBounds = new Rect();
+        mProvidedProgressColor = mProvidedBackgroundColor = mProvidedTextColor = -1;
+
+        //BACKGROUND PAINT
+        mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBackgroundPaint.setColor(mBackgroundColor);
+
+        //PROGRESS PAINT
+        mProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mProgressPaint.setColor(mProgressColor);
+
+        //TEXT PAINT
+        mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.setTextAlign(Paint.Align.CENTER);
+        mTextPaint.setTextSize(mTextSize);
+        mTextPaint.setColor(mTextColor);
+
+        if (mTypeface != null) {
+            mTextPaint.setTypeface(mTypeface);
+        }
+        if (mTextShadowColor != Color.TRANSPARENT) {
+            mTextPaint.setShadowLayer(mTextShadowRadius, mTextShadowDistX, mTextShadowDistY, mTextShadowColor);
+        }
+
+        //TEXT LAYOUT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            mTextLayout = DynamicLayout.Builder.obtain(mTextEditor, mTextPaint, Integer.MAX_VALUE)
+                    .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                    .setLineSpacing(0, 0)
+                    .setJustificationMode(Layout.JUSTIFICATION_MODE_NONE)
+                    .setBreakStrategy(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .setIncludePad(false)
+                    .build();
+        } else {
+            mTextLayout = new DynamicLayout(mTextEditor,
+                    mTextPaint,
+                    Integer.MAX_VALUE,
+                    Layout.Alignment.ALIGN_NORMAL,
+                    0, 0,
+                    false);
+        }
+
+        //ANIMATIONS
+        mProgressAnimator = ValueAnimator.ofFloat(0, mProgress);
+        mProgressAnimator.setDuration(mAnimDuration);
+        mProgressAnimator.setInterpolator(mAnimInterpolator);
+        mProgressAnimator.addUpdateListener(valueAnimator -> {
+            mProgress = (float) valueAnimator.getAnimatedValue();
+
+            if (mProgress > 0 && mProgress <= 100) {
+                mTextProgress = (int) mProgress;
+            } else if (mProgress > 100) {
+                mProgress = mTextProgress = 100;
+            } else {
+                mProgress = mTextProgress = 0;
+            }
+
+            updateDrawingAngles();
+            updateText();
+
+            mView.onProgressUpdated(mProgress);
+            mView.invalidate();
+        });
+    }
+
+    //############################################################################################## INNER BEHAVIOR
     public abstract void measure(int w, int h, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom);
 
     public abstract void draw(Canvas canvas);
 
-    public abstract void destroy();
+    void drawText(Canvas canvas) {
+        canvas.save();
+        canvas.translate(mCircleBounds.centerX(), mCircleBounds.centerY() - (mTextLayout.getHeight() >> 1));
+        mTextLayout.draw(canvas);
+        canvas.restore();
+    }
 
-    abstract void updateText();
+    public void destroy() {
+        if (mProgressAnimator != null) {
+            if (mProgressAnimator.isRunning()) {
+                mProgressAnimator.cancel();
+            }
+            mProgressAnimator.removeAllUpdateListeners();
+        }
+
+        if (mProgressColorAnimator != null) {
+            if (mProgressColorAnimator.isRunning()) {
+                mProgressColorAnimator.cancel();
+            }
+            mProgressColorAnimator.removeAllUpdateListeners();
+        }
+
+        if (mBackgroundColorAnimator != null) {
+            if (mBackgroundColorAnimator.isRunning()) {
+                mBackgroundColorAnimator.cancel();
+            }
+            mBackgroundColorAnimator.removeAllUpdateListeners();
+        }
+
+        if (mTextColorAnimator != null) {
+            if (mTextColorAnimator.isRunning()) {
+                mTextColorAnimator.cancel();
+            }
+            mTextColorAnimator.removeAllUpdateListeners();
+        }
+
+        mProgressAnimator = mProgressColorAnimator = mBackgroundColorAnimator = mTextColorAnimator = null;
+        mCircleBounds = mBackgroundBounds = null;
+        mTextBounds = null;
+        mBackgroundPaint = mProgressPaint = mTextPaint = null;
+        gradient = null;
+        mAdaptiveColorProvider = null;
+        defaultTextFormatter = mProvidedTextFormatter = null;
+    }
+
+    void updateText() {
+        if (mTextEditor != null) {
+            CharSequence text = (mProvidedTextFormatter != null) ?
+                    mProvidedTextFormatter.provideFormattedText(mTextProgress) :
+                    defaultTextFormatter.provideFormattedText(mTextProgress);
+            mTextEditor.clear();
+            mTextEditor.append(text);
+        }
+    }
+
+    abstract void updateDrawingAngles();
+
+    void updateProvidedColors(float progress) {
+        if (mAdaptiveColorProvider == null) return;
+        int providedProgressColor = mAdaptiveColorProvider.provideProgressColor(progress);
+
+        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor && mGradientType == -1) {
+            mProvidedProgressColor = providedProgressColor;
+            mProgressPaint.setColor(mProvidedProgressColor);
+        }
+
+
+        int providedBackgroundColor = mAdaptiveColorProvider.provideBackgroundColor(progress);
+
+        if (providedBackgroundColor != -1 && providedBackgroundColor != mProvidedBackgroundColor) {
+            mProvidedBackgroundColor = providedBackgroundColor;
+            mBackgroundPaint.setColor(mProvidedBackgroundColor);
+        }
+
+
+        int providedTextColor = mAdaptiveColorProvider.provideTextColor(progress);
+
+        if (providedTextColor != -1 && providedTextColor != mProvidedTextColor) {
+            mProvidedTextColor = providedTextColor;
+            mTextPaint.setColor(mProvidedTextColor);
+        }
+    }
+
+    void setupColorAnimations(){
+        if (mProgressColorAnimator == null) {
+            mProgressColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mProgressColor, mProvidedProgressColor);
+            mProgressColorAnimator.addUpdateListener(animation -> {
+                mProvidedProgressColor = (int) animation.getAnimatedValue();
+                mProgressPaint.setColor(mProvidedProgressColor);
+            });
+            mProgressColorAnimator.setDuration(mAnimDuration);
+        }
+
+        if (mBackgroundColorAnimator == null) {
+            mBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mBackgroundColor, mProvidedBackgroundColor);
+            mBackgroundColorAnimator.addUpdateListener(animation -> {
+                mProvidedBackgroundColor = (int) animation.getAnimatedValue();
+                mBackgroundPaint.setColor(mProvidedBackgroundColor);
+            });
+            mBackgroundColorAnimator.setDuration(mAnimDuration);
+        }
+
+        if (mTextColorAnimator == null) {
+            mTextColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mTextColor, mProvidedTextColor);
+            mTextColorAnimator.addUpdateListener(animation -> {
+                mProvidedTextColor = (int) animation.getAnimatedValue();
+                mTextPaint.setColor(mProvidedTextColor);
+            });
+            mTextColorAnimator.setDuration(mAnimDuration);
+        }
+    }
+
+    void updateAnimations(float progress) {
+        mProgressAnimator.setFloatValues(mProgress, progress);
+        mProgressAnimator.start();
+
+        if (mAdaptiveColorProvider == null) return;
+
+        int providedProgressColor = mAdaptiveColorProvider.provideProgressColor(progress);
+        if (providedProgressColor != -1 && providedProgressColor != mProvidedProgressColor && mGradientType == -1) {
+            mProvidedProgressColor = providedProgressColor;
+            mProgressPaint.setColor(mProvidedProgressColor);
+        }
+
+        int providedBackgroundColor = mAdaptiveColorProvider.provideBackgroundColor(progress);
+        if (providedBackgroundColor != -1 && providedBackgroundColor != mProvidedBackgroundColor) {
+            mProvidedBackgroundColor = providedBackgroundColor;
+            mBackgroundPaint.setColor(mProvidedBackgroundColor);
+        }
+
+        int providedTextColor = mAdaptiveColorProvider.provideTextColor(progress);
+        if (providedTextColor != -1 && providedTextColor != mProvidedTextColor) {
+            mProvidedTextColor = providedTextColor;
+            mTextPaint.setColor(mProvidedTextColor);
+        }
+    }
+
+    void cancelAnimations() {
+        if (mProgressAnimator.isRunning()) {
+            mProgressAnimator.cancel();
+        }
+
+        if (mProgressColorAnimator != null && mProgressColorAnimator.isRunning()) {
+            mProgressColorAnimator.cancel();
+        }
+
+        if (mBackgroundColorAnimator != null && mBackgroundColorAnimator.isRunning()) {
+            mBackgroundColorAnimator.cancel();
+        }
+
+        if (mTextColorAnimator != null && mTextColorAnimator.isRunning()) {
+            mTextColorAnimator.cancel();
+        }
+    }
+
+    abstract void setupGradientColors(RectF bounds);
+
+    abstract void updateGradientAngle(float angle);
 
     private int getThemeAccentColor() {
         int colorAttr;
@@ -397,14 +622,37 @@ public abstract class BaseModeRenderer {
     //############################################################################################## MODIFIERS
     public abstract void setAdaptiveColorProvider(@Nullable AdaptiveColorProvider adaptiveColorProvider);
 
-    public abstract void setTextFormatter(@Nullable ProgressTextFormatter textFormatter);
+    public void setTextFormatter(@Nullable ProgressTextFormatter textFormatter) {
+        this.mProvidedTextFormatter = textFormatter;
+        updateText();
+        mView.invalidate();
+    }
 
     //PROGRESS
     public float getProgress() {
         return mProgress;
     }
 
-    public abstract void setProgress(float progress, boolean animate);
+    public void setProgress(float progress, boolean animate) {
+        if (this.mProgress == progress) return;
+
+        cancelAnimations();
+
+        if (!animate) {
+            this.mProgress = progress;
+            this.mTextProgress = (int) progress;
+
+            updateProvidedColors(progress);
+            updateDrawingAngles();
+            updateText();
+
+            mView.onProgressUpdated(mProgress);
+            mView.invalidate();
+            return;
+        }
+
+        updateAnimations(progress);
+    }
 
     //DRAW BACKGROUND STATE
     public boolean isDrawBackgroundEnabled() {
@@ -455,7 +703,16 @@ public abstract class BaseModeRenderer {
         return mGradientType;
     }
 
-    public abstract void setGradientColors(int type, int[] colors, float[] positions, float angle);
+    public void setGradientColors(int type, int[] colors, float[] positions, float angle) {
+        mGradientType = type;
+        mGradientColors = colors;
+        mGradientDistributions = positions;
+        setupGradientColors(mCircleBounds);
+        if (mGradientType == GRADIENT_LINEAR && mGradientAngle != angle) {
+            mGradientAngle = angle;
+            updateGradientAngle(mGradientAngle);
+        }
+    }
 
     //ANIMATION DURATION
     public int getAnimationDuration() {
