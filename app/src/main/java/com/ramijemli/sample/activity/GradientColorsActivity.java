@@ -168,9 +168,17 @@ public class GradientColorsActivity extends AppCompatActivity {
     }
 
     private void setGradientColors(int type, int[] colors, float[] positions, float angle) {
-        mPieChart.setGradientColors(type, colors, positions, angle);
-        mRingChart.setGradientColors(type, colors, positions, angle);
-        mFillChart.setGradientColors(type, colors, positions, angle);
+        switch (displayedMode) {
+            case MODE_PIE:
+                mPieChart.setGradientColors(type, colors, positions, angle);
+                break;
+            case MODE_FILL:
+                mFillChart.setGradientColors(type, colors, positions, angle);
+                break;
+            case MODE_RING:
+                mRingChart.setGradientColors(type, colors, positions, angle);
+                break;
+        }
     }
 
     private void changeMode(int pendingMode) {

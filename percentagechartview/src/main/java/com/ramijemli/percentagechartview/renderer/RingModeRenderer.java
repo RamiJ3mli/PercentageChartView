@@ -138,16 +138,18 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         int centerY = h / 2;
         float radius = (diameter - maxOffset) / 2;
 
-        mCircleBounds.left = centerX - radius;
-        mCircleBounds.top = centerY - radius;
-        mCircleBounds.right = centerX + radius;
-        mCircleBounds.bottom = centerY + radius;
+        mCircleBounds.set(centerX - radius,
+                centerY - radius,
+                centerX + radius,
+                centerY + radius);
 
         float backgroundRadius = radius - (mBackgroundBarThickness / 2) + 1;
-        mBackgroundBounds.left = centerX - backgroundRadius;
-        mBackgroundBounds.top = centerY - backgroundRadius;
-        mBackgroundBounds.right = centerX + backgroundRadius;
-        mBackgroundBounds.bottom = centerY + backgroundRadius;
+
+        mBackgroundBounds.set(centerX - backgroundRadius,
+                centerY - backgroundRadius,
+                centerX + backgroundRadius,
+                centerY + backgroundRadius);
+
         setupGradientColors(mCircleBounds);
         updateText();
     }
@@ -199,7 +201,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
             mBackgroundBarPaint.setColor(mBackgroundBarColor);
             mBackgroundPaint.setColor(mBackgroundColor);
             mProgressPaint.setColor(mProgressColor);
-            mView.invalidate();
+            mView.postInvalidate();
             return;
         }
 
@@ -207,7 +209,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
 
         setupColorAnimations();
         updateProvidedColors(mProgress);
-        mView.invalidate();
+        mView.postInvalidate();
     }
 
     @Override

@@ -433,7 +433,7 @@ public abstract class BaseModeRenderer {
             updateText();
 
             mView.onProgressUpdated(mProgress);
-            mView.invalidate();
+            mView.postInvalidateOnAnimation();
         });
     }
 
@@ -621,7 +621,7 @@ public abstract class BaseModeRenderer {
     public void setTextFormatter(@Nullable ProgressTextFormatter textFormatter) {
         this.mProvidedTextFormatter = textFormatter;
         updateText();
-        mView.invalidate();
+        mView.postInvalidate();
     }
 
     //PROGRESS
@@ -643,7 +643,7 @@ public abstract class BaseModeRenderer {
             updateText();
 
             mView.onProgressUpdated(mProgress);
-            mView.invalidate();
+            mView.postInvalidate();
             return;
         }
 

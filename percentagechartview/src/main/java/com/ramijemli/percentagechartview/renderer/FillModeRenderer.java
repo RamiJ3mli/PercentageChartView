@@ -61,10 +61,10 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
         int centerY = h / 2;
         mRadius = (float) Math.min(w, h) / 2;
 
-        mCircleBounds.left = centerX - mRadius;
-        mCircleBounds.top = centerY - mRadius;
-        mCircleBounds.right = centerX + mRadius;
-        mCircleBounds.bottom = centerY + mRadius;
+        mCircleBounds.set(centerX - mRadius,
+                centerY - mRadius,
+                centerX + mRadius,
+                centerY + mRadius);
         measureBackgroundBounds();
         updateDrawingAngles();
         setupGradientColors(mCircleBounds);
@@ -72,10 +72,10 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
     }
 
     private void measureBackgroundBounds() {
-        mBackgroundBounds.left = mCircleBounds.left + mBackgroundOffset;
-        mBackgroundBounds.top = mCircleBounds.top + mBackgroundOffset;
-        mBackgroundBounds.right = mCircleBounds.right - mBackgroundOffset;
-        mBackgroundBounds.bottom = mCircleBounds.bottom - mBackgroundOffset;
+        mBackgroundBounds.set(mCircleBounds.left + mBackgroundOffset,
+                mCircleBounds.top + mBackgroundOffset,
+                mCircleBounds.right - mBackgroundOffset,
+                mCircleBounds.bottom - mBackgroundOffset);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
             mTextPaint.setColor(mTextColor);
             mBackgroundPaint.setColor(mBackgroundColor);
             mProgressPaint.setColor(mProgressColor);
-            mView.invalidate();
+            mView.postInvalidate();
             return;
         }
 
@@ -108,7 +108,7 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
 
         setupColorAnimations();
         updateProvidedColors(mProgress);
-        mView.invalidate();
+        mView.postInvalidate();
     }
 
     @Override

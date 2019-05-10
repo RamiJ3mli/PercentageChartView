@@ -24,8 +24,7 @@
 
         <activity
             android:name="com.ramijemli.sample.activity.PieActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="com.ramijemli.sample.activity.FillActivity"

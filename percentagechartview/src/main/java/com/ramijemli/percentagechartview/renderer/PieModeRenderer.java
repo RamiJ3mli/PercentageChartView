@@ -61,20 +61,20 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         float centerY = h * 0.5f;
         float radius = Math.min(w, h) * 0.5f;
 
-        mCircleBounds.left = centerX - radius;
-        mCircleBounds.top = centerY - radius;
-        mCircleBounds.right = centerX + radius;
-        mCircleBounds.bottom = centerY + radius;
+        mCircleBounds.set(centerX - radius,
+                centerY - radius,
+                centerX + radius,
+                centerY + radius);
         measureBackgroundBounds();
         setupGradientColors(mCircleBounds);
         updateText();
     }
 
     private void measureBackgroundBounds() {
-        mBackgroundBounds.left = mCircleBounds.left + mBackgroundOffset;
-        mBackgroundBounds.top = mCircleBounds.top + mBackgroundOffset;
-        mBackgroundBounds.right = mCircleBounds.right - mBackgroundOffset;
-        mBackgroundBounds.bottom = mCircleBounds.bottom - mBackgroundOffset;
+        mBackgroundBounds.set(mCircleBounds.left + mBackgroundOffset,
+                mCircleBounds.top + mBackgroundOffset,
+                mCircleBounds.right - mBackgroundOffset,
+                mCircleBounds.bottom - mBackgroundOffset);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
             mTextPaint.setColor(mTextColor);
             mBackgroundPaint.setColor(mBackgroundColor);
             mProgressPaint.setColor(mProgressColor);
-            mView.invalidate();
+            mView.postInvalidate();
             return;
         }
 
@@ -118,7 +118,7 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
 
         setupColorAnimations();
         updateProvidedColors(mProgress);
-        mView.invalidate();
+        mView.postInvalidate();
     }
 
     @Override
