@@ -118,16 +118,16 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
         switch (mGradientType) {
             default:
             case GRADIENT_LINEAR:
-                gradient = new LinearGradient(bounds.centerX(), bounds.top, bounds.centerX(), bounds.bottom, mGradientColors, mGradientDistributions, Shader.TileMode.CLAMP);
+                mGradientShader = new LinearGradient(bounds.centerX(), bounds.top, bounds.centerX(), bounds.bottom, mGradientColors, mGradientDistributions, Shader.TileMode.CLAMP);
                 updateGradientAngle(mGradientAngle);
                 break;
 
             case GRADIENT_RADIAL:
-                gradient = new RadialGradient(bounds.centerX(), bounds.centerY(), bounds.bottom - bounds.centerY(), mGradientColors, mGradientDistributions, Shader.TileMode.MIRROR);
+                mGradientShader = new RadialGradient(bounds.centerX(), bounds.centerY(), bounds.bottom - bounds.centerY(), mGradientColors, mGradientDistributions, Shader.TileMode.MIRROR);
                 break;
         }
 
-        mProgressPaint.setShader(gradient);
+        mProgressPaint.setShader(mGradientShader);
     }
 
     @Override
@@ -146,7 +146,12 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
         if (mGradientType == -1 || mGradientType == GRADIENT_RADIAL) return;
         Matrix matrix = new Matrix();
         matrix.postRotate(angle, mCircleBounds.centerX(), mCircleBounds.centerY());
-        gradient.setLocalMatrix(matrix);
+        mGradientShader.setLocalMatrix(matrix);
+    }
+
+    @Override
+    public float getStartAngle() {
+        return mDirectionAngle;
     }
 
     @Override
@@ -157,7 +162,7 @@ public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledM
     }
 
     //BACKGROUND OFFSET
-    public float getBackgroundOffset() {
+    public int getBackgroundOffset() {
         return mBackgroundOffset;
     }
 

@@ -57,7 +57,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/pie_chart"
                 app:pcv_backgroundBarThickness="30dp"
                 app:pcv_mode="ring"
-                app:pcv_progress="1"
+                app:pcv_progress="70"
                 app:pcv_progressBarThickness="30dp"
                 app:pcv_startAngle="90"
                 app:pcv_textSize="36sp"

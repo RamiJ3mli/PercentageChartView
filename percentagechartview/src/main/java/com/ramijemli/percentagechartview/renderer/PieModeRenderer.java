@@ -25,6 +25,8 @@ import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
@@ -123,21 +125,21 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
 
     @Override
     void setupGradientColors(RectF bounds) {
-        if (mGradientType == -1) return;
+        if (mGradientType == -1 && bounds.height() == 0) return;
 
         switch (mGradientType) {
             default:
             case GRADIENT_LINEAR:
-                gradient = new LinearGradient(bounds.centerX(), bounds.top, bounds.centerX(), bounds.bottom, mGradientColors, mGradientDistributions, Shader.TileMode.CLAMP);
+                mGradientShader = new LinearGradient(bounds.centerX(), bounds.top, bounds.centerX(), bounds.bottom, mGradientColors, mGradientDistributions, Shader.TileMode.CLAMP);
                 updateGradientAngle(mGradientAngle);
                 break;
 
             case GRADIENT_RADIAL:
-                gradient = new RadialGradient(bounds.centerX(), bounds.centerY(), bounds.bottom - bounds.centerY(), mGradientColors, mGradientDistributions, Shader.TileMode.MIRROR);
+                mGradientShader = new RadialGradient(bounds.centerX(), bounds.centerY(), bounds.bottom - bounds.centerY(), mGradientColors, mGradientDistributions, Shader.TileMode.MIRROR);
                 break;
 
             case GRADIENT_SWEEP:
-                gradient = new SweepGradient(bounds.centerX(), bounds.centerY(), mGradientColors, mGradientDistributions);
+                mGradientShader = new SweepGradient(bounds.centerX(), bounds.centerY(), mGradientColors, mGradientDistributions);
 
                 if (!mView.isInEditMode()) {
                     // THIS BREAKS SWEEP GRADIENT'S PREVIEW MODE
@@ -146,7 +148,7 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
                 break;
         }
 
-        mProgressPaint.setShader(gradient);
+        mProgressPaint.setShader(mGradientShader);
     }
 
     @Override
@@ -172,7 +174,7 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         if (mGradientType == -1 || mGradientType == GRADIENT_RADIAL) return;
         Matrix matrix = new Matrix();
         matrix.postRotate(angle, mCircleBounds.centerX(), mCircleBounds.centerY());
-        gradient.setLocalMatrix(matrix);
+        mGradientShader.setLocalMatrix(matrix);
     }
 
     public int getOrientation() {
@@ -196,7 +198,7 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
     }
 
     //BACKGROUND OFFSET
-    public float getBackgroundOffset() {
+    public int getBackgroundOffset() {
         return mBackgroundOffset;
     }
 
@@ -206,4 +208,31 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         this.mBackgroundOffset = backgroundOffset;
         measureBackgroundBounds();
     }
+
+//    //PARCELABLE
+//    private PieModeRenderer(Parcel in) {
+//        super(in);
+//        mBgStartAngle = in.readFloat();
+//        mBgSweepAngle = in.readFloat();
+//    }
+//
+//    @Override
+//    public void writeToParcel(Parcel dest, int flags) {
+//        writeToParcel(dest);
+//        dest.writeFloat(mBgStartAngle);
+//        dest.writeFloat(mBgSweepAngle);
+//    }
+//
+//    @SuppressWarnings("unused")
+//    public static final Parcelable.Creator<PieModeRenderer> CREATOR = new Parcelable.Creator<PieModeRenderer>() {
+//        @Override
+//        public PieModeRenderer createFromParcel(Parcel in) {
+//            return new PieModeRenderer(in);
+//        }
+//
+//        @Override
+//        public PieModeRenderer[] newArray(int size) {
+//            return new PieModeRenderer[size];
+//        }
+//    };
 }

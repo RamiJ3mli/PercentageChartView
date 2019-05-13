@@ -29,6 +29,8 @@ import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.TypedValue;
 
 import androidx.annotation.Nullable;
@@ -43,6 +45,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
 
     // BACKGROUND BAR
     private static final float DEFAULT_BG_BAR_DP_WIDTH = 16;
+
     private Paint mBackgroundBarPaint;
     private boolean mDrawBackgroundBar;
     private float mBackgroundBarThickness;
@@ -53,6 +56,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
     private static final float DEFAULT_PROGRESS_BAR_DP_WIDTH = 16;
     public static final int CAP_ROUND = 0;
     public static final int CAP_SQUARE = 1;
+
     private Paint.Cap mProgressBarStyle;
     private float mProgressBarThickness;
 
@@ -222,16 +226,16 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         switch (mGradientType) {
             default:
             case GRADIENT_LINEAR:
-                gradient = new LinearGradient(bounds.centerX(), bounds.top, bounds.centerX(), bounds.bottom, mGradientColors, mGradientDistributions, Shader.TileMode.CLAMP);
+                mGradientShader = new LinearGradient(bounds.centerX(), bounds.top, bounds.centerX(), bounds.bottom, mGradientColors, mGradientDistributions, Shader.TileMode.CLAMP);
                 updateGradientAngle(mStartAngle);
                 break;
 
             case GRADIENT_RADIAL:
-                gradient = new RadialGradient(bounds.centerX(), bounds.centerY(), bounds.bottom - bounds.centerY(), mGradientColors, mGradientDistributions, Shader.TileMode.MIRROR);
+                mGradientShader = new RadialGradient(bounds.centerX(), bounds.centerY(), bounds.bottom - bounds.centerY(), mGradientColors, mGradientDistributions, Shader.TileMode.MIRROR);
                 break;
 
             case GRADIENT_SWEEP:
-                gradient = new SweepGradient(bounds.centerX(), bounds.centerY(), mGradientColors, mGradientDistributions);
+                mGradientShader = new SweepGradient(bounds.centerX(), bounds.centerY(), mGradientColors, mGradientDistributions);
 
                 if (!mView.isInEditMode()) {
                     // THIS BREAKS SWEEP GRADIENT'S PREVIEW MODE
@@ -240,7 +244,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
                 break;
         }
 
-        mProgressPaint.setShader(gradient);
+        mProgressPaint.setShader(mGradientShader);
     }
 
     @Override
@@ -308,7 +312,7 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         if (mGradientType == -1 || mGradientType == GRADIENT_RADIAL) return;
         Matrix matrix = new Matrix();
         matrix.postRotate(angle, mCircleBounds.centerX(), mCircleBounds.centerY());
-        gradient.setLocalMatrix(matrix);
+        mGradientShader.setLocalMatrix(matrix);
     }
 
     public int getOrientation() {
@@ -389,4 +393,41 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         mProgressBarStyle = (progressBarStyle == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
         mProgressPaint.setStrokeCap(mProgressBarStyle);
     }
+
+//    //PARCELABLE
+//    private RingModeRenderer(Parcel in) {
+//        super(in);
+//        mDrawBackgroundBar = in.readByte() != 0x00;
+//        mBackgroundBarColor = in.readInt();
+//        mBackgroundBarThickness = in.readFloat();
+//        mProvidedBgBarColor = in.readInt();
+//        mProgressBarStyle = (in.readInt() == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
+//        mProgressBarThickness = in.readFloat();
+//        tweakAngle = in.readFloat();
+//    }
+//
+//    @Override
+//    public void writeToParcel(Parcel dest, int flags) {
+//        writeToParcel(dest);
+//        dest.writeByte((byte) (mDrawBackgroundBar ? 0x01 : 0x00));
+//        dest.writeInt(mBackgroundBarColor);
+//        dest.writeFloat(mBackgroundBarThickness);
+//        dest.writeInt(mProvidedBgBarColor);
+//        dest.writeInt(mProgressBarStyle.ordinal());
+//        dest.writeFloat(mProgressBarThickness);
+//        dest.writeFloat(tweakAngle);
+//    }
+//
+//    @SuppressWarnings("unused")
+//    public static final Parcelable.Creator<RingModeRenderer> CREATOR = new Parcelable.Creator<RingModeRenderer>() {
+//        @Override
+//        public RingModeRenderer createFromParcel(Parcel in) {
+//            return new RingModeRenderer(in);
+//        }
+//
+//        @Override
+//        public RingModeRenderer[] newArray(int size) {
+//            return new RingModeRenderer[size];
+//        }
+//    };
 }

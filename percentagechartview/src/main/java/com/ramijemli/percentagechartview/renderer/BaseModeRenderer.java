@@ -28,6 +28,8 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.Layout;
@@ -115,7 +117,7 @@ public abstract class BaseModeRenderer {
     float[] mGradientDistributions;
     int mGradientType;
     float mGradientAngle;
-    Shader gradient;
+    Shader mGradientShader;
 
     // TEXT
     TextPaint mTextPaint;
@@ -205,8 +207,6 @@ public abstract class BaseModeRenderer {
 
         //BACKGROUND OFFSET
         mBackgroundOffset = 0;
-
-        initText();
     }
 
     BaseModeRenderer(IPercentageChartView view, TypedArray attrs) {
@@ -320,9 +320,6 @@ public abstract class BaseModeRenderer {
         mBackgroundOffset = attrs.getDimensionPixelSize(
                 R.styleable.PercentageChartView_pcv_backgroundOffset,
                 0);
-
-        //TET VALUE
-        initText();
     }
 
     private void initGradientColors(TypedArray attrs) {
@@ -362,14 +359,6 @@ public abstract class BaseModeRenderer {
         }
     }
 
-    private void initText() {
-        //TEXT FORMATTER
-        defaultTextFormatter = progress -> (int) progress + "%";
-
-        //TEXT VALUE
-        mTextEditor = Editable.Factory.getInstance().newEditable(defaultTextFormatter.provideFormattedText(mTextProgress));
-    }
-
     void setup() {
         mCircleBounds = new RectF();
         mBackgroundBounds = new RectF();
@@ -397,6 +386,9 @@ public abstract class BaseModeRenderer {
         }
 
         //TEXT LAYOUT
+        defaultTextFormatter = progress -> (int) progress + "%";
+        mTextEditor = Editable.Factory.getInstance().newEditable(defaultTextFormatter.provideFormattedText(mTextProgress));
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             mTextLayout = DynamicLayout.Builder.obtain(mTextEditor, mTextPaint, Integer.MAX_VALUE)
                     .setAlignment(Layout.Alignment.ALIGN_NORMAL)
@@ -435,6 +427,11 @@ public abstract class BaseModeRenderer {
             mView.onProgressUpdated(mProgress);
             mView.postInvalidateOnAnimation();
         });
+    }
+
+    public void attach(IPercentageChartView view) {
+        mView = view;
+        setup();
     }
 
     //############################################################################################## INNER BEHAVIOR
@@ -481,7 +478,7 @@ public abstract class BaseModeRenderer {
         mProgressAnimator = mProgressColorAnimator = mBackgroundColorAnimator = mTextColorAnimator = null;
         mCircleBounds = mBackgroundBounds = null;
         mBackgroundPaint = mProgressPaint = mTextPaint = null;
-        gradient = null;
+        mGradientShader = null;
         mAdaptiveColorProvider = null;
         defaultTextFormatter = mProvidedTextFormatter = null;
     }
@@ -710,6 +707,27 @@ public abstract class BaseModeRenderer {
         }
     }
 
+    public void setGradientColorsInternal(int type, int[] colors, float[] positions, float angle) {
+        mGradientType = type;
+        mGradientColors = colors;
+        mGradientDistributions = positions;
+        if (mGradientType == GRADIENT_LINEAR && mGradientAngle != angle) {
+            mGradientAngle = angle;
+        }
+    }
+
+    public float getGradientAngle() {
+        return mGradientAngle;
+    }
+
+    public int[] getGradientColors() {
+        return mGradientColors;
+    }
+
+    public float[] getGradientDistributions() {
+        return mGradientDistributions;
+    }
+
     //ANIMATION DURATION
     public int getAnimationDuration() {
         return mAnimDuration;
@@ -824,4 +842,63 @@ public abstract class BaseModeRenderer {
         mTextPaint.setShadowLayer(mTextShadowRadius, mTextShadowDistX, mTextShadowDistY, mTextShadowColor);
         updateText();
     }
+
+    @Nullable
+    public AdaptiveColorProvider getAdaptiveColorProvider() {
+        return mAdaptiveColorProvider;
+    }
+//
+//    BaseModeRenderer(Parcel in) {
+//        mDrawBackground = in.readByte() != 0;
+//        mBackgroundColor = in.readInt();
+//        mBackgroundOffset = in.readInt();
+//        mProvidedBackgroundColor = in.readInt();
+//        mProgressColor = in.readInt();
+//        mGradientType = in.readInt();
+//        mGradientAngle = in.readFloat();
+//        mTextColor = in.readInt();
+//        mProvidedTextColor = in.readInt();
+//        mTextProgress = in.readInt();
+//        mTextSize = in.readFloat();
+//        mTextStyle = in.readInt();
+//        mTextShadowColor = in.readInt();
+//        mTextShadowRadius = in.readFloat();
+//        mTextShadowDistY = in.readFloat();
+//        mTextShadowDistX = in.readFloat();
+//        mAnimDuration = in.readInt();
+//        mProgress = in.readFloat();
+//        mStartAngle = in.readFloat();
+//        mSweepAngle = in.readFloat();
+//        mProvidedProgressColor = in.readInt();
+//        orientation = in.readInt();
+//    }
+//
+//    public int describeContents() {
+//        return hashCode();
+//    }
+//
+//    void writeToParcel(Parcel dest) {
+//        dest.writeByte((byte) (mDrawBackground ? 1 : 0));
+//        dest.writeInt(mBackgroundColor);
+//        dest.writeInt(mBackgroundOffset);
+//        dest.writeInt(mProvidedBackgroundColor);
+//        dest.writeInt(mProgressColor);
+//        dest.writeInt(mGradientType);
+//        dest.writeFloat(mGradientAngle);
+//        dest.writeInt(mTextColor);
+//        dest.writeInt(mProvidedTextColor);
+//        dest.writeInt(mTextProgress);
+//        dest.writeFloat(mTextSize);
+//        dest.writeInt(mTextStyle);
+//        dest.writeInt(mTextShadowColor);
+//        dest.writeFloat(mTextShadowRadius);
+//        dest.writeFloat(mTextShadowDistY);
+//        dest.writeFloat(mTextShadowDistX);
+//        dest.writeInt(mAnimDuration);
+//        dest.writeFloat(mProgress);
+//        dest.writeFloat(mStartAngle);
+//        dest.writeFloat(mSweepAngle);
+//        dest.writeInt(mProvidedProgressColor);
+//        dest.writeInt(orientation);
+//    }
 }

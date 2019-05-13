@@ -18,7 +18,7 @@ package com.ramijemli.percentagechartview.renderer;
 
 public interface OffsetEnabledMode {
 
-    float getBackgroundOffset();
+    int getBackgroundOffset();
 
     void setBackgroundOffset(int backgroundOffset);
 
