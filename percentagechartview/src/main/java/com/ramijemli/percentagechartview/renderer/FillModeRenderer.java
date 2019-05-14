@@ -16,7 +16,6 @@
 
 package com.ramijemli.percentagechartview.renderer;
 
-
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
@@ -30,14 +29,11 @@ import androidx.annotation.Nullable;
 import com.ramijemli.percentagechartview.IPercentageChartView;
 import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
 
-
 public class FillModeRenderer extends BaseModeRenderer implements OffsetEnabledMode {
-
 
     private float mDirectionAngle;
     private float mBgSweepAngle;
     private float mRadius;
-
 
     public FillModeRenderer(IPercentageChartView view) {
         super(view);

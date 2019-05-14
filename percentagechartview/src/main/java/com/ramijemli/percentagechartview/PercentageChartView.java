@@ -27,7 +27,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
@@ -241,6 +240,11 @@ public class PercentageChartView extends View implements IPercentageChartView {
             switch (mode) {
                 case MODE_RING:
                     renderer = new RingModeRenderer(this);
+                    ((RingModeRenderer) renderer).setProgressBarThickness(bundle.getFloat(STATE_PG_BAR_THICKNESS));
+                    ((RingModeRenderer) renderer).setProgressBarStyle(bundle.getInt(STATE_PG_BAR_STYLE));
+                    ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(bundle.getBoolean(STATE_DRAW_BG_BAR));
+                    ((RingModeRenderer) renderer).setBackgroundBarColor(bundle.getInt(STATE_BG_BAR_COLOR));
+                    ((RingModeRenderer) renderer).setBackgroundBarThickness(bundle.getFloat(STATE_BG_BAR_THICKNESS));
                     break;
                 case MODE_FILL:
                     renderer = new FillModeRenderer(this);
@@ -274,23 +278,16 @@ public class PercentageChartView extends View implements IPercentageChartView {
                     bundle.getFloat(STATE_TXT_SHA_DIST_X),
                     bundle.getFloat(STATE_TXT_SHA_DIST_Y));
 
-            if (renderer instanceof RingModeRenderer) {
-                ((RingModeRenderer) renderer).setProgressBarThickness(bundle.getFloat(STATE_PG_BAR_THICKNESS));
-                ((RingModeRenderer) renderer).setProgressBarStyle(bundle.getInt(STATE_PG_BAR_STYLE));
-                ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(bundle.getBoolean(STATE_DRAW_BG_BAR));
-                ((RingModeRenderer) renderer).setBackgroundBarColor(bundle.getInt(STATE_BG_BAR_COLOR));
-                ((RingModeRenderer) renderer).setBackgroundBarThickness(bundle.getFloat(STATE_BG_BAR_THICKNESS));
-            }
-
             if (bundle.getInt(STATE_GRADIENT_TYPE, -1) != -1) {
                 renderer.setGradientColorsInternal(bundle.getInt(STATE_GRADIENT_TYPE),
                         bundle.getIntArray(STATE_GRADIENT_COLORS),
                         bundle.getFloatArray(STATE_GRADIENT_POSITIONS),
                         bundle.getFloat(STATE_GRADIENT_ANGLE));
             }
-
-            state = bundle.getParcelable(STATE_SUPER_INSTANCE);
+            super.onRestoreInstanceState(bundle.getParcelable(STATE_SUPER_INSTANCE));
+            return;
         }
+
         super.onRestoreInstanceState(state);
     }
 

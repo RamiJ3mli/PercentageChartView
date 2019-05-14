@@ -1,6 +1,6 @@
 # Percentage Chart View
 [![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=16)
-[![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.3.0)](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.3.0/link)
+[![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.3.1)](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.3.1/link)
 [![Codacy](https://api.codacy.com/project/badge/Grade/41c7a0fa1c104a318e60dc4673e83590)](https://www.codacy.com/app/RamiJ3mli/PercentageChartView?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RamiJ3mli/PercentageChartView&amp;utm_campaign=Badge_Grade)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-PercentageChartView-yellow.svg?style=flat)](https://android-arsenal.com/details/1/7600)
 [![Twitter](https://img.shields.io/badge/Twitter-@RamiJemli-blue.svg?style=flat)](http://twitter.com/rami_jemli)
@@ -29,7 +29,7 @@ Dependency should be declared in your app module level  `build.gradle` file:
 ```  
 dependencies {    
 
-    implementation 'com.ramijemli.percentagechartview:percentagechartview:0.3.0' 
+    implementation 'com.ramijemli.percentagechartview:percentagechartview:0.3.1' 
     
 }  
 ```  

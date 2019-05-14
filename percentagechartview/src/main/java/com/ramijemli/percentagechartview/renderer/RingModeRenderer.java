@@ -29,8 +29,6 @@ import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.TypedValue;
 
 import androidx.annotation.Nullable;
@@ -41,7 +39,6 @@ import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
 
 
 public class RingModeRenderer extends BaseModeRenderer implements OrientationBasedMode {
-
 
     // BACKGROUND BAR
     private static final float DEFAULT_BG_BAR_DP_WIDTH = 16;
@@ -62,7 +59,6 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
 
     //TO PUSH PROGRESS BAR OUT OF SWEEP GRADIENT'S WAY
     private float tweakAngle;
-
 
     public RingModeRenderer(IPercentageChartView view) {
         super(view);
@@ -394,40 +390,4 @@ public class RingModeRenderer extends BaseModeRenderer implements OrientationBas
         mProgressPaint.setStrokeCap(mProgressBarStyle);
     }
 
-//    //PARCELABLE
-//    private RingModeRenderer(Parcel in) {
-//        super(in);
-//        mDrawBackgroundBar = in.readByte() != 0x00;
-//        mBackgroundBarColor = in.readInt();
-//        mBackgroundBarThickness = in.readFloat();
-//        mProvidedBgBarColor = in.readInt();
-//        mProgressBarStyle = (in.readInt() == CAP_ROUND) ? Paint.Cap.ROUND : Paint.Cap.BUTT;
-//        mProgressBarThickness = in.readFloat();
-//        tweakAngle = in.readFloat();
-//    }
-//
-//    @Override
-//    public void writeToParcel(Parcel dest, int flags) {
-//        writeToParcel(dest);
-//        dest.writeByte((byte) (mDrawBackgroundBar ? 0x01 : 0x00));
-//        dest.writeInt(mBackgroundBarColor);
-//        dest.writeFloat(mBackgroundBarThickness);
-//        dest.writeInt(mProvidedBgBarColor);
-//        dest.writeInt(mProgressBarStyle.ordinal());
-//        dest.writeFloat(mProgressBarThickness);
-//        dest.writeFloat(tweakAngle);
-//    }
-//
-//    @SuppressWarnings("unused")
-//    public static final Parcelable.Creator<RingModeRenderer> CREATOR = new Parcelable.Creator<RingModeRenderer>() {
-//        @Override
-//        public RingModeRenderer createFromParcel(Parcel in) {
-//            return new RingModeRenderer(in);
-//        }
-//
-//        @Override
-//        public RingModeRenderer[] newArray(int size) {
-//            return new RingModeRenderer[size];
-//        }
-//    };
 }

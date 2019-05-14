@@ -25,8 +25,6 @@ import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
@@ -36,10 +34,8 @@ import com.ramijemli.percentagechartview.callback.AdaptiveColorProvider;
 
 public class PieModeRenderer extends BaseModeRenderer implements OrientationBasedMode, OffsetEnabledMode {
 
-
     private float mBgStartAngle;
     private float mBgSweepAngle;
-
 
     public PieModeRenderer(IPercentageChartView view) {
         super(view);
@@ -209,30 +205,4 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
         measureBackgroundBounds();
     }
 
-//    //PARCELABLE
-//    private PieModeRenderer(Parcel in) {
-//        super(in);
-//        mBgStartAngle = in.readFloat();
-//        mBgSweepAngle = in.readFloat();
-//    }
-//
-//    @Override
-//    public void writeToParcel(Parcel dest, int flags) {
-//        writeToParcel(dest);
-//        dest.writeFloat(mBgStartAngle);
-//        dest.writeFloat(mBgSweepAngle);
-//    }
-//
-//    @SuppressWarnings("unused")
-//    public static final Parcelable.Creator<PieModeRenderer> CREATOR = new Parcelable.Creator<PieModeRenderer>() {
-//        @Override
-//        public PieModeRenderer createFromParcel(Parcel in) {
-//            return new PieModeRenderer(in);
-//        }
-//
-//        @Override
-//        public PieModeRenderer[] newArray(int size) {
-//            return new PieModeRenderer[size];
-//        }
-//    };
 }
