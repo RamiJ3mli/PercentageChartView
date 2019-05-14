@@ -22,7 +22,9 @@ public interface IPercentageChartView {
 
     Context getViewContext();
 
-    void invalidate();
+    void postInvalidate();
+
+    void postInvalidateOnAnimation();
 
     boolean isInEditMode();
 

@@ -5,6 +5,6 @@ import androidx.annotation.NonNull;
 public interface ProgressTextFormatter {
 
     @NonNull
-    String provideFormattedText(float progress);
+    CharSequence provideFormattedText(float progress);
 
 }

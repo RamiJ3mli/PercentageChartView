@@ -16,14 +16,24 @@
 
 package com.ramijemli.percentagechartview;
 
+
 import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.FloatRange;
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.ramijemli.percentagechartview.annotation.ChartMode;
 import com.ramijemli.percentagechartview.annotation.GradientTypes;
@@ -40,13 +50,6 @@ import com.ramijemli.percentagechartview.renderer.OrientationBasedMode;
 import com.ramijemli.percentagechartview.renderer.PieModeRenderer;
 import com.ramijemli.percentagechartview.renderer.RingModeRenderer;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.FloatRange;
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.GRADIENT_LINEAR;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.GRADIENT_SWEEP;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_FILL;
@@ -55,8 +58,41 @@ import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.MODE_R
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_CLOCKWISE;
 import static com.ramijemli.percentagechartview.renderer.BaseModeRenderer.ORIENTATION_COUNTERCLOCKWISE;
 
+
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public class PercentageChartView extends View implements IPercentageChartView {
+
+    private static final String STATE_SUPER_INSTANCE = "PercentageChartView.STATE_SUPER_INSTANCE";
+    private static final String STATE_MODE = "PercentageChartView.STATE_MODE";
+    private static final String STATE_ORIENTATION = "PercentageChartView.STATE_ORIENTATION";
+    private static final String STATE_START_ANGLE = "PercentageChartView.STATE_START_ANGLE";
+    private static final String STATE_DURATION = "PercentageChartView.STATE_DURATION";
+
+    private static final String STATE_PROGRESS = "PercentageChartView.STATE_PROGRESS";
+    private static final String STATE_PG_COLOR = "PercentageChartView.STATE_PG_COLOR";
+
+    private static final String STATE_DRAW_BG = "PercentageChartView.STATE_DRAW_BG";
+    private static final String STATE_BG_COLOR = "PercentageChartView.STATE_BG_COLOR";
+    private static final String STATE_BG_OFFSET = "PercentageChartView.STATE_BG_OFFSET";
+
+    private static final String STATE_TXT_COLOR = "PercentageChartView.STATE_TXT_COLOR";
+    private static final String STATE_TXT_SIZE = "PercentageChartView.STATE_TXT_SIZE";
+    private static final String STATE_TXT_SHA_COLOR = "PercentageChartView.STATE_TXT_SHD_COLOR";
+    private static final String STATE_TXT_SHA_RADIUS = "PercentageChartView.STATE_TXT_SHA_RADIUS";
+    private static final String STATE_TXT_SHA_DIST_X = "PercentageChartView.STATE_TXT_SHA_DIST_X";
+    private static final String STATE_TXT_SHA_DIST_Y = "PercentageChartView.STATE_TXT_SHA_DIST_Y";
+
+    private static final String STATE_PG_BAR_THICKNESS = "PercentageChartView.STATE_PG_BAR_THICKNESS";
+    private static final String STATE_PG_BAR_STYLE = "PercentageChartView.STATE_PG_BAR_STYLE";
+
+    private static final String STATE_DRAW_BG_BAR = "PercentageChartView.STATE_DRAW_BG_BAR";
+    private static final String STATE_BG_BAR_COLOR = "PercentageChartView.STATE_BG_BAR_COLOR";
+    private static final String STATE_BG_BAR_THICKNESS = "PercentageChartView.STATE_BG_BAR_THICKNESS";
+
+    private static final String STATE_GRADIENT_TYPE = "PercentageChartView.STATE_GRADIENT_TYPE";
+    private static final String STATE_GRADIENT_ANGLE = "PercentageChartView.STATE_GRADIENT_ANGLE";
+    private static final String STATE_GRADIENT_COLORS = "PercentageChartView.STATE_GRADIENT_COLORS";
+    private static final String STATE_GRADIENT_POSITIONS = "PercentageChartView.STATE_GRADIENT_POSITIONS";
 
     private BaseModeRenderer renderer;
 
@@ -115,19 +151,22 @@ public class PercentageChartView extends View implements IPercentageChartView {
             } finally {
                 attrs.recycle();
             }
-
         } else {
             mode = MODE_PIE;
             renderer = new PieModeRenderer(this);
         }
+        setSaveEnabled(true);
     }
 
     //##############################################################################################   BEHAVIOR
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        renderer.measure(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec), getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+        int w = MeasureSpec.getSize(widthMeasureSpec);
+        int h = MeasureSpec.getSize(heightMeasureSpec);
+        if (renderer != null)
+            renderer.measure(w, h, getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+        setMeasuredDimension(w, h);
     }
 
     @Override
@@ -145,6 +184,111 @@ public class PercentageChartView extends View implements IPercentageChartView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         renderer.draw(canvas);
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(STATE_SUPER_INSTANCE, super.onSaveInstanceState());
+
+        bundle.putInt(STATE_MODE, mode);
+        if (renderer instanceof OrientationBasedMode) {
+            bundle.putInt(STATE_ORIENTATION, ((OrientationBasedMode) renderer).getOrientation());
+        }
+        bundle.putFloat(STATE_START_ANGLE, renderer.getStartAngle());
+        bundle.putInt(STATE_DURATION, renderer.getAnimationDuration());
+
+        bundle.putFloat(STATE_PROGRESS, renderer.getProgress());
+        bundle.putInt(STATE_PG_COLOR, renderer.getProgressColor());
+
+        bundle.putBoolean(STATE_DRAW_BG, renderer.isDrawBackgroundEnabled());
+        bundle.putInt(STATE_BG_COLOR, renderer.getBackgroundColor());
+        if (renderer instanceof OffsetEnabledMode) {
+            bundle.putInt(STATE_BG_OFFSET, ((OffsetEnabledMode) renderer).getBackgroundOffset());
+        }
+
+        bundle.putInt(STATE_TXT_COLOR, renderer.getTextColor());
+        bundle.putFloat(STATE_TXT_SIZE, renderer.getTextSize());
+        bundle.putInt(STATE_TXT_SHA_COLOR, renderer.getTextShadowColor());
+        bundle.putFloat(STATE_TXT_SHA_RADIUS, renderer.getTextShadowRadius());
+        bundle.putFloat(STATE_TXT_SHA_DIST_X, renderer.getTextShadowDistX());
+        bundle.putFloat(STATE_TXT_SHA_DIST_Y, renderer.getTextShadowDistY());
+
+        if (renderer instanceof RingModeRenderer) {
+            bundle.putFloat(STATE_PG_BAR_THICKNESS, ((RingModeRenderer) renderer).getProgressBarThickness());
+            bundle.putInt(STATE_PG_BAR_STYLE, ((RingModeRenderer) renderer).getProgressBarStyle());
+            bundle.putBoolean(STATE_DRAW_BG_BAR, ((RingModeRenderer) renderer).isDrawBackgroundBarEnabled());
+            bundle.putInt(STATE_BG_BAR_COLOR, ((RingModeRenderer) renderer).getBackgroundBarColor());
+            bundle.putFloat(STATE_BG_BAR_THICKNESS, ((RingModeRenderer) renderer).getBackgroundBarThickness());
+        }
+
+        if (renderer.getGradientType() != -1) {
+            bundle.putInt(STATE_GRADIENT_TYPE, renderer.getGradientType());
+            bundle.putFloat(STATE_GRADIENT_ANGLE, renderer.getGradientAngle());
+            bundle.putIntArray(STATE_GRADIENT_COLORS, renderer.getGradientColors());
+            bundle.putFloatArray(STATE_GRADIENT_POSITIONS, renderer.getGradientDistributions());
+        }
+
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof Bundle) {
+            Bundle bundle = (Bundle) state;
+            mode = bundle.getInt(STATE_MODE);
+            switch (mode) {
+                case MODE_RING:
+                    renderer = new RingModeRenderer(this);
+                    ((RingModeRenderer) renderer).setProgressBarThickness(bundle.getFloat(STATE_PG_BAR_THICKNESS));
+                    ((RingModeRenderer) renderer).setProgressBarStyle(bundle.getInt(STATE_PG_BAR_STYLE));
+                    ((RingModeRenderer) renderer).setDrawBackgroundBarEnabled(bundle.getBoolean(STATE_DRAW_BG_BAR));
+                    ((RingModeRenderer) renderer).setBackgroundBarColor(bundle.getInt(STATE_BG_BAR_COLOR));
+                    ((RingModeRenderer) renderer).setBackgroundBarThickness(bundle.getFloat(STATE_BG_BAR_THICKNESS));
+                    break;
+                case MODE_FILL:
+                    renderer = new FillModeRenderer(this);
+                    break;
+
+                default:
+                case MODE_PIE:
+                    renderer = new PieModeRenderer(this);
+                    break;
+            }
+
+            if (renderer instanceof OrientationBasedMode) {
+                ((OrientationBasedMode) renderer).setOrientation(bundle.getInt(STATE_ORIENTATION));
+            }
+            renderer.setStartAngle(bundle.getFloat(STATE_START_ANGLE));
+            renderer.setAnimationDuration(bundle.getInt(STATE_DURATION));
+
+            renderer.setProgress(bundle.getFloat(STATE_PROGRESS), false);
+            renderer.setProgressColor(bundle.getInt(STATE_PG_COLOR));
+
+            renderer.setDrawBackgroundEnabled(bundle.getBoolean(STATE_DRAW_BG));
+            renderer.setBackgroundColor(bundle.getInt(STATE_BG_COLOR));
+            if (renderer instanceof OffsetEnabledMode) {
+                ((OffsetEnabledMode) renderer).setBackgroundOffset(bundle.getInt(STATE_BG_OFFSET));
+            }
+
+            renderer.setTextColor(bundle.getInt(STATE_TXT_COLOR));
+            renderer.setTextSize(bundle.getFloat(STATE_TXT_SIZE));
+            renderer.setTextShadow(bundle.getInt(STATE_TXT_SHA_COLOR),
+                    bundle.getFloat(STATE_TXT_SHA_RADIUS),
+                    bundle.getFloat(STATE_TXT_SHA_DIST_X),
+                    bundle.getFloat(STATE_TXT_SHA_DIST_Y));
+
+            if (bundle.getInt(STATE_GRADIENT_TYPE, -1) != -1) {
+                renderer.setGradientColorsInternal(bundle.getInt(STATE_GRADIENT_TYPE),
+                        bundle.getIntArray(STATE_GRADIENT_COLORS),
+                        bundle.getFloatArray(STATE_GRADIENT_POSITIONS),
+                        bundle.getFloat(STATE_GRADIENT_ANGLE));
+            }
+            super.onRestoreInstanceState(bundle.getParcelable(STATE_SUPER_INSTANCE));
+            return;
+        }
+
+        super.onRestoreInstanceState(state);
     }
 
     //RENDERER CALLBACKS
@@ -190,7 +334,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setOrientation(@ProgressOrientation int orientation) {
         orientation(orientation);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -210,7 +354,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setStartAngle(@FloatRange(from = 0f, to = 360f) float startAngle) {
         startAngle(startAngle);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -229,7 +373,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setDrawBackgroundEnabled(boolean enabled) {
         drawBackgroundEnabled(enabled);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -249,7 +393,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setBackgroundColor(@ColorInt int color) {
         backgroundColor(color);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -294,7 +438,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setProgressColor(@ColorInt int color) {
         progressColor(color);
-        invalidate();
+        postInvalidate();
     }
 
 
@@ -325,7 +469,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setGradientColors(@GradientTypes int type, int[] colors, float[] positions, @FloatRange(from = 0f, to = 360f) float angle) {
         gradientColors(type, colors, positions, angle);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -383,7 +527,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setTextColor(@ColorInt int color) {
         textColor(color);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -402,7 +546,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setTextSize(float size) {
         textSize(size);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -422,7 +566,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
     @SuppressWarnings("ConstantConditions")
     public void setTypeface(@NonNull Typeface typeface) {
         typeface(typeface);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -442,7 +586,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setTextStyle(@TextStyle int style) {
         textStyle(style);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -492,7 +636,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setTextShadow(@ColorInt int shadowColor, @FloatRange(from = 0) float shadowRadius, @FloatRange(from = 0) float shadowDistX, @FloatRange(from = 0) float shadowDistY) {
         textShadow(shadowColor, shadowRadius, shadowDistX, shadowDistY);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -512,7 +656,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setBackgroundOffset(@IntRange(from = 0) int offset) {
         backgroundOffset(offset);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -532,7 +676,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setDrawBackgroundBarEnabled(boolean enabled) {
         drawBackgroundBarEnabled(enabled);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -552,7 +696,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setBackgroundBarColor(@ColorInt int color) {
         backgroundBarColor(color);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -572,7 +716,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setBackgroundBarThickness(@FloatRange(from = 0) float thickness) {
         backgroundBarThickness(thickness);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -592,7 +736,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setProgressBarThickness(@FloatRange(from = 0) float thickness) {
         progressBarThickness(thickness);
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -612,7 +756,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      */
     public void setProgressBarStyle(@ProgressBarStyle int style) {
         progressBarStyle(style);
-        invalidate();
+        postInvalidate();
     }
 
     //############################################################################################## UPDATE PIPELINE AS A FLUENT API
@@ -912,7 +1056,7 @@ public class PercentageChartView extends View implements IPercentageChartView {
      * Apply all the requested changes.
      */
     public void apply() {
-        invalidate();
+        postInvalidate();
     }
 
     //##############################################################################################   ADAPTIVE COLOR PROVIDER

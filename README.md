@@ -1,6 +1,6 @@
 # Percentage Chart View
 [![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=16)
-[![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.3.0)](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.3.0/link)
+[![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.3.1)](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.3.1/link)
 [![Codacy](https://api.codacy.com/project/badge/Grade/41c7a0fa1c104a318e60dc4673e83590)](https://www.codacy.com/app/RamiJ3mli/PercentageChartView?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RamiJ3mli/PercentageChartView&amp;utm_campaign=Badge_Grade)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-PercentageChartView-yellow.svg?style=flat)](https://android-arsenal.com/details/1/7600)
 [![Twitter](https://img.shields.io/badge/Twitter-@RamiJemli-blue.svg?style=flat)](http://twitter.com/rami_jemli)
@@ -15,13 +15,13 @@ A Java-based easy to use and highly adjustable custom view that displays the pro
 <a href="https://play.google.com/store/apps/details?id=com.ramijemli.percentagechartview"><img src="art/google-play-badge.png" title="Percentage Chart View google play demo"  width="30%"></a>
 
 ## RING MODE
-<img src="art/showcase_1.gif" width="30%"/> <img src="art/showcase_2.gif" width="30%"/> <img src="art/showcase_3.gif" width="30%"/><br/><img src="art/showcase_4.gif" width="30%"/><br/>
+<img src="art/showcase_1.gif" width="30%"/>  <img src="art/showcase_2.gif" width="30%"/>  <img src="art/showcase_3.gif" width="30%"/>  <br/>  <img src="art/showcase_4.gif" width="30%"/><br/>
 
 ## PIE MODE
-<img src="art/showcase_5.gif" width="30%"/> <img src="art/showcase_6.gif" width="30%"/><img src="art/showcase_7.gif" width="30%"/> <img src="art/showcase_8.gif" width="30%"/><br/>
+<img src="art/showcase_5.gif" width="30%"/>  <img src="art/showcase_6.gif" width="30%"/>  <img src="art/showcase_7.gif" width="30%"/>  <br/>  <img src="art/showcase_8.gif" width="30%"/><br/>
 
 ## FILL MODE
-<img src="art/showcase_9.gif" width="30%"/> <img src="art/showcase_10.gif" width="30%"/><img src="art/showcase_11.gif" width="30%"/> <img src="art/showcase_12.gif" width="30%"/><br/>
+<img src="art/showcase_9.gif" width="30%"/>  <img src="art/showcase_10.gif" width="30%"/>  <img src="art/showcase_11.gif" width="30%"/>  <br/>  <img src="art/showcase_12.gif" width="30%"/><br/>
 
 ## SETUP
 Dependency should be declared in your app module level  `build.gradle` file:  
@@ -29,7 +29,7 @@ Dependency should be declared in your app module level  `build.gradle` file:
 ```  
 dependencies {    
 
-    implementation 'com.ramijemli.percentagechartview:percentagechartview:0.3.0' 
+    implementation 'com.ramijemli.percentagechartview:percentagechartview:0.3.1' 
     
 }  
 ```  
@@ -80,7 +80,7 @@ dependencies {
 | `pcv_gradientAngle` | `integer` | `pcv_startAngle` | All | Sets linear gradient colors' drawing angle to **\[0..360]**. |  
 
 ### Start angle
-`pcv_startAngle` and `pcv_gradientAngle` attributes accepts values following the next illustration.
+`pcv_startAngle` and `pcv_gradientAngle` attributes accept values following the next illustration.
 
 <img src="art/angle.png" width="30%"/>
 
