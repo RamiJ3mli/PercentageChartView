@@ -121,7 +121,7 @@ public class PieModeRenderer extends BaseModeRenderer implements OrientationBase
 
     @Override
     void setupGradientColors(RectF bounds) {
-        if (mGradientType == -1 && bounds.height() == 0) return;
+        if (mGradientType == -1 || bounds.height() == 0) return;
 
         switch (mGradientType) {
             default:
