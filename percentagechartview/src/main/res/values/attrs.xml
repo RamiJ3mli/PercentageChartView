@@ -58,6 +58,7 @@
         <attr name="pcv_textShadowDistY" format="float" />
         <attr name="pcv_textShadowDistX" format="float" />
         <attr name="pcv_textShadowColor" format="color" />
+        <attr name="pcv_textVerticalBias" format="float" />
 
         <!--PIE AND FILL MODES ATTRIBUTES-->
         <attr name="pcv_backgroundOffset" format="dimension" />
