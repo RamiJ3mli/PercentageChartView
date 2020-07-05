@@ -129,6 +129,7 @@ public abstract class BaseModeRenderer {
     private float mTextShadowRadius;
     private float mTextShadowDistY;
     private float mTextShadowDistX;
+    private float mTextVerticalBias;
     private Editable mTextEditor;
     private DynamicLayout mTextLayout;
 
@@ -314,6 +315,9 @@ public abstract class BaseModeRenderer {
             mTextShadowDistY = attrs.getFloat(R.styleable.PercentageChartView_pcv_textShadowDistY, 0);
         }
 
+        //TEXT VERTICAL BIAS
+        mTextVerticalBias = attrs.getFloat(R.styleable.PercentageChartView_pcv_textVerticalBias, 0.5f);
+
         //BACKGROUND OFFSET
         mBackgroundOffset = attrs.getDimensionPixelSize(
                 R.styleable.PercentageChartView_pcv_backgroundOffset,
@@ -439,7 +443,7 @@ public abstract class BaseModeRenderer {
 
     void drawText(Canvas canvas) {
         canvas.save();
-        canvas.translate(mCircleBounds.centerX(), mCircleBounds.centerY() - (mTextLayout.getHeight() >> 1));
+        canvas.translate(mCircleBounds.centerX(), mCircleBounds.top + (mCircleBounds.height() * mTextVerticalBias) - (mTextLayout.getHeight() >> 1));
         mTextLayout.draw(canvas);
         canvas.restore();
     }
@@ -838,6 +842,11 @@ public abstract class BaseModeRenderer {
         this.mTextShadowDistY = shadowDistY;
 
         mTextPaint.setShadowLayer(mTextShadowRadius, mTextShadowDistX, mTextShadowDistY, mTextShadowColor);
+        updateText();
+    }
+
+    public void setTextVerticalBias(float textVerticalBias) {
+        this.mTextVerticalBias = textVerticalBias;
         updateText();
     }
 

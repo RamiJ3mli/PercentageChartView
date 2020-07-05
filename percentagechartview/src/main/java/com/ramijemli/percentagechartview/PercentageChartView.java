@@ -640,6 +640,17 @@ public class PercentageChartView extends View implements IPercentageChartView {
     }
 
     /**
+     * Sets the text vertical bias. Passing 0.25 means rendering the text in the 25% of the height of the progress.
+     * The default value is 0.5 which means rendering the text in the center of the progress vertically.
+     *
+     * @param textVerticalBias text vertical bias.
+     */
+    public void setTextVerticalBias(@FloatRange(from = 0, to = 1) float textVerticalBias) {
+        renderer.setTextVerticalBias(textVerticalBias);
+        postInvalidate();
+    }
+
+    /**
      * Gets the offset of the circular background.
      *
      * @return the offset of the circular background.-1 if chart mode is not set to pie.
