@@ -1,5 +1,5 @@
 # Percentage Chart View
-## [Attention] This library is now deprecated as another one will be created to support custom progress bars and pie charts in Compose.
+## [Attention] This library is now deprecated as another one will be created to support custom progress bars in Compose.
 [![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=16)
 [![Download](https://api.bintray.com/packages/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/images/download.svg?version=0.3.1)](https://bintray.com/ramijemli/PercentageChartView/com.ramijemli.percentagechartview/0.3.1/link)
 [![Codacy](https://api.codacy.com/project/badge/Grade/41c7a0fa1c104a318e60dc4673e83590)](https://www.codacy.com/app/RamiJ3mli/PercentageChartView?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RamiJ3mli/PercentageChartView&amp;utm_campaign=Badge_Grade)
