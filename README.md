@@ -69,8 +69,9 @@ dependencies {
 | `pcv_textShadowRadius` | `string` | `0` | All | Sets text shadow/glow radius. |  
 | `pcv_textShadowDistX` | `float` | `0` | All | Sets text shadow/glow's x-axis distance. |  
 | `pcv_textShadowDistY` | `float` | `0` | All | Sets text shadow/glow's y-axis distance. |  
-| `pcv_backgroundOffset` | `dimension` | `0dp` | Pie, Fill | Sets a margin only for background. |  
-| `pcv_drawBackgroundBar` | `boolean` | `true` | Ring | Sets whether to draw background bar or not. |  
+| `pcv_textVerticalBias` | `float` | `0.5` | All | Sets text offset along y-axis. |
+| `pcv_backgroundOffset` | `dimension` | `0dp` | Pie, Fill | Sets a margin only for background. |
+| `pcv_drawBackgroundBar` | `boolean` | `true` | Ring | Sets whether to draw background bar or not. |
 | `pcv_backgroundBarThickness` | `dimension` | `16dp` | Ring | Sets background bar's thickness in DP. |  
 | `pcv_backgroundBarColor` | `color` | `#000000` | Ring | Sets background color. |  
 | `pcv_progressBarThickness` | `dimension` | `16dp` | Ring | Sets progress bar's thickness in DP. |  
